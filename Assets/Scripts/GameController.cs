@@ -50,6 +50,12 @@ public class GameController : MonoBehaviour
         //SetActivePanel(targetPanel1, true);
         //Set Active Panel targetStandard
 
+        if (PlayerPrefs.GetString("GameMode") != null && PlayerPrefs.GetString("GameMode").Length > 0)
+        {
+            gameMode = PlayerPrefs.GetString("GameMode");
+            targetWord = PlayerPrefs.GetString("TargetWord");
+        }
+
         if (gameMode.Equals(MODE_ALPHABET))
         {
             SetActivePanel(targetStandard, true);
@@ -110,8 +116,9 @@ public class GameController : MonoBehaviour
 
     public void Restart()
     {
-        Scene scene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(scene.name);
+        //Scene scene = SceneManager.GetActiveScene();
+        //SceneManager.LoadScene(scene.name);
+        SceneManager.LoadScene("Scene0");
     }
 
     public void RefreshUI()
