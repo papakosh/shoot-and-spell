@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SelectionScreen : MonoBehaviour
+public class ModeSelection : MonoBehaviour
 {
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +28,6 @@ public class SelectionScreen : MonoBehaviour
     public void ChooseWord()
     {
         PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("TargetWord", "ACCIDENT");
-        SceneManager.LoadScene("Scene1");
+        SceneManager.LoadScene("SceneGradeLevel");
     }
 }
