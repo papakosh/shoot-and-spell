@@ -126,6 +126,11 @@ public class GameController : MonoBehaviour
         
     }
 
+    public Boolean inAlphabetMode()
+    {
+        return gameMode.Equals(MODE_ALPHABET);
+    }
+
     private void PopulateDebrisArray()
     {
         debrisArray = new GameObject[debrisCount];
@@ -327,8 +332,9 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void ProcessHit(String hitLetter)
+    public Boolean ProcessHit(String hitLetter)
     {
+        Boolean goodHit = false;
         if (targetIndex < targetWord.Length)
         {
             String targetLetter = "";
@@ -339,6 +345,8 @@ public class GameController : MonoBehaviour
 
             if (targetLetter.Equals(hitLetter))
             {
+                goodHit = true;
+                
                 //mark complete
                 GameObject[] targetPanel = GetTargetPanel();
                 int targetPanelIndex = CalculateTargetPanelIndex();
@@ -369,6 +377,7 @@ public class GameController : MonoBehaviour
                 StartCoroutine(PlayerController.instance.DecreaseSpeed());
             }
         }
+        return goodHit;
     }
 
     private int CalculateTargetPanelIndex()

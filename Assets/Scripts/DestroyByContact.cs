@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,10 +9,13 @@ public class DestroyByContact : MonoBehaviour
     public GameObject explosion;
     public float damage;
     public GameObject pickup;
+    public GameObject success;
+    public GameObject failure;
 
     // Start is called before the first frame update
     void Start()
     {
+
     }
 
     // Update is called once per frame
@@ -55,7 +59,7 @@ public class DestroyByContact : MonoBehaviour
 
         if (gameObject.CompareTag("Hazard"))
         {
-            int num = Random.Range(1, 6);
+            int num = UnityEngine.Random.Range(1, 6);
             Transform pickupTransform = transform;
             Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
 
@@ -86,12 +90,26 @@ public class DestroyByContact : MonoBehaviour
         }
         else
         {
+            // instantiate gameobject to play sound
+            Boolean goodHit = GameController.instance.ProcessHit(gameObject.tag);
+            if (GameController.instance.inAlphabetMode())
+            {
+                if (goodHit) { 
+                 if (success != null)
+                    Instantiate(success);
+                }
+                else
+                {
+                    if (failure != null)
+                        Instantiate(failure);
+                }
+
+            }
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
             {
                 Destroy(other.gameObject);
             }
-            GameController.instance.ProcessHit(gameObject.tag);
         }
     }
 }
