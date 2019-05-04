@@ -46,10 +46,7 @@ public class GameController : MonoBehaviour
         {
             healthIndicator[i].SetActive(true);
         }
-
-        //SetActivePanel(targetPanel1, true);
-        //Set Active Panel targetStandard
-
+               
         if (PlayerPrefs.GetString("GameMode") != null && PlayerPrefs.GetString("GameMode").Length > 0)
         {
             gameMode = PlayerPrefs.GetString("GameMode");
@@ -58,7 +55,11 @@ public class GameController : MonoBehaviour
 
         if (gameMode.Equals(MODE_ALPHABET))
         {
-            SetActivePanel(targetStandard, true);
+            if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
+                SetActivePanel(targetStandard, true);
+            else
+                SetActivePanel(targetStandard, false);
+
         }
         else
         {
@@ -76,8 +77,6 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        
-
     }
 
     // Start is called before the first frame update
@@ -114,18 +113,16 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void Restart()
+    private void GameWin()
     {
-        //Scene scene = SceneManager.GetActiveScene();
-        //SceneManager.LoadScene(scene.name);
-        SceneManager.LoadScene("Scene0");
+        SceneManager.LoadScene("GameWin");
     }
 
-    public void RefreshUI()
+    public void GameLose()
     {
-        
+        SceneManager.LoadScene("GameLose");
     }
-
+   
     public Boolean inAlphabetMode()
     {
         return gameMode.Equals(MODE_ALPHABET);
@@ -142,14 +139,6 @@ public class GameController : MonoBehaviour
             UpdateActivePanel(targetStandard, CalculateTargetPanelIndex());
             blocksArray = new GameObject[9];
         }
-
-        //if (targetIndex > 8 && targetIndex < 18
-        //else
-        //{
-        //    UpdateActivePanel(targetStandard, CalculateTargetPanelIndex());
-        //   blocksArray = new GameObject[8];
-        //}
-
 
         if (gameMode.Equals(MODE_ALPHABET))
         {
@@ -210,126 +199,12 @@ public class GameController : MonoBehaviour
                 }
                 else if (num > 94) // 5 % chance
                 {
-                    //if (blocksArray.Length == 9) // choose block
-                    //{
                         debrisArray[i] = blocksArray[8];
-                    //}
-                   // else // choose asteroid
-                    //{
-                    //    debrisArray[i] = hazards[UnityEngine.Random.Range(0, hazards.Length)];
-                    //}
                 }
 
             }
         }
 
-    }
-
-    private void PopulateDebrisArrayForAlphabet()
-    {
-        debrisArray = new GameObject[debrisCount];
-        GameObject[] blockSub = null;
-       
-        if (targetIndex < 9) // choose a to i
-        {
-            blockSub = new GameObject[9];
-            Array.Copy(blocks, 0, blockSub, 0, 9);
-
-        }
-        else if (targetIndex > 8 && targetIndex < 18) // choose j to r
-        {
-            SetActivePanel(targetPanel1, false);
-            SetActivePanel(targetPanel2, true);
-            blockSub = new GameObject[9];
-            Array.Copy(blocks, 9, blockSub, 0, 9);
-        }
-        else // choose s to x
-        {
-            SetActivePanel(targetPanel2, false);
-            SetActivePanel(targetPanel3, true);
-            blockSub = new GameObject[8];
-            Array.Copy(blocks, 18, blockSub, 0, 8);
-        }
-
-        GameObject[] tempBlockArray = new GameObject[blockSub.Length];
-        int tempIndex = 0;
-        if (targetIndex > 9 && targetIndex < 18)
-        {
-            tempIndex = targetIndex - blockSub.Length;
-
-        }
-        else if (targetIndex > 17)
-        {
-            tempIndex = targetIndex - ((blockSub.Length+1) * 2);
-        }
-        else
-        {
-            tempIndex = targetIndex;
-        }
-
-        for (int j = 0; j < blockSub.Length; j++)
-        {
-            if (j < blockSub.Length - tempIndex)
-                tempBlockArray[j] = blockSub[j + tempIndex];
-            else
-                tempBlockArray[j] = blockSub[(j + tempIndex) - blockSub.Length];
-        }
-
-        for (int i = 0; i < debrisCount; i++)
-        {
-            int random = UnityEngine.Random.Range(0, 3);
-            if (random == 0) // choose hazard
-            {
-                debrisArray[i] = hazards[UnityEngine.Random.Range(0, hazards.Length)];
-            }else // choose block
-            {
-                int num = UnityEngine.Random.Range(0, 100);
-                if (num <= 29)
-                {
-                    debrisArray[i] = tempBlockArray[0];
-                }
-                else if (num > 29 && num <= 44)
-                {
-                    debrisArray[i] = tempBlockArray[1];
-                }
-                else if (num > 44 && num <= 59)
-                {
-                    debrisArray[i] = tempBlockArray[2];
-                }
-                else if (num > 59 && num <= 69)
-                {
-                    debrisArray[i] = tempBlockArray[3];
-                }
-                else if (num > 69 && num <= 79)
-                {
-                    debrisArray[i] = tempBlockArray[4];
-                }
-                else if (num > 79 && num <= 84)
-                {
-                    debrisArray[i] = tempBlockArray[5];
-                }
-                else if (num > 84 && num <= 89)
-                {
-                    debrisArray[i] = tempBlockArray[6];
-                }
-                else if (num > 89 && num <= 94)
-                {
-                    debrisArray[i] = tempBlockArray[7];
-                }
-                else if (num > 94)
-                {
-                    if (tempBlockArray.Length == 9) // choose block
-                    {
-                        debrisArray[i] = tempBlockArray[8];
-                    }
-                    else // choose asteroid
-                    {
-                        debrisArray[i] = hazards[UnityEngine.Random.Range(0, hazards.Length)];
-                    }
-                }
-
-            }
-        }
     }
 
     public Boolean ProcessHit(String hitLetter)
@@ -350,30 +225,21 @@ public class GameController : MonoBehaviour
                 //mark complete
                 GameObject[] targetPanel = GetTargetPanel();
                 int targetPanelIndex = CalculateTargetPanelIndex();
-
                 int elementIndex = 0;
-                //if (targetPanelIndex < 2)
-                    elementIndex= targetIndex - (targetPanel.Length * targetPanelIndex);
-                //else
-                  //  elementIndex = targetIndex - ((targetPanel.Length+1) * targetPanelIndex);
-
-                //Sprite spriteLetter = targetPanel[elementIndex].GetComponent<Image>().sprite;
-                //Sprite newSprite = Resources.Load<Sprite>("Sprites/Letters_Completed/"+spriteLetter.name);
-               // Debug.Log("Image color is " + targetPanel[elementIndex].GetComponent<Image>().color);
+                elementIndex= targetIndex - (targetPanel.Length * targetPanelIndex);
+                targetPanel[elementIndex].SetActive(true);
                 targetPanel[elementIndex].GetComponent<Image>().color= completedColor;
                 
                 if (targetIndex == targetWord.Length - 1) {
-                    Restart();
+                    GameWin();
                 }
                 else
                 {
                     targetIndex++;
-                    //progressText.text = "Good Job! Next letter is '" + targetWord.Substring(targetIndex, 1) + "'";
                 }
             }
             else
             {
-                //progressText.text = "Nope! Target letter is '" + targetWord.Substring(targetIndex, 1) + "'";
                 StartCoroutine(PlayerController.instance.DecreaseSpeed());
             }
         }
@@ -392,13 +258,6 @@ public class GameController : MonoBehaviour
 
     private GameObject[] GetTargetPanel()
     {
-        //int targetPanelIndex = CalculateTargetPanelIndex();
-        //if (targetPanelIndex == 0)
-        //  return targetPanel1;
-        //else if (targetPanelIndex == 1)
-        //  return targetPanel2;
-        //else
-        //  return targetPanel3;
         return targetStandard;
     }
 
@@ -421,7 +280,14 @@ public class GameController : MonoBehaviour
             for (int i = 0; i < targetPanel2.Length; i++)
             {
                 panel[i].GetComponent<Image>().sprite = targetPanel2[i].GetComponent<Image>().sprite;
-                panel[i].SetActive(true);
+                if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
+                {
+                    panel[i].SetActive(true);
+                }
+                else
+                {
+                    panel[i].SetActive(false);
+                }
                 panel[i].GetComponent<Image>().color = defaultColor;
             }
         }
@@ -430,14 +296,20 @@ public class GameController : MonoBehaviour
             for (int i = 0; i < targetPanel3.Length; i++)
             {
                 panel[i].GetComponent<Image>().sprite = targetPanel3[i].GetComponent<Image>().sprite;
-                panel[i].SetActive(true);
+                if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
+                {
+                    panel[i].SetActive(true);
+                }
+                else
+                {
+                    panel[i].SetActive(false);
+                }
                 panel[i].GetComponent<Image>().color = defaultColor;//null out last letter
             }
             panel[8].SetActive(false);
         }
 
     }
-
     private int[] CalculateTargetIndices()
     {
         int[] targetIndices = new int[targetWord.Length];
@@ -450,15 +322,12 @@ public class GameController : MonoBehaviour
                 if (letter.Equals(letters[j]))
                 {
                     targetIndices[letterIndex] = j;
-                    //System.out.println ("Target Index of " + letter + " is " + j);
                     letterIndex++;
                     if (letterIndex < targetWord.Length - 1)
                         letter = targetWord.Substring(letterIndex, 1);
                     else
                         letter = targetWord.Substring(letterIndex);
-                    //System.out.println("Next letter is " + letter);
                 }
-
             }
 
         }

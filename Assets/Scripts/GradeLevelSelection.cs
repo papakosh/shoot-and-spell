@@ -5,25 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class GradeLevelSelection : MonoBehaviour
 {
-
     public string[] preschool;
     public string[] kindergarten;
     public string[] first;
     public string[] second;
     public string[] third;
     public string[] fourth;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void ChoosePreschool()
     {
@@ -68,6 +55,6 @@ public class GradeLevelSelection : MonoBehaviour
 
     private void LoadScene()
     {
-        SceneManager.LoadScene("Scene1");
+        SceneManager.LoadScene("Game");
     }
 }

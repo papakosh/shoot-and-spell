@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
     public Text healthText;
     private float originalSpeed;
     private AudioSource _audio;
+    private AudioSource healthPickupAudio;
 
     private void Awake()
     {
@@ -38,7 +39,9 @@ public class PlayerController : MonoBehaviour
         else
             Destroy(gameObject);
 
-        _audio = GetComponent<AudioSource>();
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        _audio = audioSources[0];
+        healthPickupAudio = audioSources[1];
     }
 
     // Start is called before the first frame update
@@ -48,7 +51,6 @@ public class PlayerController : MonoBehaviour
         canFire = true;
         isDead = false;
         CalibrateAccelerometer();
-        //healthText.text = "Heart Points: " + health;
         originalSpeed = speed;
     }
 
@@ -111,6 +113,7 @@ public class PlayerController : MonoBehaviour
 
     public void IncreaseHealth(float amt)
     {
+        healthPickupAudio.Play();
         if (health == 3.0f)
             return;
         else
@@ -118,7 +121,6 @@ public class PlayerController : MonoBehaviour
             health += amt;
             if (health > 3.0f)
                 health = 3.0f;
-            //healthText.text = "Heart Points: " + health;
             int healthLevel = (int)(health * 2);
             int index = 0;
 
@@ -136,7 +138,6 @@ public class PlayerController : MonoBehaviour
         {
             health -= damageAmt;
             StartCoroutine(BeenHit());
-            //healthText.text = "Heart Points: " + health;
             int healthLevel = (int)(health * 2) - 1;
             int index = GameController.instance.healthIndicator.Length - 1;
 
@@ -153,14 +154,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             health = 0;
-            //healthText.text = "Heart Points: " + health;
-            //int healthLevel = (int)(health);
-            //int index = GameController.instance.healthIndicator.Length - 1;
-
-            //
-                GameController.instance.healthIndicator[0].SetActive(false);
-              
-            //}
+            GameController.instance.healthIndicator[0].SetActive(false);
             isDead = true;
         }
     }
@@ -196,7 +190,6 @@ public class PlayerController : MonoBehaviour
                 if (health < 3.0f)
                 {
                     health += 0.5f;
-                    //healthText.text = "Heart Points: " + health;
                 }
                 break;
             case 4:

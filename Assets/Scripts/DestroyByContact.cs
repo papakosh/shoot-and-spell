@@ -12,18 +12,6 @@ public class DestroyByContact : MonoBehaviour
     public GameObject success;
     public GameObject failure;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Boundary"))
@@ -33,7 +21,6 @@ public class DestroyByContact : MonoBehaviour
 
         if (gameObject.CompareTag("Health"))
         {
-           // Debug.Log("Contact");
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
@@ -54,6 +41,7 @@ public class DestroyByContact : MonoBehaviour
             {
                 Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                 Destroy(other.gameObject);
+                GameController.instance.GameLose();
             }
         }
 
@@ -85,8 +73,6 @@ public class DestroyByContact : MonoBehaviour
                 default:
                     break;
             }
-
-            //PlayerController.instance.HealthPickup();
         }
         else
         {
