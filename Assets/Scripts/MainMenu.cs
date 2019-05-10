@@ -12,6 +12,13 @@ public class MainMenu : MonoBehaviour
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color chosenColor = new Color32(212, 175, 55, 255);
 
+    public string[] preschool;
+    public string[] kindergarten;
+    public string[] first;
+    public string[] second;
+    public string[] third;
+    public string[] fourth;
+
     void Awake()
     {
         easyButton.GetComponent<Image>().color = chosenColor;
@@ -30,6 +37,59 @@ public class MainMenu : MonoBehaviour
         PlayerPrefs.SetString("GameMode", "WORD");
         SceneManager.LoadScene("GradeLevelMenu");
     }
+
+    public void ChoosePreschool()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "Preschool");
+        PlayerPrefs.SetString("TargetWord", preschool[Random.Range(0, preschool.Length)]);
+        LoadScene();
+    }
+
+    public void ChooseKindergarten()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "Kindergarten");
+        PlayerPrefs.SetString("TargetWord", kindergarten[Random.Range(0, kindergarten.Length)]);
+        LoadScene();
+    }
+
+    public void ChooseFirstGrade()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "FirstGrade");
+        PlayerPrefs.SetString("TargetWord", first[Random.Range(0, first.Length)]);
+        LoadScene();
+    }
+
+    public void ChooseSecondGrade()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "SecondGrade");
+        PlayerPrefs.SetString("TargetWord", second[Random.Range(0, second.Length)]);
+        LoadScene();
+    }
+
+    public void ChooseThirdGrade()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "ThirdGrade");
+        PlayerPrefs.SetString("TargetWord", third[Random.Range(0, third.Length)]);
+        LoadScene();
+    }
+    public void ChooseFourthGrade()
+    {
+        PlayerPrefs.SetString("GameMode", "WORD");
+        PlayerPrefs.SetString("GradeLevel", "FourthGrade");
+        PlayerPrefs.SetString("TargetWord", fourth[Random.Range(0, fourth.Length)]);
+        LoadScene();
+    }
+
+    private void LoadScene()
+    {
+        SceneManager.LoadScene("Game");
+    }
+
 
     public void SetEasyLevel()
     {

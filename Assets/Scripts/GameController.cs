@@ -22,19 +22,22 @@ public class GameController : MonoBehaviour
     public String gameMode = MODE_ALPHABET;
     public GameObject[] panelLetters;
     private bool panelSet;
-
+    private String gradeLevel;
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color completedColor = new Color32(212, 175, 55, 255);
     private String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I",
             "J", "K", "L", "M", "N", "O", "P", "Q", "R","S", "T", "U", "V", "W", "X", "Y", "Z"
         };
 
+    private String difficulty;
     private GameObject[] debrisArray;
     public int targetIndex;
     const String MODE_ALPHABET = "ALPHABET";
     const String MODE_WORD = "WORD";
     public GameObject[] targetStandard;
     private int[] targetIndices;
+    private AudioSource _audio;
+    private AudioClip wordClip;
 
     private void Awake()
     {
@@ -46,42 +49,26 @@ public class GameController : MonoBehaviour
         {
             healthIndicator[i].SetActive(true);
         }
-               
+
+        _audio = GetComponent<AudioSource>();
         if (PlayerPrefs.GetString("GameMode") != null && PlayerPrefs.GetString("GameMode").Length > 0)
         {
             gameMode = PlayerPrefs.GetString("GameMode");
             targetWord = PlayerPrefs.GetString("TargetWord");
+            gradeLevel = PlayerPrefs.GetString("GradeLevel");
+            wordClip = Resources.Load<AudioClip>("Audio/" + gradeLevel + "/" + targetWord.ToLower());
+            difficulty = PlayerPrefs.GetString("GameDifficulty");
+            //Debug.Log("Clip found is " + clip.name);
         }
 
-        if (gameMode.Equals(MODE_ALPHABET))
-        {
-            if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
-                SetActivePanel(targetStandard, true);
-            else
-                SetActivePanel(targetStandard, false);
-
-        }
-        else
-        {
-            targetIndices = CalculateTargetIndices();
-            for (int i = 0; i < targetStandard.Length; i++)
-            {
-                if (i < targetIndices.Length)
-                {
-                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                    targetStandard[i].SetActive(true);
-                }
-                else
-                {
-                    targetStandard[i].SetActive(false);
-                }
-            }
-        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        StartCoroutine(DisplayWord(10.0f));
+        _audio.clip = wordClip;
+        _audio.Play();
         targetIndex = 0;
         StartCoroutine(SpawnWaves());
     }
@@ -90,6 +77,11 @@ public class GameController : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void PlayWord()
+    {
+        _audio.Play();
     }
 
     IEnumerator SpawnWaves()
@@ -110,6 +102,64 @@ public class GameController : MonoBehaviour
                 yield return new WaitForSeconds(spawnWait);
             }
             yield return new WaitForSeconds(waveWait);
+        }
+    }
+
+    IEnumerator DisplayWord(float delay)
+    {
+        
+
+        if (!difficulty.Equals("HARD")) // if not hard, show the word
+        {
+            targetIndices = CalculateTargetIndices();
+
+            for (int i = 0; i < targetStandard.Length; i++)
+            {
+                if (i < targetIndices.Length)
+                {
+                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                        targetStandard[i].SetActive(true);
+                }
+                else
+                {
+                    targetStandard[i].SetActive(false);
+                }
+            }
+            if (difficulty.Equals("NORMAL")) //if normal, after showing the word delay for set time and then turn off word
+            {
+                yield return new WaitForSeconds(delay);
+                targetIndices = CalculateTargetIndices();
+
+                for (int i = 0; i < targetStandard.Length; i++)
+                {
+                    if (i < targetIndices.Length)
+                    {
+                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                        targetStandard[i].SetActive(false);
+                    }
+                    else
+                    {
+                        targetStandard[i].SetActive(false);
+                    }
+                }
+            }
+        }
+        else // else, never show the word
+        {
+            targetIndices = CalculateTargetIndices();
+
+            for (int i = 0; i < targetStandard.Length; i++)
+            {
+                if (i < targetIndices.Length)
+                {
+                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                    targetStandard[i].SetActive(false);
+                }
+                else
+                {
+                    targetStandard[i].SetActive(false);
+                }
+            }
         }
     }
 
