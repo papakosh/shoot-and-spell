@@ -13,7 +13,7 @@ public class GameController : MonoBehaviour
     public int debrisCount;
     public float spawnWait, startWait, waveWait;
     public static GameController instance = null;
-    public Text progressText;
+    //public Text progressText;
     public String targetWord;
     public GameObject[] healthIndicator;
     public GameObject[] targetPanel1;
@@ -38,6 +38,28 @@ public class GameController : MonoBehaviour
     private int[] targetIndices;
     private AudioSource _audio;
     private AudioClip wordClip;
+    private string[] preschool = {"AWAY", "BIG", "BLUE", "CAN", "FIND", "FUNNY", "HELP", "MAKE", "LOOK", "PLAY"};
+    private string[] kindergarten = { "ARTIST", "COMMUNITY", "DENTIST", "DEW", "GLANCE", "GUST", "KNIGHT", "LAUNDRY", "NOTE", "PRESIDENT"};
+    private string[] first = { "APPLAUSE","BLUSH", "BORROW", "CABIN", "CAVE", "ENORMOUS", "MOUNTAIN", "NARROW", "SIBLING", "THUNDER"};
+    private string[] second = { "ASTRONOMY", "TELESCOPE", "CLIFF", "DANGEROUS", "FUEL", "INSECT", "NERVOUS", "PLANET", "SHELTER", "VILLAGE"};
+    private string[] third = {"ADOPT", "ARCTIC", "CUSTOM", "EXAMINE", "LOYAL", "NECTAR", "PASSAGE", "PREDATOR", "SCHEDULE", "TREASURE"};
+    private string[] fourth = {"ARENA", "ASCEND", "CONFUSE", "CREATE", "FRONTIER", "HOST", "MATURE","PORTION", "SHABBY", "VALIANT"};
+    int skillLevel;
+    public const int PRESCHOOL_SKILLEVEL = 1;
+    public const int KINDERGARTEN_SKILLEVEL = 2;
+    public const int FIRSTGRADE_SKILLEVEL = 3;
+    public const int SECONDGRADE_SKILLEVEL = 4;
+    public const int THIRDGRADE_SKILLEVEL = 5;
+    public const int FOURTHGRADE_SKILLEVEL = 6;
+    private int[] skillLevelArray = { PRESCHOOL_SKILLEVEL, KINDERGARTEN_SKILLEVEL, FIRSTGRADE_SKILLEVEL, SECONDGRADE_SKILLEVEL, THIRDGRADE_SKILLEVEL, FOURTHGRADE_SKILLEVEL };
+
+    int level;
+    int experience;
+    int experienceNeededToLevelUp;
+    int wordExperienceModifier = 2;
+
+    public Slider levelUpBar;
+    public Text currentLevel;
 
     private void Awake()
     {
@@ -54,34 +76,123 @@ public class GameController : MonoBehaviour
         if (PlayerPrefs.GetString("GameMode") != null && PlayerPrefs.GetString("GameMode").Length > 0)
         {
             gameMode = PlayerPrefs.GetString("GameMode");
-            targetWord = PlayerPrefs.GetString("TargetWord");
             gradeLevel = PlayerPrefs.GetString("GradeLevel");
+            targetWord = RandomWord();
             wordClip = Resources.Load<AudioClip>("Audio/" + gradeLevel + "/" + targetWord.ToLower());
             difficulty = PlayerPrefs.GetString("GameDifficulty");
-            //Debug.Log("Clip found is " + clip.name);
+            experience = PlayerPrefs.GetInt("XP");
+            skillLevel = PlayerPrefs.GetInt("SkillLevel");
         }
 
+    }
+
+    public String GetSkillLevelText(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return "Preschooler";
+            case 2:
+                return "Kindergartner";
+            case 3:
+                return "First Grader";
+            case 4:
+                return "Second Grader";
+            case 5:
+                return "Third Grader";
+            case 6:
+                return "Fourth Grader";
+            default:
+                return "Undefined";
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        currentLevel.text = GetSkillLevelText(skillLevel);
+        PlayerPrefs.SetInt("FirstTime", 1);
+
+        // pause game design
+        // show paused ui
+        // pause game by setting Time.timeScale = 0f
+        // on pause ui, player clicks button to continue which will set Time.timeScale = 1f
         StartCoroutine(DisplayWord(10.0f));
         _audio.clip = wordClip;
         _audio.Play();
         targetIndex = 0;
         StartCoroutine(SpawnWaves());
+
+        levelUpBar.maxValue = (int)nextLevelCustom(skillLevel);
+        levelUpBar.value = experience;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    private double nextLevelCustom(int level)
+    {
+        double exponent = 1.25;
+        double baseXP = 50;
+        return Math.Floor(baseXP * Math.Pow(level, exponent));
+    }
+
+    private void CheckProgression()
+    {
+         
+        if (experience > (int)nextLevelCustom(skillLevel))
+        {
+            skillLevel++;
+            experience = 0;
+        }
+    }
+
+    private string RandomWord ()
+    {
+        switch (gradeLevel)
+        {
+            case "Preschool":
+                return preschool[UnityEngine.Random.Range(0, preschool.Length)];
+            case "Kindergarten":
+                return kindergarten[UnityEngine.Random.Range(0, kindergarten.Length)];
+            case "FirstGrade":
+                return first[UnityEngine.Random.Range(0, first.Length)];
+            case "SecondGrade":
+                return second[UnityEngine.Random.Range(0, second.Length)];
+            case "ThirdGrade":
+                return third[UnityEngine.Random.Range(0, third.Length)];
+            case "FourthGrade":
+                return fourth[UnityEngine.Random.Range(0, fourth.Length)];
+            default:
+                return null;
+        }
     }
 
     public void PlayWord()
     {
         _audio.Play();
+    }
+
+    public void GoHome()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    IEnumerator CalculateWordScore (bool won)
+    {
+        if (won)
+        {
+            experience = experience + (targetWord.Length * wordExperienceModifier);
+            CheckProgression();
+            PlayerPrefs.SetInt("XP", experience);
+            PlayerPrefs.SetInt("SkillLevel", skillLevel);
+        }
+
+        yield return new WaitForSeconds(5.0f);
+
     }
 
     IEnumerator SpawnWaves()
@@ -165,12 +276,14 @@ public class GameController : MonoBehaviour
 
     private void GameWin()
     {
-        SceneManager.LoadScene("GameWin");
+        StartCoroutine(CalculateWordScore(true));
+        SceneManager.LoadScene("Game");
     }
 
     public void GameLose()
     {
-        SceneManager.LoadScene("GameLose");
+        StartCoroutine(CalculateWordScore(false));
+        SceneManager.LoadScene("Game");
     }
    
     public Boolean inAlphabetMode()
