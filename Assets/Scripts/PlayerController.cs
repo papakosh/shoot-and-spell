@@ -17,21 +17,31 @@ public class PlayerController : MonoBehaviour
     private Quaternion calibrationQuaternion;
     public float speed;
     public Transform shotSpawn;
+    public Transform shotSpawnDual1;
+    public Transform shotSpawnDual2;
     public GameObject shot;
     public Boundary boundary;
     public float tiltModifier;
     public float health;
+    private float healthMax;
     public static PlayerController instance = null;
     [HideInInspector]
     public bool isDead;
     private Color normalColor = Color.white;
     private Color hitColor = Color.red;
+    private Color bufferColor = Color.yellow;
     public float flashDelay = 0.025f;
     public int timesToFlash = 3;
     public Text healthText;
     private float originalSpeed;
     private AudioSource _audio;
     private AudioSource healthPickupAudio;
+    [HideInInspector]
+    public bool doubleBoltAbility;
+    [HideInInspector]
+    public bool bufferAbility;
+    [HideInInspector]
+    public bool wormholeAbility;
 
     private void Awake()
     {
@@ -43,6 +53,18 @@ public class PlayerController : MonoBehaviour
         AudioSource[] audioSources = GetComponents<AudioSource>();
         _audio = audioSources[0];
         healthPickupAudio = audioSources[1];
+        if (PlayerPrefs.GetFloat("PlayerHealthMax") == 0) {
+            healthMax = health;
+        }
+        else
+        {
+            healthMax = PlayerPrefs.GetFloat("PlayerHealthMax");
+            health = healthMax;
+        }
+        doubleBoltAbility = false;
+        bufferAbility = false;
+        wormholeAbility = false;
+
     }
 
     // Start is called before the first frame update
@@ -61,7 +83,23 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && canFire)
         {
-            Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+            // if double bolt ability is true, then spawn two shots - need new shot spawn
+            if (doubleBoltAbility)
+            {
+                //Debug.Log("Two shots fired");
+                Instantiate(shot, shotSpawnDual1.position, shotSpawnDual1.rotation);
+                Instantiate(shot, shotSpawnDual2.position, shotSpawnDual2.rotation);
+                doubleBoltAbility = false;
+            }else if (wormholeAbility)
+            {
+                Debug.Log("Open wormhole at X, Y");
+                wormholeAbility = false;
+            }
+            else
+            {
+                Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+            }
+            
             canFire = false;
             _audio.Play();
         }
@@ -111,17 +149,16 @@ public class PlayerController : MonoBehaviour
         Vector3 fixedAcceleration = calibrationQuaternion * acceleration;
         return fixedAcceleration;
     }
-
     public void IncreaseHealth(float amt)
     {
         healthPickupAudio.Play();
-        if (health == 3.0f)
+        if (health == healthMax)
             return;
         else
         {
             health += amt;
-            if (health > 3.0f)
-                health = 3.0f;
+            if (health > healthMax) //was 3.0f, now 2.0f
+                health = healthMax; //was 3.0f, now 2.0f
             int healthLevel = (int)(health * 2);
             int index = 0;
 
@@ -133,6 +170,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+
+    public void ShieldsUp()
+    {
+        StartCoroutine(BufferedAbilityOn());
+        PlayerController.instance.bufferAbility = false;
+    }
     public void DecreaseHealth (float damageAmt)
     {
         if (health > 0.5f)
@@ -178,6 +221,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    IEnumerator BufferedAbilityOn ()
+    {
+        for (int i = 1; i <= timesToFlash; i++)
+        {
+            GetComponent<Renderer>().material.color = bufferColor;
+            yield return new WaitForSeconds(flashDelay);
+            GetComponent<Renderer>().material.color = normalColor;
+            yield return new WaitForSeconds(flashDelay);
+        }
+    }
+
     public void HealthPickup()
     {
         int num = Random.Range(1, 6);
@@ -201,6 +255,18 @@ public class PlayerController : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    public void LevelUp(bool increaseHealth, float amt)
+    {
+        // Health may increase
+        if (increaseHealth) { 
+            healthMax = healthMax + amt;
+            if (healthMax > 3)
+                healthMax = 3;
+            health = healthMax;
+            PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
         }
     }
 }

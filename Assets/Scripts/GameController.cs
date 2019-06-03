@@ -13,16 +13,21 @@ public class GameController : MonoBehaviour
     public int debrisCount;
     public float spawnWait, startWait, waveWait;
     public static GameController instance = null;
-    //public Text progressText;
-    public String targetWord;
     public GameObject[] healthIndicator;
-    public GameObject[] targetPanel1;
-    public GameObject[] targetPanel2;
-    public GameObject[] targetPanel3;
-    public String gameMode = MODE_ALPHABET;
     public GameObject[] panelLetters;
+    public GameObject[] targetStandard;
+
+    public Slider levelUpBar;
+    public Text currentRankText;
+    public GameObject UIRoundBegin;
+    public GameObject UIRoundOver;
+    public GameObject player;
+    public GameObject xpAddedText;
+
+    private DataController dataController;
     private bool panelSet;
-    private String gradeLevel;
+    private String targetWord;
+    private int currentGameLevel;
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color completedColor = new Color32(212, 175, 55, 255);
     private String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I",
@@ -31,35 +36,17 @@ public class GameController : MonoBehaviour
 
     private String difficulty;
     private GameObject[] debrisArray;
-    public int targetIndex;
-    const String MODE_ALPHABET = "ALPHABET";
-    const String MODE_WORD = "WORD";
-    public GameObject[] targetStandard;
+    private int targetIndex;
     private int[] targetIndices;
     private AudioSource _audio;
     private AudioClip wordClip;
-    private string[] preschool = {"AWAY", "BIG", "BLUE", "CAN", "FIND", "FUNNY", "HELP", "MAKE", "LOOK", "PLAY"};
-    private string[] kindergarten = { "ARTIST", "COMMUNITY", "DENTIST", "DEW", "GLANCE", "GUST", "KNIGHT", "LAUNDRY", "NOTE", "PRESIDENT"};
-    private string[] first = { "APPLAUSE","BLUSH", "BORROW", "CABIN", "CAVE", "ENORMOUS", "MOUNTAIN", "NARROW", "SIBLING", "THUNDER"};
-    private string[] second = { "ASTRONOMY", "TELESCOPE", "CLIFF", "DANGEROUS", "FUEL", "INSECT", "NERVOUS", "PLANET", "SHELTER", "VILLAGE"};
-    private string[] third = {"ADOPT", "ARCTIC", "CUSTOM", "EXAMINE", "LOYAL", "NECTAR", "PASSAGE", "PREDATOR", "SCHEDULE", "TREASURE"};
-    private string[] fourth = {"ARENA", "ASCEND", "CONFUSE", "CREATE", "FRONTIER", "HOST", "MATURE","PORTION", "SHABBY", "VALIANT"};
-    int skillLevel;
-    public const int PRESCHOOL_SKILLEVEL = 1;
-    public const int KINDERGARTEN_SKILLEVEL = 2;
-    public const int FIRSTGRADE_SKILLEVEL = 3;
-    public const int SECONDGRADE_SKILLEVEL = 4;
-    public const int THIRDGRADE_SKILLEVEL = 5;
-    public const int FOURTHGRADE_SKILLEVEL = 6;
-    private int[] skillLevelArray = { PRESCHOOL_SKILLEVEL, KINDERGARTEN_SKILLEVEL, FIRSTGRADE_SKILLEVEL, SECONDGRADE_SKILLEVEL, THIRDGRADE_SKILLEVEL, FOURTHGRADE_SKILLEVEL };
+    private AudioClip introClip;
+    private int rank;
 
-    int level;
-    int experience;
-    int experienceNeededToLevelUp;
-    int wordExperienceModifier = 2;
-
-    public Slider levelUpBar;
-    public Text currentLevel;
+    private int experiencePoints;
+    private int experienceNeededToLevelUp;
+    private int wordExperienceModifier = 2;
+    private bool gameOver;
 
     private void Awake()
     {
@@ -67,40 +54,34 @@ public class GameController : MonoBehaviour
             instance = this;
         else if (instance != this)
             Destroy(gameObject);
-        for (int i = 0; i < healthIndicator.Length; i++)
-        {
-            healthIndicator[i].SetActive(true);
-        }
+
+        dataController = FindObjectOfType<DataController>();
 
         _audio = GetComponent<AudioSource>();
-        if (PlayerPrefs.GetString("GameMode") != null && PlayerPrefs.GetString("GameMode").Length > 0)
-        {
-            gameMode = PlayerPrefs.GetString("GameMode");
-            gradeLevel = PlayerPrefs.GetString("GradeLevel");
-            targetWord = RandomWord();
-            wordClip = Resources.Load<AudioClip>("Audio/" + gradeLevel + "/" + targetWord.ToLower());
-            difficulty = PlayerPrefs.GetString("GameDifficulty");
-            experience = PlayerPrefs.GetInt("XP");
-            skillLevel = PlayerPrefs.GetInt("SkillLevel");
-        }
-
+        currentGameLevel = PlayerPrefs.GetInt("Level");
+        targetWord = RandomWord();
+        wordClip = Resources.Load<AudioClip>("Audio/" + currentGameLevel + "/" + targetWord.ToLower());
+        introClip = Resources.Load<AudioClip>("Audio/intro");
+        difficulty = PlayerPrefs.GetString("Difficulty");
+        experiencePoints = PlayerPrefs.GetInt("XP");
+        rank = PlayerPrefs.GetInt("Rank");
     }
 
-    public String GetSkillLevelText(int level)
+    public String GetRankText(int rank)
     {
-        switch (level)
+        switch (rank)
         {
-            case 1:
+            case DataController.PRESCHOOL_RANK:
                 return "Preschooler";
-            case 2:
+            case DataController.KINDERGARTEN_RANK:
                 return "Kindergartner";
-            case 3:
+            case DataController.FIRSTGRADE_RANK:
                 return "First Grader";
-            case 4:
+            case DataController.SECONDGRADE_RANK:
                 return "Second Grader";
-            case 5:
+            case DataController.THIRDGRADE_RANK:
                 return "Third Grader";
-            case 6:
+            case DataController.FOURTHGRADE_RANK:
                 return "Fourth Grader";
             default:
                 return "Undefined";
@@ -110,65 +91,90 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentLevel.text = GetSkillLevelText(skillLevel);
-        PlayerPrefs.SetInt("FirstTime", 1);
+        RefreshUI();
+        gameOver = false;
+        if (PlayerPrefs.GetInt("InRound") == 0)
+        {
+            UIRoundBegin.SetActive(true);
 
-        // pause game design
-        // show paused ui
-        // pause game by setting Time.timeScale = 0f
-        // on pause ui, player clicks button to continue which will set Time.timeScale = 1f
-        StartCoroutine(DisplayWord(10.0f));
-        _audio.clip = wordClip;
-        _audio.Play();
+            player.SetActive(false);
+            Time.timeScale = 0f;
+            _audio.clip = introClip;
+            _audio.Play();
+        }
+        else
+        {
+            _audio.clip = wordClip;
+        }
         targetIndex = 0;
         StartCoroutine(SpawnWaves());
-
-        levelUpBar.maxValue = (int)nextLevelCustom(skillLevel);
-        levelUpBar.value = experience;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
-    private double nextLevelCustom(int level)
+    public void Unpause()
+    {
+        // on pause ui, player clicks button to continue which will set Time.timeScale = 1f
+        Time.timeScale = 1f;
+        UIRoundBegin.SetActive(false);
+        player.SetActive(true);
+        PlayerPrefs.SetInt("InRound", 1);
+        _audio.clip = wordClip;
+    }
+
+    private void RefreshUI()
+    {
+        currentRankText.text = GetRankText(rank);
+        levelUpBar.maxValue = (int)calculateLevelXP(currentGameLevel);
+        levelUpBar.value = experiencePoints;
+
+        int healthLevel = (int)(PlayerController.instance.health * 2);
+        for (int i = 0; i < healthLevel; i++)
+        {
+            healthIndicator[i].SetActive(true);
+        }
+    }
+
+    /*    private double nextLevelCustom(int level)
+        {
+            double exponent = 1.25;
+            double baseXP = 10;
+            return Math.Floor(baseXP * Math.Pow(level + 1, exponent));
+        }*/
+    private double calculateLevelXP(int level)
     {
         double exponent = 1.25;
-        double baseXP = 50;
+        double baseXP = 10;
         return Math.Floor(baseXP * Math.Pow(level, exponent));
     }
 
     private void CheckProgression()
     {
-         
-        if (experience > (int)nextLevelCustom(skillLevel))
+        int currentLevelXP = (int)calculateLevelXP(currentGameLevel);
+        if (experiencePoints > currentLevelXP)
         {
-            skillLevel++;
-            experience = 0;
+            rank++;
+            experiencePoints = experiencePoints - currentLevelXP;
+            dataController.SavePlayerProgress(rank, experiencePoints);
+            if (rank > 1)
+            {
+                PlayerController.instance.LevelUp(true, 0.5f);
+            }
+            else
+            {
+                PlayerController.instance.LevelUp(false, 0f);
+            }
         }
     }
 
-    private string RandomWord ()
+    private string RandomWord()
     {
-        switch (gradeLevel)
-        {
-            case "Preschool":
-                return preschool[UnityEngine.Random.Range(0, preschool.Length)];
-            case "Kindergarten":
-                return kindergarten[UnityEngine.Random.Range(0, kindergarten.Length)];
-            case "FirstGrade":
-                return first[UnityEngine.Random.Range(0, first.Length)];
-            case "SecondGrade":
-                return second[UnityEngine.Random.Range(0, second.Length)];
-            case "ThirdGrade":
-                return third[UnityEngine.Random.Range(0, third.Length)];
-            case "FourthGrade":
-                return fourth[UnityEngine.Random.Range(0, fourth.Length)];
-            default:
-                return null;
-        }
+        WordData[] words = dataController.allLevelData[currentGameLevel].words;
+        return words[UnityEngine.Random.Range(0, words.Length)].word;
     }
 
     public void PlayWord()
@@ -178,17 +184,18 @@ public class GameController : MonoBehaviour
 
     public void GoHome()
     {
+        PlayerPrefs.SetInt("InRound", 0);
         SceneManager.LoadScene("MainMenu");
     }
 
-    IEnumerator CalculateWordScore (bool won)
+    IEnumerator CalculateWordScore(bool won)
     {
         if (won)
         {
-            experience = experience + (targetWord.Length * wordExperienceModifier);
+            experiencePoints = experiencePoints + (targetWord.Length * wordExperienceModifier);
             CheckProgression();
-            PlayerPrefs.SetInt("XP", experience);
-            PlayerPrefs.SetInt("SkillLevel", skillLevel);
+            PlayerPrefs.SetInt("XP", experiencePoints);
+            PlayerPrefs.SetInt("Rank", rank);
         }
 
         yield return new WaitForSeconds(5.0f);
@@ -198,6 +205,9 @@ public class GameController : MonoBehaviour
     IEnumerator SpawnWaves()
     {
         yield return new WaitForSeconds(startWait);
+        StartCoroutine(DisplayWord(10.0f));
+
+        _audio.Play();
         while (true)
         {
             PopulateDebrisArray();
@@ -207,20 +217,24 @@ public class GameController : MonoBehaviour
                 GameObject debris = debrisArray[UnityEngine.Random.Range(0, debrisArray.Length)];
                 Vector3 spawnPosition = new Vector3(
                     UnityEngine.Random.Range(-spawnValues.x, spawnValues.x),
-                    spawnValues.y,spawnValues.z);
+                    spawnValues.y, spawnValues.z);
                 Quaternion spawnRotation = Quaternion.identity;
                 Instantiate(debris, spawnPosition, spawnRotation);
                 yield return new WaitForSeconds(spawnWait);
             }
             yield return new WaitForSeconds(waveWait);
+
+            if (gameOver)
+            {
+                break;
+            }
+
         }
     }
 
     IEnumerator DisplayWord(float delay)
     {
-        
-
-        if (!difficulty.Equals("HARD")) // if not hard, show the word
+        if (!difficulty.Equals(DataController.DIFFICULTY_HARD)) // if not hard, show the word
         {
             targetIndices = CalculateTargetIndices();
 
@@ -228,15 +242,15 @@ public class GameController : MonoBehaviour
             {
                 if (i < targetIndices.Length)
                 {
-                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                        targetStandard[i].SetActive(true);
+                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                    targetStandard[i].SetActive(true);
                 }
                 else
                 {
                     targetStandard[i].SetActive(false);
                 }
             }
-            if (difficulty.Equals("NORMAL")) //if normal, after showing the word delay for set time and then turn off word
+            if (difficulty.Equals(DataController.DIFFICULTY_NORMAL)) //if normal, after showing the word delay for set time and then turn off word
             {
                 yield return new WaitForSeconds(delay);
                 targetIndices = CalculateTargetIndices();
@@ -277,44 +291,47 @@ public class GameController : MonoBehaviour
     private void GameWin()
     {
         StartCoroutine(CalculateWordScore(true));
-        SceneManager.LoadScene("Game");
+        gameOver = true;
+        UIRoundOver.GetComponent<Text>().text = "Good job, cadet. You've just earned <color=#42f442>" + (targetWord.Length * wordExperienceModifier) + " experience points.</color> Click to continue.";
+        UIRoundOver.SetActive(true);
+        xpAddedText.SetActive(true);
+        xpAddedText.GetComponent<Text>().text = "+" + (targetWord.Length * wordExperienceModifier) + " xp ";
+        xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
+        player.SetActive(false);
     }
 
     public void GameLose()
     {
+
         StartCoroutine(CalculateWordScore(false));
-        SceneManager.LoadScene("Game");
+        gameOver = true;
+        UIRoundOver.GetComponent<Text>().text = "Better luck next time, cadet. Click to continue playing.";
+        UIRoundOver.SetActive(true);
     }
-   
-    public Boolean inAlphabetMode()
+
+    public void ContinuePlaying()
     {
-        return gameMode.Equals(MODE_ALPHABET);
+        SceneManager.LoadScene("Game");
     }
 
     private void PopulateDebrisArray()
     {
         debrisArray = new GameObject[debrisCount];
         GameObject[] blocksArray = null;
-                
-       if (targetIndex < 9)
+
+        if (targetIndex < 9)
             blocksArray = new GameObject[9];
-        else{
+        else
+        {
             UpdateActivePanel(targetStandard, CalculateTargetPanelIndex());
             blocksArray = new GameObject[9];
         }
 
-        if (gameMode.Equals(MODE_ALPHABET))
-        {
-            blocksArray[0] = blocks[targetIndex]; //alphabet mode
-        }
-        else
-        {
-            blocksArray[0] = blocks[targetIndices[targetIndex]]; // word mode
-        }
+        blocksArray[0] = blocks[targetIndices[targetIndex]]; // word mode
 
         for (int j = 1; j < blocksArray.Length; j++)
         {
-            int num = UnityEngine.Random.Range(0,26);
+            int num = UnityEngine.Random.Range(0, 26);
             blocksArray[j] = blocks[num];
         }
 
@@ -323,7 +340,33 @@ public class GameController : MonoBehaviour
             int random = UnityEngine.Random.Range(0, 3);
             if (random == 0) // choose hazard
             {
-                debrisArray[i] = hazards[UnityEngine.Random.Range(0, hazards.Length)];
+                int numHazards = 0;
+                switch (currentGameLevel)
+                {
+                    case 0:
+                    case 1:
+                        numHazards = 1;
+                        break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        numHazards = 2;
+                        break;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                        numHazards = 3;
+                        break;
+                    case 10:
+                    case 11:
+                    case 12:
+                    case 13:
+                        numHazards = 4;
+                        break;
+                }
+                debrisArray[i] = hazards[UnityEngine.Random.Range(0, numHazards)];
             }
             else // choose block
             {
@@ -362,7 +405,7 @@ public class GameController : MonoBehaviour
                 }
                 else if (num > 94) // 5 % chance
                 {
-                        debrisArray[i] = blocksArray[8];
+                    debrisArray[i] = blocksArray[8];
                 }
 
             }
@@ -384,16 +427,17 @@ public class GameController : MonoBehaviour
             if (targetLetter.Equals(hitLetter))
             {
                 goodHit = true;
-                
+
                 //mark complete
                 GameObject[] targetPanel = GetTargetPanel();
                 int targetPanelIndex = CalculateTargetPanelIndex();
                 int elementIndex = 0;
-                elementIndex= targetIndex - (targetPanel.Length * targetPanelIndex);
+                elementIndex = targetIndex - (targetPanel.Length * targetPanelIndex);
                 targetPanel[elementIndex].SetActive(true);
-                targetPanel[elementIndex].GetComponent<Image>().color= completedColor;
-                
-                if (targetIndex == targetWord.Length - 1) {
+                targetPanel[elementIndex].GetComponent<Image>().color = completedColor;
+
+                if (targetIndex == targetWord.Length - 1)
+                {
                     GameWin();
                 }
                 else
@@ -411,7 +455,7 @@ public class GameController : MonoBehaviour
 
     private int CalculateTargetPanelIndex()
     {
-        if(targetIndex < 9)
+        if (targetIndex < 9)
             return 0;
         else if (targetIndex > 8 && targetIndex < 18)
             return 1;
@@ -436,42 +480,8 @@ public class GameController : MonoBehaviour
 
     private void UpdateActivePanel(GameObject[] panel, int targetPanelIndex)
     {
-        if (targetPanelIndex == 0 || (targetIndex >9 && targetIndex <18) || (targetIndex > 18))
+        if (targetPanelIndex == 0 || (targetIndex > 9 && targetIndex < 18) || (targetIndex > 18))
             return;
-        else if (targetPanelIndex == 1)
-        {
-            for (int i = 0; i < targetPanel2.Length; i++)
-            {
-                panel[i].GetComponent<Image>().sprite = targetPanel2[i].GetComponent<Image>().sprite;
-                if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
-                {
-                    panel[i].SetActive(true);
-                }
-                else
-                {
-                    panel[i].SetActive(false);
-                }
-                panel[i].GetComponent<Image>().color = defaultColor;
-            }
-        }
-        else if (targetPanelIndex == 2)
-        {
-            for (int i = 0; i < targetPanel3.Length; i++)
-            {
-                panel[i].GetComponent<Image>().sprite = targetPanel3[i].GetComponent<Image>().sprite;
-                if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
-                {
-                    panel[i].SetActive(true);
-                }
-                else
-                {
-                    panel[i].SetActive(false);
-                }
-                panel[i].GetComponent<Image>().color = defaultColor;//null out last letter
-            }
-            panel[8].SetActive(false);
-        }
-
     }
     private int[] CalculateTargetIndices()
     {
@@ -495,6 +505,37 @@ public class GameController : MonoBehaviour
 
         }
         return targetIndices;
+    }
+
+    public void SpawnRandomPickup(GameObject[] pickups, Transform pickupTransform, Quaternion rotateQuaternion)
+    {
+        int num = UnityEngine.Random.Range(1, 6);
+
+        switch (num)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                if (rank > DataController.NINTHGRADE_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
+                else if (rank > DataController.FIFTHGRADE_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
+                else if (rank > DataController.KINDERGARTEN_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
+                else
+                    Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            default:
+                break;
+        }
     }
 
 }

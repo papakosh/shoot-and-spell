@@ -8,7 +8,7 @@ public class DestroyByContact : MonoBehaviour
     public GameObject playerExplosion;
     public GameObject explosion;
     public float damage;
-    public GameObject pickup;
+    public GameObject[] pickups;
     public GameObject success;
     public GameObject failure;
 
@@ -17,6 +17,8 @@ public class DestroyByContact : MonoBehaviour
         if (other.CompareTag("Boundary"))
             return;
         if (gameObject.CompareTag("Health") && other.CompareTag("Bolt"))
+            return;
+        if (gameObject.CompareTag("Shield") && other.CompareTag("Bolt"))
             return;
 
         if (gameObject.CompareTag("Health"))
@@ -29,6 +31,28 @@ public class DestroyByContact : MonoBehaviour
 
             return;
         }
+        // compare tag "Double Bolt", set double bolt ability to true
+        if (gameObject.CompareTag("Double Bolt"))
+        {
+            Destroy(gameObject);
+            if (!other.CompareTag("Player"))
+                Destroy(other.gameObject);
+            else
+                PlayerController.instance.doubleBoltAbility = true;
+
+            return;
+        }
+        if (gameObject.CompareTag("Shield"))
+        {
+            Destroy(gameObject);
+            if (!other.CompareTag("Player"))
+                Destroy(other.gameObject);
+            else
+                PlayerController.instance.bufferAbility = true;
+
+            return;
+        }
+
         if (explosion != null)
         {
             Instantiate(explosion, transform.position, transform.rotation);
@@ -36,12 +60,20 @@ public class DestroyByContact : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            PlayerController.instance.DecreaseHealth(damage);
-            if (PlayerController.instance.isDead)
+            if (PlayerController.instance.bufferAbility)
             {
-                Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
-                Destroy(other.gameObject);
-                GameController.instance.GameLose();
+                PlayerController.instance.ShieldsUp();
+            }
+            else
+            {
+
+                PlayerController.instance.DecreaseHealth(damage);
+                if (PlayerController.instance.isDead)
+                {
+                    Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
+                    Destroy(other.gameObject);
+                    GameController.instance.GameLose();
+                }
             }
         }
 
@@ -54,31 +86,14 @@ public class DestroyByContact : MonoBehaviour
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
-
-            switch (num)
-            {
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    Instantiate(pickup, pickupTransform.position, rotateQuaternion);
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-                case 6:
-                    break;
-                default:
-                    break;
-            }
+            // game controller spawn random pickup - health or double bolt or invinicibily or wormhole
+            GameController.instance.SpawnRandomPickup(pickups, pickupTransform, rotateQuaternion);
         }
         else
         {
             // instantiate gameobject to play sound
             Boolean goodHit = GameController.instance.ProcessHit(gameObject.tag);
-            if (GameController.instance.inAlphabetMode())
+            /*if (GameController.instance.inAlphabetMode())
             {
                 if (goodHit) { 
                  if (success != null)
@@ -90,7 +105,7 @@ public class DestroyByContact : MonoBehaviour
                         Instantiate(failure);
                 }
 
-            }
+            }*/
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
             {

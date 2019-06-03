@@ -19,68 +19,61 @@ public class MainMenu : MonoBehaviour
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color chosenColor = new Color32(212, 175, 55, 255);
 
+    private DataController dataController;
+
+    public void CallSettings()
+    {
+        SceneManager.LoadScene("SettingsMenu");
+    }
+
     void Awake()
     {
-
-        if (PlayerPrefs.GetInt("FirstTime") == 0)
+        dataController = FindObjectOfType<DataController>();
+        preschool.GetComponent<Button>().interactable = true;
+        switch (PlayerPrefs.GetInt("Rank"))
         {
-            PlayerPrefs.SetInt("SkillLevel", GameController.PRESCHOOL_SKILLEVEL);
-            PlayerPrefs.SetInt("XP", 0);
-            // Enable/Disable for skill level
-            preschool.GetComponent<Button>().interactable = true;
-            kindergarten.GetComponent<Button>().interactable = false;
-            firstGrade.GetComponent<Button>().interactable = false;
-            secondGrade.GetComponent<Button>().interactable = false;
-            thirdGrade.GetComponent<Button>().interactable = false;
-            fourthGrade.GetComponent<Button>().interactable = false;
-        }
-        else{
-            preschool.GetComponent<Button>().interactable = true;
-            switch (PlayerPrefs.GetInt("SkillLevel"))
-            {
-                case GameController.PRESCHOOL_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = false;
-                    firstGrade.GetComponent<Button>().interactable = false;
-                    secondGrade.GetComponent<Button>().interactable = false;
-                    thirdGrade.GetComponent<Button>().interactable = false;
-                    fourthGrade.GetComponent<Button>().interactable = false;
-                    break;
-                case GameController.KINDERGARTEN_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = true;
-                    firstGrade.GetComponent<Button>().interactable = false;
-                    secondGrade.GetComponent<Button>().interactable = false;
-                    thirdGrade.GetComponent<Button>().interactable = false;
-                    fourthGrade.GetComponent<Button>().interactable = false;
-                    break;
-                case GameController.FIRSTGRADE_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = true;
-                    firstGrade.GetComponent<Button>().interactable = true;
-                    secondGrade.GetComponent<Button>().interactable = false;
-                    thirdGrade.GetComponent<Button>().interactable = false;
-                    fourthGrade.GetComponent<Button>().interactable = false;
-                    break;
-                case GameController.SECONDGRADE_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = true;
-                    firstGrade.GetComponent<Button>().interactable = true;
-                    secondGrade.GetComponent<Button>().interactable = true;
-                    thirdGrade.GetComponent<Button>().interactable = false;
-                    fourthGrade.GetComponent<Button>().interactable = false;
-                    break;
-                case GameController.THIRDGRADE_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = true;
-                    firstGrade.GetComponent<Button>().interactable = true;
-                    secondGrade.GetComponent<Button>().interactable = true;
-                    thirdGrade.GetComponent<Button>().interactable = true;
-                    fourthGrade.GetComponent<Button>().interactable = false;
-                    break;
-                case GameController.FOURTHGRADE_SKILLEVEL:
-                    kindergarten.GetComponent<Button>().interactable = true;
-                    firstGrade.GetComponent<Button>().interactable = true;
-                    secondGrade.GetComponent<Button>().interactable = true;
-                    thirdGrade.GetComponent<Button>().interactable = true;
-                    fourthGrade.GetComponent<Button>().interactable = true;
-                    break;
-            }
+            case DataController.PRESCHOOL_RANK:
+                kindergarten.GetComponent<Button>().interactable = false;
+                firstGrade.GetComponent<Button>().interactable = false;
+                secondGrade.GetComponent<Button>().interactable = false;
+                thirdGrade.GetComponent<Button>().interactable = false;
+                fourthGrade.GetComponent<Button>().interactable = false;
+                break;
+            case DataController.KINDERGARTEN_RANK:
+                kindergarten.GetComponent<Button>().interactable = true;
+                firstGrade.GetComponent<Button>().interactable = false;
+                secondGrade.GetComponent<Button>().interactable = false;
+                thirdGrade.GetComponent<Button>().interactable = false;
+                fourthGrade.GetComponent<Button>().interactable = false;
+                break;
+            case DataController.FIRSTGRADE_RANK:
+                kindergarten.GetComponent<Button>().interactable = true;
+                firstGrade.GetComponent<Button>().interactable = true;
+                secondGrade.GetComponent<Button>().interactable = false;
+                thirdGrade.GetComponent<Button>().interactable = false;
+                fourthGrade.GetComponent<Button>().interactable = false;
+                break;
+            case DataController.SECONDGRADE_RANK:
+                kindergarten.GetComponent<Button>().interactable = true;
+                firstGrade.GetComponent<Button>().interactable = true;
+                secondGrade.GetComponent<Button>().interactable = true;
+                thirdGrade.GetComponent<Button>().interactable = false;
+                fourthGrade.GetComponent<Button>().interactable = false;
+                break;
+            case DataController.THIRDGRADE_RANK:
+                kindergarten.GetComponent<Button>().interactable = true;
+                firstGrade.GetComponent<Button>().interactable = true;
+                secondGrade.GetComponent<Button>().interactable = true;
+                thirdGrade.GetComponent<Button>().interactable = true;
+                fourthGrade.GetComponent<Button>().interactable = false;
+                break;
+            case DataController.FOURTHGRADE_RANK:
+                kindergarten.GetComponent<Button>().interactable = true;
+                firstGrade.GetComponent<Button>().interactable = true;
+                secondGrade.GetComponent<Button>().interactable = true;
+                thirdGrade.GetComponent<Button>().interactable = true;
+                fourthGrade.GetComponent<Button>().interactable = true;
+                break;
         }
 
         SetDifficultyButton();
@@ -89,95 +82,79 @@ public class MainMenu : MonoBehaviour
 
     public void ChoosePreschool()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "Preschool");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 0);
+        LoadGame();
     }
 
     public void ChooseKindergarten()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "Kindergarten");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 1);
+        LoadGame();
     }
 
     public void ChooseFirstGrade()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "FirstGrade");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 2);
+        LoadGame();
     }
 
     public void ChooseSecondGrade()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "SecondGrade");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 3);
+        LoadGame();
     }
 
     public void ChooseThirdGrade()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "ThirdGrade");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 4);
+        LoadGame();
     }
     public void ChooseFourthGrade()
     {
-        PlayerPrefs.SetString("GameMode", "WORD");
-        PlayerPrefs.SetString("GradeLevel", "FourthGrade");
-        LoadScene();
+        PlayerPrefs.SetInt("Level", 5);
+        LoadGame();
     }
 
-    private void LoadScene()
+    private void LoadGame()
     {
         SceneManager.LoadScene("Game");
     }
 
     private void SetDifficultyButton()
     {
-        if (PlayerPrefs.GetInt("FirstTime") == 0)
+        switch (PlayerPrefs.GetString("Difficulty"))
         {
-            easyButton.GetComponent<Image>().color = chosenColor;
-            PlayerPrefs.SetString("GameDifficulty", "EASY");
-            normalButton.GetComponent<Image>().color = defaultColor;
-            hardButton.GetComponent<Image>().color = defaultColor;
-        }
-        else if (PlayerPrefs.GetString("GameDifficulty").Equals("EASY"))
-        {
-            SetEasyLevel();
-        }else if (PlayerPrefs.GetString("GameDifficulty").Equals("NORMAL"))
-        {
-            SetNormalLevel();
-        }
-        else
-        {
-            SetHardLevel();
+            case DataController.DIFFICULTY_EASY:
+                SetEasyLevel();
+                break;
+            case DataController.DIFFICULTY_NORMAL:
+                SetNormalLevel();
+                break;
+            case DataController.DIFFICULTY_HARD:
+                SetHardLevel();
+                break;
         }
     }
 
     public void SetEasyLevel()
     {
-          easyButton.GetComponent<Image>().color = chosenColor;
-            PlayerPrefs.SetString("GameDifficulty", "EASY");
-            normalButton.GetComponent<Image>().color = defaultColor;
-            hardButton.GetComponent<Image>().color = defaultColor;
-        
+        easyButton.GetComponent<Image>().color = chosenColor;
+        normalButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().color = defaultColor;
+        dataController.SavePlayerSettings(DataController.DIFFICULTY_EASY);
     }
     public void SetNormalLevel()
     {
-       
-            normalButton.GetComponent<Image>().color = chosenColor;
-            PlayerPrefs.SetString("GameDifficulty", "NORMAL");
-            easyButton.GetComponent<Image>().color = defaultColor;
-            hardButton.GetComponent<Image>().color = defaultColor;
-
-        
+        normalButton.GetComponent<Image>().color = chosenColor;
+        easyButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().color = defaultColor;
+        dataController.SavePlayerSettings(DataController.DIFFICULTY_NORMAL);
     }
     public void SetHardLevel()
     {
-            hardButton.GetComponent<Image>().color = chosenColor;
-            PlayerPrefs.SetString("GameDifficulty", "HARD");
-            easyButton.GetComponent<Image>().color = defaultColor;
-            normalButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().color = chosenColor;
+        easyButton.GetComponent<Image>().color = defaultColor;
+        normalButton.GetComponent<Image>().color = defaultColor;
+        dataController.SavePlayerSettings(DataController.DIFFICULTY_HARD);
     }
 }
