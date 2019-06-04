@@ -6,5 +6,4 @@ public class PlayerProgress
 {
     public int rank; // 0=cadet, 1=?, 2=?, etc.
     public int xp;
-    public float health;
 }

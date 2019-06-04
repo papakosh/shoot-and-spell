@@ -24,6 +24,8 @@ public class GameController : MonoBehaviour
     public GameObject player;
     public GameObject xpAddedText;
 
+    public AudioClip healthPickup;
+
     private DataController dataController;
     private bool panelSet;
     private String targetWord;
@@ -41,14 +43,35 @@ public class GameController : MonoBehaviour
     private AudioSource _audio;
     private AudioClip wordClip;
     private AudioClip introClip;
-    private int rank;
+    private int currentRank;
 
     private int experiencePoints;
     private int experienceNeededToLevelUp;
     private int wordExperienceModifier = 2;
     private bool gameOver;
+    private Color normalColor = Color.white;
+    private Color hitColor = Color.red;
+    private Color bufferColor = Color.yellow;
 
-    private void Awake()
+    // player performance
+    private float health = 2;
+    private float healthMax = 2;
+    private float originalSpeed;
+
+    [HideInInspector]
+    public bool doubleBoltAbility;
+    [HideInInspector]
+    public bool bufferAbility;
+    [HideInInspector]
+    public bool wormholeAbility;
+
+    public float flashDelay = 0.125f;
+    public int timesToFlash = 3; 
+    [HideInInspector]
+    public bool isDead;
+    public float speed=5.0f;
+
+    void Awake()
     {
         if (instance == null)
             instance = this;
@@ -64,28 +87,10 @@ public class GameController : MonoBehaviour
         introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = PlayerPrefs.GetString("Difficulty");
         experiencePoints = PlayerPrefs.GetInt("XP");
-        rank = PlayerPrefs.GetInt("Rank");
-    }
-
-    public String GetRankText(int rank)
-    {
-        switch (rank)
-        {
-            case DataController.PRESCHOOL_RANK:
-                return "Preschooler";
-            case DataController.KINDERGARTEN_RANK:
-                return "Kindergartner";
-            case DataController.FIRSTGRADE_RANK:
-                return "First Grader";
-            case DataController.SECONDGRADE_RANK:
-                return "Second Grader";
-            case DataController.THIRDGRADE_RANK:
-                return "Third Grader";
-            case DataController.FOURTHGRADE_RANK:
-                return "Fourth Grader";
-            default:
-                return "Undefined";
-        }
+        currentRank = PlayerPrefs.GetInt("Rank");
+        healthMax = CalculateHealthMax();
+        health = healthMax;
+        originalSpeed = speed;
     }
 
     // Start is called before the first frame update
@@ -113,7 +118,28 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public String GetRankText(int rank)
+    {
+        switch (rank)
+        {
+            case DataController.PRESCHOOL_RANK:
+                return "Preschooler";
+            case DataController.KINDERGARTEN_RANK:
+                return "Kindergartner";
+            case DataController.FIRSTGRADE_RANK:
+                return "First Grader";
+            case DataController.SECONDGRADE_RANK:
+                return "Second Grader";
+            case DataController.THIRDGRADE_RANK:
+                return "Third Grader";
+            case DataController.FOURTHGRADE_RANK:
+                return "Fourth Grader";
+            default:
+                return "Undefined";
+        }
     }
 
     public void Unpause()
@@ -126,59 +152,113 @@ public class GameController : MonoBehaviour
         _audio.clip = wordClip;
     }
 
-    private void RefreshUI()
+    public void IncreaseHealth(float amt)
     {
-        currentRankText.text = GetRankText(rank);
-        levelUpBar.maxValue = (int)calculateLevelXP(currentGameLevel);
-        levelUpBar.value = experiencePoints;
-
-        int healthLevel = (int)(PlayerController.instance.health * 2);
-        for (int i = 0; i < healthLevel; i++)
+        _audio.clip = healthPickup;
+        _audio.Play();
+        if (health == healthMax)
+            return;
+        else
         {
-            healthIndicator[i].SetActive(true);
+            health += amt;
+            if (health > healthMax)
+                health = healthMax;
+            RefreshUI();
         }
     }
 
-    /*    private double nextLevelCustom(int level)
-        {
-            double exponent = 1.25;
-            double baseXP = 10;
-            return Math.Floor(baseXP * Math.Pow(level + 1, exponent));
-        }*/
-    private double calculateLevelXP(int level)
+    public void DecreaseHealth(float damageAmt)
     {
-        double exponent = 1.25;
-        double baseXP = 10;
-        return Math.Floor(baseXP * Math.Pow(level, exponent));
-    }
+        if (health > 0.5f)
+        {
+            health -= damageAmt;
+            StartCoroutine(BeenHit());
+            int healthLevel = (int)(health * 2) - 1;
+            int index = healthIndicator.Length - 1;
 
-    private void CheckProgression()
-    {
-        int currentLevelXP = (int)calculateLevelXP(currentGameLevel);
-        if (experiencePoints > currentLevelXP)
+            while (index > healthLevel)
+            {
+                healthIndicator[index].SetActive(false);
+                index--;
+            }
+
+
+            if (health == 0)
+                isDead = true;
+        }
+        else
         {
-            rank++;
-            experiencePoints = experiencePoints - currentLevelXP;
-            dataController.SavePlayerProgress(rank, experiencePoints);
-            if (rank > 1)
-            {
-                PlayerController.instance.LevelUp(true, 0.5f);
-            }
-            else
-            {
-                PlayerController.instance.LevelUp(false, 0f);
-            }
+            health = 0;
+            healthIndicator[0].SetActive(false);
+            isDead = true;
         }
     }
 
-    private string RandomWord()
+    public void ShieldsUp()
     {
-        WordData[] words = dataController.allLevelData[currentGameLevel].words;
-        return words[UnityEngine.Random.Range(0, words.Length)].word;
+        StartCoroutine(BufferedAbilityOn());
+        bufferAbility = false;
+    }
+
+    public void LevelUp(bool increaseHealth, float amt)
+    {
+        if (increaseHealth)
+        {
+            healthMax = healthMax + amt;
+            if (healthMax > 3)
+                healthMax = 3;
+            health = healthMax;
+            PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
+        }
+        else
+        {
+            health = healthMax;
+            PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
+        }
+    }
+
+    public void HealthPickup()
+    {
+        int num = UnityEngine.Random.Range(1, 6);
+        switch (num)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                if (health < 3.0f)
+                {
+                    health += 0.5f;
+                }
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void GameLose()
+    {
+        CalculateWordScore(false);
+        gameOver = true;
+        UIRoundOver.GetComponent<Text>().text = "Better luck next time, cadet. Click to continue playing.";
+        UIRoundOver.SetActive(true);
+    }
+
+    public void ContinuePlaying()
+    {
+        SceneManager.LoadScene("Game");
     }
 
     public void PlayWord()
     {
+        _audio.clip = wordClip;
         _audio.Play();
     }
 
@@ -188,109 +268,171 @@ public class GameController : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    IEnumerator CalculateWordScore(bool won)
+    public Boolean ProcessHit(String hitLetter)
+    {
+        Boolean goodHit = false;
+        if (targetIndex < targetWord.Length)
+        {
+            String targetLetter = "";
+            if (targetIndex < targetWord.Length - 1)
+                targetLetter = targetWord.Substring(targetIndex, 1);
+            else
+                targetLetter = targetWord.Substring(targetIndex);
+
+            if (targetLetter.Equals(hitLetter))
+            {
+                goodHit = true;
+
+                //mark complete
+                GameObject[] targetPanel = GetTargetPanel();
+                int targetPanelIndex = CalculateTargetPanelIndex();
+                int elementIndex = 0;
+                elementIndex = targetIndex - (targetPanel.Length * targetPanelIndex);
+                targetPanel[elementIndex].SetActive(true);
+                targetPanel[elementIndex].GetComponent<Image>().color = completedColor;
+
+                if (targetIndex == targetWord.Length - 1)
+                {
+                    GameWin();
+                }
+                else
+                {
+                    targetIndex++;
+                }
+            }
+            else
+            {
+                StartCoroutine(DecreaseSpeed());
+            }
+        }
+        return goodHit;
+    }
+    public void SpawnRandomPickup(GameObject[] pickups, Transform pickupTransform, Quaternion rotateQuaternion)
+    {
+        int num = UnityEngine.Random.Range(1, 6);
+
+        switch (num)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                if (currentRank > DataController.NINTHGRADE_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
+                else if (currentRank > DataController.FIFTHGRADE_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
+                else if (currentRank > DataController.KINDERGARTEN_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
+                else
+                    Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void RefreshUI()
+    {
+        currentRankText.text = GetRankText(currentRank);
+        levelUpBar.maxValue = (int)CalculateRankXP(currentRank);
+        levelUpBar.value = experiencePoints;
+
+        int healthLevel = (int)(health * 2);
+        for (int i = 0; i < healthLevel; i++)
+        {
+            healthIndicator[i].SetActive(true);
+        }
+    }
+
+    private float CalculateHealthMax()
+    {
+        switch (currentRank)
+        {
+            case 0:
+            case 1:
+                return 2.0f;
+            case 2:
+                return 2.5f;
+            case 3:
+                return 3.0f;
+            case 4:
+                return 3.5f;
+            case 5:
+                return 4.0f;
+            case 6:
+                return 4.5f;
+            case 7:
+                return 5.0f;
+            case 8:
+                return 5.5f;
+            case 9:
+                return 6.0f;
+            case 10:
+                return 6.5f;
+            case 11:
+                return 7.0f;
+            case 12:
+                return 7.5f;
+            case 13:
+                return 8.0f;
+            default:
+                return 2.0f;
+                    
+        }
+    }
+
+    private double CalculateRankXP(int rank)
+    {
+        double exponent = 1.25;
+        double baseXP = 10;
+        return Math.Floor(baseXP * Math.Pow(rank+1, exponent));
+    }
+
+    private void CheckProgression()
+    {
+        int currentRankXP = (int)CalculateRankXP(currentRank);
+        if (experiencePoints > currentRankXP)
+        {
+            currentRank++;
+            experiencePoints = experiencePoints - currentRankXP;
+            if (currentRank > 1)
+            {
+                LevelUp(true, 0.5f);
+            }
+            else
+            {
+                LevelUp(false, 0f);
+            }
+        }
+        dataController.SavePlayerProgress(currentRank, experiencePoints);
+    }
+
+    private string RandomWord()
+    {
+        WordData[] words = dataController.allLevelData[currentGameLevel].words;
+        return words[UnityEngine.Random.Range(0, words.Length)].word;
+    }
+
+    private void CalculateWordScore(bool won)
     {
         if (won)
         {
             experiencePoints = experiencePoints + (targetWord.Length * wordExperienceModifier);
             CheckProgression();
-            PlayerPrefs.SetInt("XP", experiencePoints);
-            PlayerPrefs.SetInt("Rank", rank);
-        }
-
-        yield return new WaitForSeconds(5.0f);
-
-    }
-
-    IEnumerator SpawnWaves()
-    {
-        yield return new WaitForSeconds(startWait);
-        StartCoroutine(DisplayWord(10.0f));
-
-        _audio.Play();
-        while (true)
-        {
-            PopulateDebrisArray();
-
-            for (int i = 0; i < debrisCount; i++)
-            {
-                GameObject debris = debrisArray[UnityEngine.Random.Range(0, debrisArray.Length)];
-                Vector3 spawnPosition = new Vector3(
-                    UnityEngine.Random.Range(-spawnValues.x, spawnValues.x),
-                    spawnValues.y, spawnValues.z);
-                Quaternion spawnRotation = Quaternion.identity;
-                Instantiate(debris, spawnPosition, spawnRotation);
-                yield return new WaitForSeconds(spawnWait);
-            }
-            yield return new WaitForSeconds(waveWait);
-
-            if (gameOver)
-            {
-                break;
-            }
-
-        }
-    }
-
-    IEnumerator DisplayWord(float delay)
-    {
-        if (!difficulty.Equals(DataController.DIFFICULTY_HARD)) // if not hard, show the word
-        {
-            targetIndices = CalculateTargetIndices();
-
-            for (int i = 0; i < targetStandard.Length; i++)
-            {
-                if (i < targetIndices.Length)
-                {
-                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                    targetStandard[i].SetActive(true);
-                }
-                else
-                {
-                    targetStandard[i].SetActive(false);
-                }
-            }
-            if (difficulty.Equals(DataController.DIFFICULTY_NORMAL)) //if normal, after showing the word delay for set time and then turn off word
-            {
-                yield return new WaitForSeconds(delay);
-                targetIndices = CalculateTargetIndices();
-
-                for (int i = 0; i < targetStandard.Length; i++)
-                {
-                    if (i < targetIndices.Length)
-                    {
-                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                        targetStandard[i].SetActive(false);
-                    }
-                    else
-                    {
-                        targetStandard[i].SetActive(false);
-                    }
-                }
-            }
-        }
-        else // else, never show the word
-        {
-            targetIndices = CalculateTargetIndices();
-
-            for (int i = 0; i < targetStandard.Length; i++)
-            {
-                if (i < targetIndices.Length)
-                {
-                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                    targetStandard[i].SetActive(false);
-                }
-                else
-                {
-                    targetStandard[i].SetActive(false);
-                }
-            }
+            RefreshUI();
         }
     }
 
     private void GameWin()
     {
-        StartCoroutine(CalculateWordScore(true));
+        CalculateWordScore(true);
         gameOver = true;
         UIRoundOver.GetComponent<Text>().text = "Good job, cadet. You've just earned <color=#42f442>" + (targetWord.Length * wordExperienceModifier) + " experience points.</color> Click to continue.";
         UIRoundOver.SetActive(true);
@@ -298,20 +440,6 @@ public class GameController : MonoBehaviour
         xpAddedText.GetComponent<Text>().text = "+" + (targetWord.Length * wordExperienceModifier) + " xp ";
         xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
         player.SetActive(false);
-    }
-
-    public void GameLose()
-    {
-
-        StartCoroutine(CalculateWordScore(false));
-        gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Better luck next time, cadet. Click to continue playing.";
-        UIRoundOver.SetActive(true);
-    }
-
-    public void ContinuePlaying()
-    {
-        SceneManager.LoadScene("Game");
     }
 
     private void PopulateDebrisArray()
@@ -413,46 +541,6 @@ public class GameController : MonoBehaviour
 
     }
 
-    public Boolean ProcessHit(String hitLetter)
-    {
-        Boolean goodHit = false;
-        if (targetIndex < targetWord.Length)
-        {
-            String targetLetter = "";
-            if (targetIndex < targetWord.Length - 1)
-                targetLetter = targetWord.Substring(targetIndex, 1);
-            else
-                targetLetter = targetWord.Substring(targetIndex);
-
-            if (targetLetter.Equals(hitLetter))
-            {
-                goodHit = true;
-
-                //mark complete
-                GameObject[] targetPanel = GetTargetPanel();
-                int targetPanelIndex = CalculateTargetPanelIndex();
-                int elementIndex = 0;
-                elementIndex = targetIndex - (targetPanel.Length * targetPanelIndex);
-                targetPanel[elementIndex].SetActive(true);
-                targetPanel[elementIndex].GetComponent<Image>().color = completedColor;
-
-                if (targetIndex == targetWord.Length - 1)
-                {
-                    GameWin();
-                }
-                else
-                {
-                    targetIndex++;
-                }
-            }
-            else
-            {
-                StartCoroutine(PlayerController.instance.DecreaseSpeed());
-            }
-        }
-        return goodHit;
-    }
-
     private int CalculateTargetPanelIndex()
     {
         if (targetIndex < 9)
@@ -507,35 +595,120 @@ public class GameController : MonoBehaviour
         return targetIndices;
     }
 
-    public void SpawnRandomPickup(GameObject[] pickups, Transform pickupTransform, Quaternion rotateQuaternion)
+    IEnumerator DecreaseSpeed()
     {
-        int num = UnityEngine.Random.Range(1, 6);
+        speed = speed / 2;
+        yield return new WaitForSeconds(3.0f);
+        speed = originalSpeed;
+    }
 
-        switch (num)
+    IEnumerator BeenHit()
+    {
+        for (int i = 1; i <= timesToFlash; i++)
         {
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                if (rank > DataController.NINTHGRADE_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
-                else if (rank > DataController.FIFTHGRADE_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
-                else if (rank > DataController.KINDERGARTEN_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
-                else
-                    Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
-                break;
-            case 4:
-                break;
-            case 5:
-                break;
-            case 6:
-                break;
-            default:
-                break;
+            player.GetComponent<Renderer>().material.color = hitColor;
+            yield return new WaitForSeconds(flashDelay);
+            player.GetComponent<Renderer>().material.color = normalColor;
+            yield return new WaitForSeconds(flashDelay);
         }
     }
 
+    IEnumerator BufferedAbilityOn()
+    {
+        for (int i = 1; i <= timesToFlash; i++)
+        {
+            player.GetComponent<Renderer>().material.color = bufferColor;
+            yield return new WaitForSeconds(flashDelay);
+            player.GetComponent<Renderer>().material.color = normalColor;
+            yield return new WaitForSeconds(flashDelay);
+        }
+    }
+
+    IEnumerator SpawnWaves()
+    {
+        yield return new WaitForSeconds(startWait);
+        StartCoroutine(DisplayWord(10.0f));
+
+        _audio.Play();
+        while (true)
+        {
+            PopulateDebrisArray();
+
+            for (int i = 0; i < debrisCount; i++)
+            {
+                GameObject debris = debrisArray[UnityEngine.Random.Range(0, debrisArray.Length)];
+                Vector3 spawnPosition = new Vector3(
+                    UnityEngine.Random.Range(-spawnValues.x, spawnValues.x),
+                    spawnValues.y, spawnValues.z);
+                Quaternion spawnRotation = Quaternion.identity;
+                Instantiate(debris, spawnPosition, spawnRotation);
+                yield return new WaitForSeconds(spawnWait);
+            }
+            yield return new WaitForSeconds(waveWait);
+
+            if (gameOver)
+            {
+                break;
+            }
+
+        }
+    }
+
+    IEnumerator DisplayWord(float delay)
+    {
+        if (!difficulty.Equals(DataController.DIFFICULTY_HARD)) // if not hard, show the word
+        {
+            targetIndices = CalculateTargetIndices();
+
+            for (int i = 0; i < targetStandard.Length; i++)
+            {
+                if (i < targetIndices.Length)
+                {
+                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                    targetStandard[i].SetActive(true);
+                }
+                else
+                {
+                    targetStandard[i].SetActive(false);
+                }
+            }
+            if (difficulty.Equals(DataController.DIFFICULTY_NORMAL)) //if normal, after showing the word delay for set time and then turn off word
+            {
+                yield return new WaitForSeconds(delay);
+                targetIndices = CalculateTargetIndices();
+
+                for (int i = 0; i < targetStandard.Length; i++)
+                {
+                    if (i < targetIndices.Length)
+                    {
+                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                        targetStandard[i].SetActive(false);
+                    }
+                    else
+                    {
+                        targetStandard[i].SetActive(false);
+                    }
+                }
+            }
+        }
+        else // else, never show the word
+        {
+            targetIndices = CalculateTargetIndices();
+
+            for (int i = 0; i < targetStandard.Length; i++)
+            {
+                if (i < targetIndices.Length)
+                {
+                    targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                    targetStandard[i].SetActive(false);
+                }
+                else
+                {
+                    targetStandard[i].SetActive(false);
+                }
+            }
+        }
+    }
+
+    
 }

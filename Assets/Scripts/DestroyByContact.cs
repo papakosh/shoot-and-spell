@@ -27,18 +27,17 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                PlayerController.instance.IncreaseHealth(damage);
+                GameController.instance.IncreaseHealth(damage);
 
             return;
         }
-        // compare tag "Double Bolt", set double bolt ability to true
         if (gameObject.CompareTag("Double Bolt"))
         {
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                PlayerController.instance.doubleBoltAbility = true;
+                GameController.instance.doubleBoltAbility = true;
 
             return;
         }
@@ -48,7 +47,7 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                PlayerController.instance.bufferAbility = true;
+                GameController.instance.bufferAbility = true;
 
             return;
         }
@@ -60,15 +59,15 @@ public class DestroyByContact : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            if (PlayerController.instance.bufferAbility)
+            if (GameController.instance.bufferAbility)
             {
-                PlayerController.instance.ShieldsUp();
+                GameController.instance.ShieldsUp();
             }
             else
             {
 
-                PlayerController.instance.DecreaseHealth(damage);
-                if (PlayerController.instance.isDead)
+                GameController.instance.DecreaseHealth(damage);
+                if (GameController.instance.isDead)
                 {
                     Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                     Destroy(other.gameObject);
@@ -86,26 +85,11 @@ public class DestroyByContact : MonoBehaviour
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
-            // game controller spawn random pickup - health or double bolt or invinicibily or wormhole
             GameController.instance.SpawnRandomPickup(pickups, pickupTransform, rotateQuaternion);
         }
         else
         {
-            // instantiate gameobject to play sound
             Boolean goodHit = GameController.instance.ProcessHit(gameObject.tag);
-            /*if (GameController.instance.inAlphabetMode())
-            {
-                if (goodHit) { 
-                 if (success != null)
-                    Instantiate(success);
-                }
-                else
-                {
-                    if (failure != null)
-                        Instantiate(failure);
-                }
-
-            }*/
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
             {

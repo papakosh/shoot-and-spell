@@ -65,6 +65,8 @@ public class DataController : MonoBehaviour
 
     public void SavePlayerProgress(int rank, int xp )
     {
+        playerProgress.rank = rank;
+        playerProgress.xp = xp;
         PlayerPrefs.SetInt("Rank", rank);
         PlayerPrefs.SetInt("XP", xp);
     }
@@ -72,13 +74,6 @@ public class DataController : MonoBehaviour
     public void SavePlayerSettings (String difficulty)
     {
         PlayerPrefs.SetString("Difficulty", difficulty);
-    }
-
-    private double calculateLevelXP(int level)
-    {
-        double exponent = 1.25;
-        double baseXP = 10;
-        return Math.Floor(baseXP * Math.Pow(level, exponent));
     }
 
     private void LoadGameData()
