@@ -24,7 +24,9 @@ public class PlayerController : MonoBehaviour
     public float tiltModifier;
     public static PlayerController instance = null;
     private AudioSource _audio;
-    
+    [HideInInspector]
+    public float originalSpeed;
+
     private void Awake()
     {
         if (instance == null)
@@ -34,7 +36,8 @@ public class PlayerController : MonoBehaviour
 
         AudioSource[] audioSources = GetComponents<AudioSource>();
         _audio = audioSources[0];
-        
+        originalSpeed = speed;
+
     }
 
     // Start is called before the first frame update
@@ -49,7 +52,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
 
-        if (Input.GetButtonDown("Fire1") && canFire)
+        if (Input.GetButtonDown("Fire1") && canFire && !GameController.instance.isPaused)
         {
             // if double bolt ability is true, then spawn two shots - need new shot spawn
             if (GameController.instance.doubleBoltAbility)

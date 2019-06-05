@@ -56,7 +56,6 @@ public class GameController : MonoBehaviour
     // player performance
     private float health = 2;
     private float healthMax = 2;
-    private float originalSpeed;
 
     [HideInInspector]
     public bool doubleBoltAbility;
@@ -69,7 +68,9 @@ public class GameController : MonoBehaviour
     public int timesToFlash = 3; 
     [HideInInspector]
     public bool isDead;
-    public float speed=5.0f;
+    [HideInInspector]
+    public bool isPaused;
+    public GameObject homeButton;
 
     void Awake()
     {
@@ -90,7 +91,7 @@ public class GameController : MonoBehaviour
         currentRank = PlayerPrefs.GetInt("Rank");
         healthMax = CalculateHealthMax();
         health = healthMax;
-        originalSpeed = speed;
+        homeButton.GetComponent<Button>().interactable = false;
     }
 
     // Start is called before the first frame update
@@ -98,8 +99,10 @@ public class GameController : MonoBehaviour
     {
         RefreshUI();
         gameOver = false;
+        isPaused = false;
         if (PlayerPrefs.GetInt("InRound") == 0)
         {
+            isPaused = true;
             UIRoundBegin.SetActive(true);
 
             player.SetActive(false);
@@ -118,7 +121,21 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!isPaused)
+            {
+                isPaused = true;
+                Time.timeScale = 0f;
+                homeButton.GetComponent<Button>().interactable = true;
+            }
+            else
+            {
+                homeButton.GetComponent<Button>().interactable = false;
+                isPaused = false;
+                Time.timeScale = 1f;
+            }
+        }
     }
 
     public String GetRankText(int rank)
@@ -150,6 +167,7 @@ public class GameController : MonoBehaviour
         player.SetActive(true);
         PlayerPrefs.SetInt("InRound", 1);
         _audio.clip = wordClip;
+        isPaused = false;
     }
 
     public void IncreaseHealth(float amt)
@@ -172,19 +190,21 @@ public class GameController : MonoBehaviour
         if (health > 0.5f)
         {
             health -= damageAmt;
-            StartCoroutine(BeenHit());
-            int healthLevel = (int)(health * 2) - 1;
-            int index = healthIndicator.Length - 1;
-
-            while (index > healthLevel)
-            {
-                healthIndicator[index].SetActive(false);
-                index--;
-            }
-
-
-            if (health == 0)
+            if (health <= 0)
                 isDead = true;
+            else
+            {
+                StartCoroutine(BeenHit());
+            }
+                int healthLevel = (int)(health * 2) - 1;
+                int index = healthIndicator.Length - 1;
+
+                while (index > healthLevel)
+                {
+                    healthIndicator[index].SetActive(false);
+                    index--;
+                }
+            
         }
         else
         {
@@ -597,19 +617,22 @@ public class GameController : MonoBehaviour
 
     IEnumerator DecreaseSpeed()
     {
-        speed = speed / 2;
+        PlayerController.instance.speed = PlayerController.instance.speed / 2;
         yield return new WaitForSeconds(3.0f);
-        speed = originalSpeed;
+        PlayerController.instance.speed = PlayerController.instance.originalSpeed;
     }
 
     IEnumerator BeenHit()
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
-            player.GetComponent<Renderer>().material.color = hitColor;
-            yield return new WaitForSeconds(flashDelay);
-            player.GetComponent<Renderer>().material.color = normalColor;
-            yield return new WaitForSeconds(flashDelay);
+            if (player.activeSelf)
+            {
+                player.GetComponent<Renderer>().material.color = hitColor;
+                yield return new WaitForSeconds(flashDelay);
+                player.GetComponent<Renderer>().material.color = normalColor;
+                yield return new WaitForSeconds(flashDelay);
+            }
         }
     }
 

@@ -78,8 +78,12 @@ public class DataController : MonoBehaviour
 
     private void LoadGameData()
     {
-        string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
-
+        string filePath;
+#if UNITY_EDITOR
+        filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
+#elif UNITY_ANDROID
+        filePath = "jar:file://" + Application.dataPath + "!/assets/" + gameDataFilename;
+#endif
         if (File.Exists(filePath))
         {
             // read all text into string
