@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System;
+using UnityEngine.Networking;
 
 public class DataController : MonoBehaviour
 {
@@ -36,7 +37,8 @@ public class DataController : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-        LoadGameData();
+        //LoadGameData();
+        StartCoroutine(LoadGameDataOnOnAndroid());
         LoadPlayerProgress();
         LoadPlayerSettings();
         SceneManager.LoadScene("MainMenu");
@@ -76,14 +78,39 @@ public class DataController : MonoBehaviour
         PlayerPrefs.SetString("Difficulty", difficulty);
     }
 
+    IEnumerator LoadGameDataOnOnAndroid()
+    {
+        string filePath;
+        filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
+        //Debug.Log("file path on android is " + filePath);
+        string dataAsJson;
+        if (filePath.Contains("://") || filePath.Contains (":///")) 
+        {
+            UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(filePath);
+            yield return www.SendWebRequest();
+            dataAsJson = www.downloadHandler.text;
+            // deserialize string into object
+            GameData loadData = JsonUtility.FromJson<GameData>(dataAsJson);
+            allLevelData = loadData.allLevelData;
+        }
+        else if (File.Exists(filePath))
+        {
+            dataAsJson = File.ReadAllText(filePath);
+            // deserialize string into object
+            GameData loadData = JsonUtility.FromJson<GameData>(dataAsJson);
+            allLevelData = loadData.allLevelData;
+        }
+        else
+        {
+            Debug.LogError("Cannot load game data!");
+        }
+    }
+
     private void LoadGameData()
     {
         string filePath;
-#if UNITY_EDITOR
         filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
-#elif UNITY_ANDROID
-        filePath = "jar:file://" + Application.dataPath + "!/assets/" + gameDataFilename;
-#endif
+        //Debug.Log("file path on normal is " + filePath);
         if (File.Exists(filePath))
         {
             // read all text into string

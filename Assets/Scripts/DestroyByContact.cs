@@ -20,6 +20,8 @@ public class DestroyByContact : MonoBehaviour
             return;
         if (gameObject.CompareTag("Shield") && other.CompareTag("Bolt"))
             return;
+        if (gameObject.CompareTag("Double Bolt") && other.CompareTag("Bolt"))
+            return;
 
         if (gameObject.CompareTag("Health"))
         {
