@@ -9,12 +9,16 @@ public class MainMenu : MonoBehaviour
     public GameObject easyButton;
     public GameObject normalButton;
     public GameObject hardButton;
-    public GameObject preschool;
-    public GameObject kindergarten;
-    public GameObject firstGrade;
-    public GameObject secondGrade;
-    public GameObject thirdGrade;
-    public GameObject fourthGrade;
+    public GameObject level1;
+    public GameObject level2;
+    public GameObject level3;
+    public GameObject level4;
+    public GameObject level5;
+    public GameObject level6;
+    public GameObject level7;
+    public GameObject level8;
+    public GameObject level9;
+    public GameObject level10;
 
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color chosenColor = new Color32(212, 175, 55, 255);
@@ -29,52 +33,16 @@ public class MainMenu : MonoBehaviour
     void Awake()
     {
         dataController = FindObjectOfType<DataController>();
-        preschool.GetComponent<Button>().interactable = true;
-        switch (PlayerPrefs.GetInt("Rank"))
-        {
-            case DataController.PRESCHOOL_RANK:
-                kindergarten.GetComponent<Button>().interactable = false;
-                firstGrade.GetComponent<Button>().interactable = false;
-                secondGrade.GetComponent<Button>().interactable = false;
-                thirdGrade.GetComponent<Button>().interactable = false;
-                fourthGrade.GetComponent<Button>().interactable = false;
-                break;
-            case DataController.KINDERGARTEN_RANK:
-                kindergarten.GetComponent<Button>().interactable = true;
-                firstGrade.GetComponent<Button>().interactable = false;
-                secondGrade.GetComponent<Button>().interactable = false;
-                thirdGrade.GetComponent<Button>().interactable = false;
-                fourthGrade.GetComponent<Button>().interactable = false;
-                break;
-            case DataController.FIRSTGRADE_RANK:
-                kindergarten.GetComponent<Button>().interactable = true;
-                firstGrade.GetComponent<Button>().interactable = true;
-                secondGrade.GetComponent<Button>().interactable = false;
-                thirdGrade.GetComponent<Button>().interactable = false;
-                fourthGrade.GetComponent<Button>().interactable = false;
-                break;
-            case DataController.SECONDGRADE_RANK:
-                kindergarten.GetComponent<Button>().interactable = true;
-                firstGrade.GetComponent<Button>().interactable = true;
-                secondGrade.GetComponent<Button>().interactable = true;
-                thirdGrade.GetComponent<Button>().interactable = false;
-                fourthGrade.GetComponent<Button>().interactable = false;
-                break;
-            case DataController.THIRDGRADE_RANK:
-                kindergarten.GetComponent<Button>().interactable = true;
-                firstGrade.GetComponent<Button>().interactable = true;
-                secondGrade.GetComponent<Button>().interactable = true;
-                thirdGrade.GetComponent<Button>().interactable = true;
-                fourthGrade.GetComponent<Button>().interactable = false;
-                break;
-            case DataController.FOURTHGRADE_RANK:
-                kindergarten.GetComponent<Button>().interactable = true;
-                firstGrade.GetComponent<Button>().interactable = true;
-                secondGrade.GetComponent<Button>().interactable = true;
-                thirdGrade.GetComponent<Button>().interactable = true;
-                fourthGrade.GetComponent<Button>().interactable = true;
-                break;
-        }
+        level1.GetComponent<Button>().interactable = true;
+        level2.GetComponent<Button>().interactable = dataController.allLevelData[0].isComplete;
+        level3.GetComponent<Button>().interactable = dataController.allLevelData[1].isComplete;
+        level4.GetComponent<Button>().interactable = dataController.allLevelData[2].isComplete;
+        level5.GetComponent<Button>().interactable = dataController.allLevelData[3].isComplete;
+        level6.GetComponent<Button>().interactable = dataController.allLevelData[4].isComplete;
+        level7.GetComponent<Button>().interactable = dataController.allLevelData[5].isComplete;
+        level8.GetComponent<Button>().interactable = dataController.allLevelData[6].isComplete;
+        level9.GetComponent<Button>().interactable = dataController.allLevelData[7].isComplete;
+        level10.GetComponent<Button>().interactable = dataController.allLevelData[8].isComplete;
 
         SetDifficultyButton();
 

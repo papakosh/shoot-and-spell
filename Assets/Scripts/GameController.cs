@@ -47,15 +47,15 @@ public class GameController : MonoBehaviour
 
     private int experiencePoints;
     private int experienceNeededToLevelUp;
-    private int wordExperienceModifier = 2;
+    private int wordExperienceModifier = 1;
     private bool gameOver;
     private Color normalColor = Color.white;
     private Color hitColor = Color.red;
     private Color bufferColor = Color.yellow;
 
     // player performance
-    private float health = 2;
-    private float healthMax = 2;
+    private float health = 1;
+    private float healthMax = 1;
 
     [HideInInspector]
     public bool doubleBoltAbility;
@@ -87,8 +87,8 @@ public class GameController : MonoBehaviour
         wordClip = Resources.Load<AudioClip>("Audio/" + currentGameLevel + "/" + targetWord.ToLower());
         introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = PlayerPrefs.GetString("Difficulty");
-        experiencePoints = PlayerPrefs.GetInt("XP");
-        currentRank = PlayerPrefs.GetInt("Rank");
+        experiencePoints = dataController.GetPlayerXP();
+        currentRank = dataController.GetPlayerRank();  
         healthMax = CalculateHealthMax();
         health = healthMax;
         homeButton.GetComponent<Button>().interactable = false;
@@ -100,6 +100,7 @@ public class GameController : MonoBehaviour
         RefreshUI();
         gameOver = false;
         isPaused = false;
+        wordExperienceModifier = currentRank > 0 ? currentRank : 1;
         if (PlayerPrefs.GetInt("InRound") == 0)
         {
             isPaused = true;
@@ -142,18 +143,22 @@ public class GameController : MonoBehaviour
     {
         switch (rank)
         {
-            case DataController.PRESCHOOL_RANK:
-                return "Preschooler";
-            case DataController.KINDERGARTEN_RANK:
-                return "Kindergartner";
-            case DataController.FIRSTGRADE_RANK:
-                return "First Grader";
-            case DataController.SECONDGRADE_RANK:
-                return "Second Grader";
-            case DataController.THIRDGRADE_RANK:
-                return "Third Grader";
-            case DataController.FOURTHGRADE_RANK:
-                return "Fourth Grader";
+            case DataController.RECRUIT_RANK:
+                return "Space Recruit";
+            case DataController.CADET_RANK:
+                return "Space Cadet";
+            case DataController.PILOT_RANK:
+                return "Space Pilot";
+            case DataController.ACE_RANK:
+                return "Space Ace";
+            case DataController.CHIEF_RANK:
+                return "Space Chief";
+            case DataController.CAPTAIN_RANK:
+                return "Space Captain";
+            case DataController.COMMANDER_RANK:
+                return "Space Commander";
+            case DataController.MASTER_RANK:
+                return "Space Master";
             default:
                 return "Undefined";
         }
@@ -220,21 +225,11 @@ public class GameController : MonoBehaviour
         bufferAbility = false;
     }
 
-    public void LevelUp(bool increaseHealth, float amt)
+    public void LevelUp()
     {
-        if (increaseHealth)
-        {
-            healthMax = healthMax + amt;
-            if (healthMax > 3)
-                healthMax = 3;
-            health = healthMax;
-            PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
-        }
-        else
-        {
-            health = healthMax;
-            PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
-        }
+        healthMax = CalculateHealthMax();
+        health = healthMax;
+        PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
     }
 
     public void HealthPickup()
@@ -263,9 +258,8 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void GameLose()
+    public void RoundLose()
     {
-        CalculateWordScore(false);
         gameOver = true;
         UIRoundOver.GetComponent<Text>().text = "Better luck next time, cadet. Click to continue playing.";
         UIRoundOver.SetActive(true);
@@ -313,7 +307,7 @@ public class GameController : MonoBehaviour
 
                 if (targetIndex == targetWord.Length - 1)
                 {
-                    GameWin();
+                    RoundWin();
                 }
                 else
                 {
@@ -338,11 +332,11 @@ public class GameController : MonoBehaviour
             case 2:
                 break;
             case 3:
-                if (currentRank > DataController.NINTHGRADE_RANK)
+                if (currentRank > DataController.CAPTAIN_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
-                else if (currentRank > DataController.FIFTHGRADE_RANK)
+                else if (currentRank > DataController.PILOT_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
-                else if (currentRank > DataController.KINDERGARTEN_RANK)
+                else if (currentRank > DataController.CADET_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
                 else
                     Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
@@ -375,43 +369,32 @@ public class GameController : MonoBehaviour
     {
         switch (currentRank)
         {
-            case 0:
-            case 1:
+            case DataController.RECRUIT_RANK:
+                return 1.0f;
+            case DataController.CADET_RANK:
                 return 2.0f;
-            case 2:
-                return 2.5f;
-            case 3:
+            case DataController.PILOT_RANK:
                 return 3.0f;
-            case 4:
-                return 3.5f;
-            case 5:
+            case DataController.ACE_RANK:
                 return 4.0f;
-            case 6:
-                return 4.5f;
-            case 7:
+            case DataController.CHIEF_RANK:
                 return 5.0f;
-            case 8:
-                return 5.5f;
-            case 9:
+            case DataController.CAPTAIN_RANK:
                 return 6.0f;
-            case 10:
-                return 6.5f;
-            case 11:
+            case DataController.COMMANDER_RANK:
                 return 7.0f;
-            case 12:
-                return 7.5f;
-            case 13:
+            case DataController.MASTER_RANK:
                 return 8.0f;
             default:
-                return 2.0f;
+                return 1.0f;
                     
         }
     }
 
     private double CalculateRankXP(int rank)
     {
-        double exponent = 1.25;
-        double baseXP = 10;
+        double exponent = 1.5;
+        double baseXP = 50;
         return Math.Floor(baseXP * Math.Pow(rank+1, exponent));
     }
 
@@ -422,16 +405,18 @@ public class GameController : MonoBehaviour
         {
             currentRank++;
             experiencePoints = experiencePoints - currentRankXP;
-            if (currentRank > 1)
-            {
-                LevelUp(true, 0.5f);
-            }
-            else
-            {
-                LevelUp(false, 0f);
-            }
+            LevelUp();
+            
         }
-        dataController.SavePlayerProgress(currentRank, experiencePoints);
+        dataController.DisplayProgress(currentGameLevel);
+        dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
+        dataController.DisplayProgress(currentGameLevel);
+        List<String> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
+        if (! dataController.allLevelData[currentGameLevel].isComplete && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        {
+            dataController.MarkLevelComplete(currentGameLevel);
+            Debug.Log("Marked Level " + (currentGameLevel + 1) + " Complete");
+        }
     }
 
     private string RandomWord()
@@ -440,19 +425,16 @@ public class GameController : MonoBehaviour
         return words[UnityEngine.Random.Range(0, words.Length)].word;
     }
 
-    private void CalculateWordScore(bool won)
+    private void CalculateWordScore()
     {
-        if (won)
-        {
-            experiencePoints = experiencePoints + (targetWord.Length * wordExperienceModifier);
-            CheckProgression();
-            RefreshUI();
-        }
+        experiencePoints = experiencePoints + (targetWord.Length * wordExperienceModifier);
     }
 
-    private void GameWin()
+    private void RoundWin()
     {
-        CalculateWordScore(true);
+        CalculateWordScore();
+        CheckProgression();
+        RefreshUI();
         gameOver = true;
         UIRoundOver.GetComponent<Text>().text = "Good job, cadet. You've just earned <color=#42f442>" + (targetWord.Length * wordExperienceModifier) + " experience points.</color> Click to continue.";
         UIRoundOver.SetActive(true);
@@ -460,6 +442,7 @@ public class GameController : MonoBehaviour
         xpAddedText.GetComponent<Text>().text = "+" + (targetWord.Length * wordExperienceModifier) + " xp ";
         xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
         player.SetActive(false);
+        
     }
 
     private void PopulateDebrisArray()
@@ -626,7 +609,7 @@ public class GameController : MonoBehaviour
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
-            if (player.activeSelf)
+            if (player != null && player.activeSelf)
             {
                 player.GetComponent<Renderer>().material.color = hitColor;
                 yield return new WaitForSeconds(flashDelay);

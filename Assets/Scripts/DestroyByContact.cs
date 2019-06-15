@@ -73,7 +73,7 @@ public class DestroyByContact : MonoBehaviour
                 {
                     Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                     Destroy(other.gameObject);
-                    GameController.instance.GameLose();
+                    GameController.instance.RoundLose();
                 }
             }
         }
