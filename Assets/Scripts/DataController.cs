@@ -5,15 +5,16 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System;
 using UnityEngine.Networking;
+using System.Text;
 
 public class DataController : MonoBehaviour
 {
     public LevelData[] allLevelData;
     private string gameDataFilename = "data.json";
     private string playerDataFilename = "player.json";
-    public PlayerProgress playerProgress;
-    private PlayerSettings playerSettings;
-    private PlayerData playerData;
+    //public PlayerProgress playerProgress;
+    //private PlayerSettings playerSettings;
+    public PlayerData playerData;
 
     public const int RECRUIT_RANK = 0;
     public const int CADET_RANK = 1;
@@ -34,18 +35,19 @@ public class DataController : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         StartCoroutine(LoadGameData());
-        StartCoroutine(LoadPlayerData());
-        LoadPlayerProgress();
-        LoadPlayerSettings();
+        //StartCoroutine(LoadPlayerData());
+        LoadPlayerData();
+        //LoadPlayerProgress();
+        //LoadPlayerSettings();
         SceneManager.LoadScene("MainMenu");
     }
 
-    private void LoadPlayerProgress()
+    /*private void LoadPlayerProgress()
     {
         playerProgress = new PlayerProgress(PlayerPrefs.GetInt("Rank"), PlayerPrefs.GetInt("XP"));
-    }
+    }*/
 
-    private void LoadPlayerSettings()
+    /*private void LoadPlayerSettings()
     {
         playerSettings = new PlayerSettings();
         if (PlayerPrefs.HasKey("Difficulty"))
@@ -57,16 +59,16 @@ public class DataController : MonoBehaviour
             playerSettings.levelOfDifficulty = "EASY";
             PlayerPrefs.SetString("Difficulty", playerSettings.levelOfDifficulty);
         }
-    }
+    }*/
 
     public void DisplayProgress(int level)
     {
-        Debug.Log("words solved so far is on level " + (level + 1) + " is " + getCompletedLevelList(level).Count + " out of " + allLevelData[level].words.Length);
+        Debug.Log("words solved so far is on level " + (level +  1) + " is " + getCompletedLevelList(level).Count + " out of " + allLevelData[level].words.Length);
     }
 
     public List<String> getCompletedLevelList(int level)
     {
-        switch (level + 1)
+        switch (level+1)
         {
             case 1:
                 return playerData.level1Completed;
@@ -93,20 +95,14 @@ public class DataController : MonoBehaviour
         }
     }
 
-    public void MarkLevelComplete(int level)
+    public void UnlockNextLevel (int level)
     {
-        allLevelData[level].isComplete = true;
-        SaveGameData();
-
+        playerData.levelsUnlocked[level+1] = true;
+        SavePlayerData();
     }
 
     public void SavePlayerProgress(int rank, int xp, int level, string word )
     {
-        playerProgress.rank = rank;
-        playerProgress.xp = xp;
-        PlayerPrefs.SetInt("Rank", rank);
-        PlayerPrefs.SetInt("XP", xp);
-
         playerData.rank = rank;
         playerData.xp = xp;
 
@@ -160,37 +156,35 @@ public class DataController : MonoBehaviour
         }
     }
 
-    IEnumerator LoadPlayerData()
+    private void LoadPlayerData()
     {
-        string filePath;
-        filePath = Path.Combine(Application.streamingAssetsPath, playerDataFilename);
-
-        string dataAsJson;
-        if (filePath.Contains("://") || filePath.Contains(":///"))
+        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
+        if (File.Exists(filePath))
         {
-            UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(filePath);
-            yield return www.SendWebRequest();
-            dataAsJson = www.downloadHandler.text;
-            // deserialize string into object
+            byte[] jsonBytes = File.ReadAllBytes(filePath);
+            string dataAsJson = Encoding.ASCII.GetString(jsonBytes);
             playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
-            //allLevelData = loadData.allLevelData;
-            if (playerData != null && playerData.level10Completed != null)
-            Debug.Log("level 1 data count is " + playerData.level10Completed.Count);
-        }
-        else if (File.Exists(filePath))
-        {
-            dataAsJson = File.ReadAllText(filePath);
-            // deserialize string into object
-            playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
-            //allLevelData = loadData.allLevelData;
             if (playerData != null && playerData.level1Completed != null)
-                Debug.Log("level 1 data count is " + playerData.level1Completed.Count);
+            {
+                Debug.Log("level 1 completed count is " + playerData.level1Completed.Count);
+            }
         }
         else
         {
-            Debug.LogError("Cannot load game data!");
-        }
+            //Debug.Log("Persistent data path is " + Application.persistentDataPath);
+            playerData = new PlayerData();
+            string dataAsJson = JsonUtility.ToJson(playerData);
+            byte[] jsonBytes = Encoding.ASCII.GetBytes(dataAsJson);
+            File.WriteAllBytes(filePath, jsonBytes);
 
+            byte[] jsonBytesRead = File.ReadAllBytes(filePath);
+            string dataAsJsonRead = Encoding.ASCII.GetString(jsonBytesRead);
+            playerData = JsonUtility.FromJson<PlayerData>(dataAsJsonRead);
+            if (playerData != null && playerData.level1Completed != null)
+            {
+                Debug.Log("level 1 completed count is " + playerData.level1Completed.Count);
+            }
+        }
     }
 
     private void SaveGameData()
@@ -205,31 +199,18 @@ public class DataController : MonoBehaviour
     void SavePlayerData()
     {
         string dataAsJson = JsonUtility.ToJson(playerData);
-        string filePath = Path.Combine(Application.streamingAssetsPath, playerDataFilename);
+        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
+        byte[] bytes = Encoding.ASCII.GetBytes(dataAsJson);
+        File.WriteAllBytes(filePath, bytes);
+        //File.WriteAllText(filePath, dataAsJson);
 
-        /*if (filePath.Contains("://") || filePath.Contains(":///"))
-        {
-            UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(filePath);
-            yield return www.SendWebRequest();
-            www.downloadHandler.text = dataAsJson;
-            // deserialize string into object
-            playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
-            //allLevelData = loadData.allLevelData;
-            if (playerData != null && playerData.level10Completed != null)
-                Debug.Log("level 1 data count is " + playerData.level10Completed.Count);
-        }
-        else *///if (File.Exists(filePath))
-       // {
-            //dataAsJson = File.ReadAllText(filePath);
-            File.WriteAllText(filePath, dataAsJson);
-            // deserialize string into object
-            //playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
-            //allLevelData = loadData.allLevelData;
-        //}
-        //else
-       // {
-        //    Debug.LogError("Cannot load game data!");
-        //}
+    }
 
+    public void UpdatePlayerDifficulty(String difficultySelected)
+    {
+        if (playerData.difficultySelected.Equals(difficultySelected))
+            return;
+        playerData.difficultySelected = difficultySelected;
+        SavePlayerData();
     }
 }

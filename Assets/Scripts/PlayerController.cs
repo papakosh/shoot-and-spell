@@ -54,16 +54,27 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && canFire && !GameController.instance.isPaused)
         {
+            //Debug.Log("Open wormhole (X,Y) at '('" + Input.mousePosition.x + "," + Input.mousePosition.y + "')'");
             // if double bolt ability is true, then spawn two shots - need new shot spawn
             if (GameController.instance.doubleBoltAbility)
             {
                 Instantiate(shot, shotSpawnDual1.position, shotSpawnDual1.rotation);
                 Instantiate(shot, shotSpawnDual2.position, shotSpawnDual2.rotation);
+
+                AudioSource[] audioSources = GetComponents<AudioSource>();
+                _audio = audioSources[1];
+                _audio.Play();
+                _audio = audioSources[0];
                 GameController.instance.doubleBoltAbility = false;
             }else if (GameController.instance.wormholeAbility)
             {
-                Debug.Log("Open wormhole at X, Y");
+                rb.position = new Vector3(Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, boundary.xMin, boundary.xMax),
+            0.0f,Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).z, boundary.zMin, boundary.zMax));
+                
+                GameController.instance.WormholeActivated();
                 GameController.instance.wormholeAbility = false;
+                canFire = false;
+                return;
             }
             else
             {

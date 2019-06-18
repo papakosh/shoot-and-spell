@@ -38,7 +38,7 @@ public class PlayerDataEditor : EditorWindow
 
     private void LoadPlayerData()
     {
-        string filePath = Path.Combine(Application.streamingAssetsPath, playerDataFilename);
+        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
         if (File.Exists(filePath))
         {
             string dataAsJson = File.ReadAllText(filePath);
@@ -53,7 +53,7 @@ public class PlayerDataEditor : EditorWindow
     private void SavePlayerData()
     {
         string dataAsJson = JsonUtility.ToJson(playerData);
-        string filePath = Path.Combine(Application.streamingAssetsPath, playerDataFilename);
+        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
         File.WriteAllText(filePath, dataAsJson);
     }
 }

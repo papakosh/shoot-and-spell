@@ -25,6 +25,11 @@ public class GameController : MonoBehaviour
     public GameObject xpAddedText;
 
     public AudioClip healthPickup;
+    public AudioClip wormholePickup;
+    public AudioClip shieldPickup;
+    public AudioClip bufferActivated;
+    public AudioClip wormholeActivated;
+    public AudioClip doubleBoltPickup;
 
     private DataController dataController;
     private bool panelSet;
@@ -71,7 +76,7 @@ public class GameController : MonoBehaviour
     [HideInInspector]
     public bool isPaused;
     public GameObject homeButton;
-
+    
     void Awake()
     {
         if (instance == null)
@@ -84,7 +89,7 @@ public class GameController : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
-        wordClip = Resources.Load<AudioClip>("Audio/" + currentGameLevel + "/" + targetWord.ToLower());
+        wordClip = Resources.Load<AudioClip>("Audio/" + (currentGameLevel+1) + "/" + targetWord.ToLower());
         introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = PlayerPrefs.GetString("Difficulty");
         experiencePoints = dataController.GetPlayerXP();
@@ -100,7 +105,7 @@ public class GameController : MonoBehaviour
         RefreshUI();
         gameOver = false;
         isPaused = false;
-        wordExperienceModifier = currentRank > 0 ? currentRank : 1;
+        wordExperienceModifier = currentGameLevel + 1;
         if (PlayerPrefs.GetInt("InRound") == 0)
         {
             isPaused = true;
@@ -219,8 +224,10 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void ShieldsUp()
+    public void BufferActivated()
     {
+        _audio.clip = bufferActivated;
+        _audio.Play();
         StartCoroutine(BufferedAbilityOn());
         bufferAbility = false;
     }
@@ -387,7 +394,6 @@ public class GameController : MonoBehaviour
                 return 8.0f;
             default:
                 return 1.0f;
-                    
         }
     }
 
@@ -412,10 +418,10 @@ public class GameController : MonoBehaviour
         dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         dataController.DisplayProgress(currentGameLevel);
         List<String> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
-        if (! dataController.allLevelData[currentGameLevel].isComplete && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel+1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
-            dataController.MarkLevelComplete(currentGameLevel);
-            Debug.Log("Marked Level " + (currentGameLevel + 1) + " Complete");
+            dataController.UnlockNextLevel(currentGameLevel);
+           // Debug.Log("Unlocked Level " + (currentGameLevel + 1));
         }
     }
 
@@ -607,10 +613,11 @@ public class GameController : MonoBehaviour
 
     IEnumerator BeenHit()
     {
-        for (int i = 1; i <= timesToFlash; i++)
+        if (player != null && player.activeSelf)
         {
-            if (player != null && player.activeSelf)
+            for (int i = 1; i <= timesToFlash; i++)
             {
+
                 player.GetComponent<Renderer>().material.color = hitColor;
                 yield return new WaitForSeconds(flashDelay);
                 player.GetComponent<Renderer>().material.color = normalColor;
@@ -619,7 +626,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    IEnumerator BufferedAbilityOn()
+    public IEnumerator BufferedAbilityOn()
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
@@ -628,6 +635,32 @@ public class GameController : MonoBehaviour
             player.GetComponent<Renderer>().material.color = normalColor;
             yield return new WaitForSeconds(flashDelay);
         }
+    }
+    public void WormholeActivated()
+    {
+        _audio.clip = wormholeActivated;
+        _audio.Play();
+    }
+
+    public void WormholePickup()
+    {
+        wormholeAbility = true;
+        _audio.clip = wormholePickup;
+        _audio.Play();
+    }
+
+    public void ShieldPickup()
+    {
+        bufferAbility = true;
+        _audio.clip = shieldPickup;
+        _audio.Play();
+    }
+
+    public void DoubleBoltPickup()
+    {
+        doubleBoltAbility = true;
+        _audio.clip = shieldPickup;
+        _audio.Play();
     }
 
     IEnumerator SpawnWaves()

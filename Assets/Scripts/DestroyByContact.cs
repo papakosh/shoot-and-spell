@@ -22,6 +22,8 @@ public class DestroyByContact : MonoBehaviour
             return;
         if (gameObject.CompareTag("Double Bolt") && other.CompareTag("Bolt"))
             return;
+        if (gameObject.CompareTag("Wormhole") && other.CompareTag("Bolt"))
+            return;
 
         if (gameObject.CompareTag("Health"))
         {
@@ -39,7 +41,7 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                GameController.instance.doubleBoltAbility = true;
+                GameController.instance.DoubleBoltPickup();
 
             return;
         }
@@ -49,8 +51,18 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                GameController.instance.bufferAbility = true;
+                GameController.instance.ShieldPickup();
 
+            return;
+        }
+
+        if (gameObject.CompareTag("Wormhole"))
+        {
+            Destroy(gameObject);
+            if (!other.CompareTag("Player"))
+                Destroy(other.gameObject);
+            else
+                GameController.instance.WormholePickup();
             return;
         }
 
@@ -63,7 +75,7 @@ public class DestroyByContact : MonoBehaviour
         {
             if (GameController.instance.bufferAbility)
             {
-                GameController.instance.ShieldsUp();
+                GameController.instance.BufferActivated();
             }
             else
             {
