@@ -19,6 +19,16 @@ public class MainMenu : MonoBehaviour
     public GameObject level8;
     public GameObject level9;
     public GameObject level10;
+    public Slider level1Progress;
+    public Slider level2Progress;
+    public Slider level3Progress;
+    public Slider level4Progress;
+    public Slider level5Progress;
+    public Slider level6Progress;
+    public Slider level7Progress;
+    public Slider level8Progress;
+    public Slider level9Progress;
+    public Slider level10Progress;
 
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color chosenColor = new Color32(212, 175, 55, 255);
@@ -47,6 +57,57 @@ public class MainMenu : MonoBehaviour
         SetDifficultyButton();
 
     }
+
+    private void Start()
+    {
+        List<string> completedLevelList = dataController.getCompletedLevelList(0);
+        level1Progress.maxValue = dataController.allLevelData[0].words.Length;
+        level1Progress.value = completedLevelList.Count;
+
+        List<string> completedLevelList2 = dataController.getCompletedLevelList(1);
+        level2Progress.maxValue = dataController.allLevelData[1].words.Length;
+        level2Progress.value = completedLevelList2.Count;
+
+        List<string> completedLevelList3 = dataController.getCompletedLevelList(2);
+        level3Progress.maxValue = dataController.allLevelData[2].words.Length;
+        level3Progress.value = completedLevelList3.Count;
+
+        List<string> completedLevelList4 = dataController.getCompletedLevelList(3);
+        level4Progress.maxValue = dataController.allLevelData[3].words.Length;
+        level4Progress.value = completedLevelList4.Count;
+
+        List<string> completedLevelList5 = dataController.getCompletedLevelList(4);
+        level5Progress.maxValue = dataController.allLevelData[4].words.Length;
+        level5Progress.value = completedLevelList5.Count;
+
+        List<string> completedLevelList6 = dataController.getCompletedLevelList(5);
+        level6Progress.maxValue = dataController.allLevelData[5].words.Length;
+        level6Progress.value = completedLevelList6.Count;
+
+        List<string> completedLevelList7 = dataController.getCompletedLevelList(6);
+        level7Progress.maxValue = dataController.allLevelData[6].words.Length;
+        level7Progress.value = completedLevelList7.Count;
+
+        List<string> completedLevelList8 = dataController.getCompletedLevelList(7);
+        level8Progress.maxValue = dataController.allLevelData[7].words.Length;
+        level8Progress.value = completedLevelList8.Count;
+
+        List<string> completedLevelList9 = dataController.getCompletedLevelList(8);
+        level9Progress.maxValue = dataController.allLevelData[8].words.Length;
+        level9Progress.value = completedLevelList9.Count;
+
+        List<string> completedLevelList10 = dataController.getCompletedLevelList(9);
+        level10Progress.maxValue = dataController.allLevelData[9].words.Length;
+        level10Progress.value = completedLevelList10.Count;
+
+        //Debug.Log("Progress on level 1 is " + (int)percent + " %");
+    }
+
+    private double CalculatePercentComplete(int count, int total)
+    {
+        return ((double)count / total) * 100;
+    }
+    
 
     public void ChooseLevel1()
     {

@@ -417,7 +417,7 @@ public class GameController : MonoBehaviour
         dataController.DisplayProgress(currentGameLevel);
         dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         dataController.DisplayProgress(currentGameLevel);
-        List<String> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
+        List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
         if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel+1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
