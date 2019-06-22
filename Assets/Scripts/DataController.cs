@@ -12,8 +12,6 @@ public class DataController : MonoBehaviour
     public LevelData[] allLevelData;
     private string gameDataFilename = "data.json";
     private string playerDataFilename = "player.json";
-    //public PlayerProgress playerProgress;
-    //private PlayerSettings playerSettings;
     public PlayerData playerData;
 
     public const int RECRUIT_RANK = 0;
@@ -35,35 +33,17 @@ public class DataController : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         StartCoroutine(LoadGameData());
-        //StartCoroutine(LoadPlayerData());
         LoadPlayerData();
-        //LoadPlayerProgress();
-        //LoadPlayerSettings();
+    }
+
+    public void LoadGame()
+    {
         SceneManager.LoadScene("MainMenu");
     }
 
-    /*private void LoadPlayerProgress()
-    {
-        playerProgress = new PlayerProgress(PlayerPrefs.GetInt("Rank"), PlayerPrefs.GetInt("XP"));
-    }*/
-
-    /*private void LoadPlayerSettings()
-    {
-        playerSettings = new PlayerSettings();
-        if (PlayerPrefs.HasKey("Difficulty"))
-        {
-            playerSettings.levelOfDifficulty = PlayerPrefs.GetString("Difficulty");
-        }
-        else
-        {
-            playerSettings.levelOfDifficulty = "EASY";
-            PlayerPrefs.SetString("Difficulty", playerSettings.levelOfDifficulty);
-        }
-    }*/
-
     public void DisplayProgress(int level)
     {
-        Debug.Log("words solved so far is on level " + (level +  1) + " is " + getCompletedLevelList(level).Count + " out of " + allLevelData[level].words.Length);
+        //Debug.Log("words solved so far is on level " + (level +  1) + " is " + getCompletedLevelList(level).Count + " out of " + allLevelData[level].words.Length);
     }
 
     public List<String> getCompletedLevelList(int level)
@@ -127,8 +107,11 @@ public class DataController : MonoBehaviour
     {
         PlayerPrefs.SetString("Difficulty", difficulty);
     }
-
-    IEnumerator LoadGameData()
+    IEnumerator Pause()
+    {
+        yield return new WaitForSeconds(2.0f);
+    }
+        IEnumerator LoadGameData()
     {
         string filePath;
         filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
@@ -164,14 +147,9 @@ public class DataController : MonoBehaviour
             byte[] jsonBytes = File.ReadAllBytes(filePath);
             string dataAsJson = Encoding.ASCII.GetString(jsonBytes);
             playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
-            if (playerData != null && playerData.level1Completed != null)
-            {
-                Debug.Log("level 1 completed count is " + playerData.level1Completed.Count);
-            }
         }
         else
         {
-            //Debug.Log("Persistent data path is " + Application.persistentDataPath);
             playerData = new PlayerData();
             string dataAsJson = JsonUtility.ToJson(playerData);
             byte[] jsonBytes = Encoding.ASCII.GetBytes(dataAsJson);
@@ -180,10 +158,6 @@ public class DataController : MonoBehaviour
             byte[] jsonBytesRead = File.ReadAllBytes(filePath);
             string dataAsJsonRead = Encoding.ASCII.GetString(jsonBytesRead);
             playerData = JsonUtility.FromJson<PlayerData>(dataAsJsonRead);
-            if (playerData != null && playerData.level1Completed != null)
-            {
-                Debug.Log("level 1 completed count is " + playerData.level1Completed.Count);
-            }
         }
     }
 
@@ -202,8 +176,6 @@ public class DataController : MonoBehaviour
         string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
         byte[] bytes = Encoding.ASCII.GetBytes(dataAsJson);
         File.WriteAllBytes(filePath, bytes);
-        //File.WriteAllText(filePath, dataAsJson);
-
     }
 
     public void UpdatePlayerDifficulty(String difficultySelected)

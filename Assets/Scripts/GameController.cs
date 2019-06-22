@@ -23,6 +23,11 @@ public class GameController : MonoBehaviour
     public GameObject UIRoundOver;
     public GameObject player;
     public GameObject xpAddedText;
+    public GameObject levelUnlockedText;
+    public Image doubleBoltIcon;
+    public Image shieldIcon;
+    public Image wormholeIcon;
+    public GameObject background;
 
     public AudioClip healthPickup;
     public AudioClip wormholePickup;
@@ -97,6 +102,29 @@ public class GameController : MonoBehaviour
         healthMax = CalculateHealthMax();
         health = healthMax;
         homeButton.GetComponent<Button>().interactable = false;
+        Texture nebulaBackground = GetBackGroundTexture (currentGameLevel);
+        //Debug.Log("name of texture for the material was " + background.GetComponent<Renderer>().material.mainTexture.name);  
+        GameObject backgroundChild = background.transform.GetChild(0).gameObject;
+        backgroundChild.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
+        background.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
+        //Debug.Log("name of texture for the material is " + background.GetComponent<Renderer>().material.mainTexture.name);
+    }
+
+    private Texture GetBackGroundTexture(int gameLevel)
+    {
+        switch (gameLevel)
+        {
+            case 0:
+                return Resources.Load<Texture>("Textures/level 1/tile_nebula_green");
+            case 1:
+                return Resources.Load<Texture>("Textures/level 2/tile_nebula_red");
+            case 2:
+                return Resources.Load<Texture>("Textures/level 3/tile_nebula_blue");
+            case 3:
+                return Resources.Load<Texture>("Textures/level 4/tile_nebula_aqua_pink");
+            default:
+                return Resources.Load<Texture>("Textures/level 1/tile_nebula_green");
+        }
     }
 
     // Start is called before the first frame update
@@ -206,15 +234,15 @@ public class GameController : MonoBehaviour
             {
                 StartCoroutine(BeenHit());
             }
-                int healthLevel = (int)(health * 2) - 1;
+                int healthLevel = (int)(health * 2) - 1; // if health is 0, health level goes negative, which blows up while loop - need to handle case where you might be
+            // positive health like 2 hearts (1 heatlh) but get hit by an asteroid with damage of 2, which would put you to health level of-1. In case, i need to 
+            // zero out everything remaining
                 int index = healthIndicator.Length - 1;
-
                 while (index > healthLevel)
                 {
                     healthIndicator[index].SetActive(false);
                     index--;
                 }
-            
         }
         else
         {
@@ -226,6 +254,7 @@ public class GameController : MonoBehaviour
 
     public void BufferActivated()
     {
+        shieldIcon.color = defaultColor;
         _audio.clip = bufferActivated;
         _audio.Play();
         StartCoroutine(BufferedAbilityOn());
@@ -268,7 +297,7 @@ public class GameController : MonoBehaviour
     public void RoundLose()
     {
         gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Better luck next time, cadet. Click to continue playing.";
+        UIRoundOver.GetComponent<Text>().text = "Better luck next time, " + currentRankText.text + ". Click to continue playing.";
         UIRoundOver.SetActive(true);
     }
 
@@ -339,7 +368,7 @@ public class GameController : MonoBehaviour
             case 2:
                 break;
             case 3:
-                if (currentRank > DataController.CAPTAIN_RANK)
+                if (currentRank >= DataController.RECRUIT_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
                 else if (currentRank > DataController.PILOT_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
@@ -421,6 +450,7 @@ public class GameController : MonoBehaviour
         if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel+1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
+            levelUnlockedText.SetActive(true);
            // Debug.Log("Unlocked Level " + (currentGameLevel + 1));
         }
     }
@@ -442,13 +472,12 @@ public class GameController : MonoBehaviour
         CheckProgression();
         RefreshUI();
         gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Good job, cadet. You've just earned <color=#42f442>" + (targetWord.Length * wordExperienceModifier) + " experience points.</color> Click to continue.";
+        UIRoundOver.GetComponent<Text>().text = "Good job, " + currentRankText.text + ". Click to continue.";
         UIRoundOver.SetActive(true);
         xpAddedText.SetActive(true);
         xpAddedText.GetComponent<Text>().text = "+" + (targetWord.Length * wordExperienceModifier) + " xp ";
         xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
         player.SetActive(false);
-        
     }
 
     private void PopulateDebrisArray()
@@ -617,11 +646,16 @@ public class GameController : MonoBehaviour
         {
             for (int i = 1; i <= timesToFlash; i++)
             {
-
-                player.GetComponent<Renderer>().material.color = hitColor;
-                yield return new WaitForSeconds(flashDelay);
-                player.GetComponent<Renderer>().material.color = normalColor;
-                yield return new WaitForSeconds(flashDelay);
+                if (player != null && player.activeSelf)
+                {
+                    player.GetComponent<Renderer>().material.color = hitColor;
+                    yield return new WaitForSeconds(flashDelay);
+                }
+                if (player != null && player.activeSelf)
+                {
+                    player.GetComponent<Renderer>().material.color = normalColor;
+                    yield return new WaitForSeconds(flashDelay);
+                }
             }
         }
     }
@@ -638,12 +672,14 @@ public class GameController : MonoBehaviour
     }
     public void WormholeActivated()
     {
+        wormholeIcon.color = defaultColor;
         _audio.clip = wormholeActivated;
         _audio.Play();
     }
 
     public void WormholePickup()
     {
+        wormholeIcon.color = completedColor;
         wormholeAbility = true;
         _audio.clip = wormholePickup;
         _audio.Play();
@@ -651,15 +687,23 @@ public class GameController : MonoBehaviour
 
     public void ShieldPickup()
     {
+        shieldIcon.color = completedColor;
         bufferAbility = true;
         _audio.clip = shieldPickup;
         _audio.Play();
     }
 
+    public void ResetDoubleBolt()
+    {
+        doubleBoltIcon.color = defaultColor;
+        doubleBoltAbility = false;
+    }
+
     public void DoubleBoltPickup()
     {
+        doubleBoltIcon.color = completedColor;
         doubleBoltAbility = true;
-        _audio.clip = shieldPickup;
+        _audio.clip = doubleBoltPickup;
         _audio.Play();
     }
 

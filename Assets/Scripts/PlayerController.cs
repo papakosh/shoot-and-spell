@@ -65,8 +65,10 @@ public class PlayerController : MonoBehaviour
                 _audio = audioSources[1];
                 _audio.Play();
                 _audio = audioSources[0];
-                GameController.instance.doubleBoltAbility = false;
-            }else if (GameController.instance.wormholeAbility)
+
+                GameController.instance.ResetDoubleBolt ();
+            }
+            else if (GameController.instance.wormholeAbility)
             {
                 rb.position = new Vector3(Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, boundary.xMin, boundary.xMax),
             0.0f,Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).z, boundary.zMin, boundary.zMax));
