@@ -13,16 +13,17 @@ public class GameController : MonoBehaviour
     public int debrisCount;
     public float spawnWait, startWait, waveWait;
     public static GameController instance = null;
-    public GameObject[] healthIndicator;
     public GameObject[] panelLetters;
     public GameObject[] targetStandard;
 
     public Slider levelUpBar;
+    public Slider healthBar;
     public Text currentRankText;
     public GameObject UIRoundBegin;
     public GameObject UIRoundOver;
     public GameObject player;
     public GameObject xpAddedText;
+    public GameObject healthChangedText;
     public GameObject levelUnlockedText;
     public Image doubleBoltIcon;
     public Image shieldIcon;
@@ -75,13 +76,13 @@ public class GameController : MonoBehaviour
     public bool wormholeAbility;
 
     public float flashDelay = 0.125f;
-    public int timesToFlash = 3; 
+    public int timesToFlash = 3;
     [HideInInspector]
     public bool isDead;
     [HideInInspector]
     public bool isPaused;
     public GameObject homeButton;
-    
+
     void Awake()
     {
         if (instance == null)
@@ -94,20 +95,23 @@ public class GameController : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
-        wordClip = Resources.Load<AudioClip>("Audio/" + (currentGameLevel+1) + "/" + targetWord.ToLower());
+        wordClip = Resources.Load<AudioClip>("Audio/" + (currentGameLevel + 1) + "/" + targetWord.ToLower());
         introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = PlayerPrefs.GetString("Difficulty");
         experiencePoints = dataController.GetPlayerXP();
-        currentRank = dataController.GetPlayerRank();  
+        currentRank = dataController.GetPlayerRank();
         healthMax = CalculateHealthMax();
         health = healthMax;
         homeButton.GetComponent<Button>().interactable = false;
-        Texture nebulaBackground = GetBackGroundTexture (currentGameLevel);
-        //Debug.Log("name of texture for the material was " + background.GetComponent<Renderer>().material.mainTexture.name);  
+        SetLevelBackground();
+    }
+
+    private void SetLevelBackground()
+    {
+        Texture nebulaBackground = GetBackGroundTexture(currentGameLevel);
         GameObject backgroundChild = background.transform.GetChild(0).gameObject;
         backgroundChild.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
         background.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
-        //Debug.Log("name of texture for the material is " + background.GetComponent<Renderer>().material.mainTexture.name);
     }
 
     private Texture GetBackGroundTexture(int gameLevel)
@@ -212,15 +216,24 @@ public class GameController : MonoBehaviour
     {
         _audio.clip = healthPickup;
         _audio.Play();
+
+       
+        //healthChangedText.SetActive(true);
+        //healthChangedText.GetComponent<Text>().text = "+" + amt + " HP";
+        //healthChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         if (health == healthMax)
+        {
             return;
+        }
         else
         {
             health += amt;
             if (health > healthMax)
                 health = healthMax;
-            RefreshUI();
+           
+            RefreshHealthBar();
         }
+        StartCoroutine(HandleHealthText(3, amt, false));
     }
 
     public void DecreaseHealth(float damageAmt)
@@ -234,24 +247,37 @@ public class GameController : MonoBehaviour
             {
                 StartCoroutine(BeenHit());
             }
-                int healthLevel = (int)(health * 2) - 1; // if health is 0, health level goes negative, which blows up while loop - need to handle case where you might be
-            // positive health like 2 hearts (1 heatlh) but get hit by an asteroid with damage of 2, which would put you to health level of-1. In case, i need to 
-            // zero out everything remaining
-                int index = healthIndicator.Length - 1;
-                while (index > healthLevel)
-                {
-                    healthIndicator[index].SetActive(false);
-                    index--;
-                }
         }
         else
         {
             health = 0;
-            healthIndicator[0].SetActive(false);
             isDead = true;
         }
+
+        StartCoroutine(HandleHealthText(3, damageAmt, true));
+        //healthChangedText.SetActive(true);
+        //healthChangedText.GetComponent<Text>().text = "-" + damageAmt + " HP";
+        //healthChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
+        RefreshHealthBar();
     }
 
+    public IEnumerator HandleHealthText(int delay, float amt, bool damage)
+    {
+
+        healthChangedText.SetActive(true);
+        if (damage)
+        {
+            healthChangedText.GetComponent<Text>().text = "-" + amt + " HP";
+        }
+        else
+        {
+            healthChangedText.GetComponent<Text>().text = "+" + amt + " HP";
+        }
+        healthChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
+        yield return new WaitForSeconds(delay);
+        healthChangedText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
+        healthChangedText.SetActive(false);
+    }
     public void BufferActivated()
     {
         shieldIcon.color = defaultColor;
@@ -393,12 +419,15 @@ public class GameController : MonoBehaviour
         currentRankText.text = GetRankText(currentRank);
         levelUpBar.maxValue = (int)CalculateRankXP(currentRank);
         levelUpBar.value = experiencePoints;
+        RefreshHealthBar();
+    }
 
-        int healthLevel = (int)(health * 2);
-        for (int i = 0; i < healthLevel; i++)
-        {
-            healthIndicator[i].SetActive(true);
-        }
+    private void RefreshHealthBar()
+    {
+        healthBar.maxValue = healthMax;
+        healthBar.value = health;
+        Debug.Log("health bar max value = " + healthBar.maxValue);
+        Debug.Log("health bar value = " + healthBar.value);
     }
 
     private float CalculateHealthMax()
@@ -430,7 +459,7 @@ public class GameController : MonoBehaviour
     {
         double exponent = 1.5;
         double baseXP = 50;
-        return Math.Floor(baseXP * Math.Pow(rank+1, exponent));
+        return Math.Floor(baseXP * Math.Pow(rank + 1, exponent));
     }
 
     private void CheckProgression()
@@ -441,17 +470,16 @@ public class GameController : MonoBehaviour
             currentRank++;
             experiencePoints = experiencePoints - currentRankXP;
             LevelUp();
-            
+
         }
         dataController.DisplayProgress(currentGameLevel);
         dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         dataController.DisplayProgress(currentGameLevel);
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
-        if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel+1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
             levelUnlockedText.SetActive(true);
-           // Debug.Log("Unlocked Level " + (currentGameLevel + 1));
         }
     }
 
@@ -670,6 +698,7 @@ public class GameController : MonoBehaviour
             yield return new WaitForSeconds(flashDelay);
         }
     }
+
     public void WormholeActivated()
     {
         wormholeIcon.color = defaultColor;
@@ -793,5 +822,5 @@ public class GameController : MonoBehaviour
         }
     }
 
-    
+
 }
