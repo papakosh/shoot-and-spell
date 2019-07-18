@@ -1,0 +1,140 @@
+fileFormatVersion: 2
+guid: ead5cb94a1802464b8c3aa9100be95f2
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: BACK
+    100002: //RootNode
+    100004: BOTTOM
+    100006: Box
+    100008: FRONT
+    100010: LEFT
+    100012: RIGHT
+    100014: TOP
+    400000: BACK
+    400002: //RootNode
+    400004: BOTTOM
+    400006: Box
+    400008: FRONT
+    400010: LEFT
+    400012: RIGHT
+    400014: TOP
+    2100000: edgewoodMaterial
+    2100002: woodMaterial
+    2300000: BACK
+    2300002: BOTTOM
+    2300004: Box
+    2300006: FRONT
+    2300008: LEFT
+    2300010: RIGHT
+    2300012: TOP
+    3300000: BACK
+    3300002: BOTTOM
+    3300004: Box
+    3300006: FRONT
+    3300008: LEFT
+    3300010: RIGHT
+    3300012: TOP
+    4300000: BOTTOM
+    4300002: TOP
+    4300004: LEFT
+    4300006: BACK
+    4300008: FRONT
+    4300010: RIGHT
+    4300012: Box
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: edgewoodMaterial
+    second: {fileID: 2100000, guid: 243453d976c95934ab57970bc4477e08, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: woodMaterial
+    second: {fileID: 2100000, guid: 2fdbce96891083a429f3a313057bf585, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 1
+    hasPreviousCalculatedGlobalScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

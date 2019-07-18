@@ -57,7 +57,8 @@ public class GameController : MonoBehaviour
     private int currentRank;
 
     private int experiencePoints;
-    private int experienceNeededToLevelUp;
+    //private int experienceNeededToLevelUp;
+    private int xpAdded;
     private int wordExperienceModifier = 1;
     private bool gameOver;
     private Color normalColor = Color.white;
@@ -83,6 +84,12 @@ public class GameController : MonoBehaviour
     public bool isPaused;
     public GameObject homeButton;
 
+    private float playerStreak = 0f;
+    private const float streakModifier = 0.05f;
+    private int targetWordIndex;
+    private int timeRemaining;
+    private bool gameReady;
+
     void Awake()
     {
         if (instance == null)
@@ -95,15 +102,31 @@ public class GameController : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
-        wordClip = Resources.Load<AudioClip>("Audio/" + (currentGameLevel + 1) + "/" + targetWord.ToLower());
+        wordClip = Resources.Load<AudioClip>(dataController.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
         introClip = Resources.Load<AudioClip>("Audio/intro");
-        difficulty = PlayerPrefs.GetString("Difficulty");
+        difficulty = dataController.playerData.difficultySelected;
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
-        healthMax = CalculateHealthMax();
-        health = healthMax;
+        healthMax = GetHealthMax();
+        if (PlayerPrefs.HasKey("PlayerHealth"))
+        {
+            health = PlayerPrefs.GetFloat("PlayerHealth");
+        }
+        else
+        {
+            health = healthMax;
+        }
         homeButton.GetComponent<Button>().interactable = false;
         SetLevelBackground();
+
+        if (PlayerPrefs.HasKey("PlayerStreak")){
+            playerStreak = PlayerPrefs.GetFloat("PlayerStreak");
+        }
+        else
+        {
+            playerStreak = 0;
+        }
+        gameReady = false;
     }
 
     private void SetLevelBackground()
@@ -126,6 +149,18 @@ public class GameController : MonoBehaviour
                 return Resources.Load<Texture>("Textures/level 3/tile_nebula_blue");
             case 3:
                 return Resources.Load<Texture>("Textures/level 4/tile_nebula_aqua_pink");
+            case 4:
+                return Resources.Load<Texture>("Textures/level 5/tile_nebula_blue_black");
+            case 5:
+                return Resources.Load<Texture>("Textures/level 6/tile_nebula_blue_green_stars");
+            case 6:
+                return Resources.Load<Texture>("Textures/level 7/tile_nebula_blue_lizard");
+            case 7:
+                return Resources.Load<Texture>("Textures/level 8/tile_nebula_magenta");
+            case 8:
+                return Resources.Load<Texture>("Textures/level 9/tile_nebula_yellow");
+            case 9:
+                return Resources.Load<Texture>("Textures/level 10/tile_nebula_green_stars");
             default:
                 return Resources.Load<Texture>("Textures/level 1/tile_nebula_green");
         }
@@ -134,26 +169,55 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        timeRemaining = 3;
         RefreshUI();
         gameOver = false;
         isPaused = false;
         wordExperienceModifier = currentGameLevel + 1;
-        if (PlayerPrefs.GetInt("InRound") == 0)
-        {
-            isPaused = true;
-            UIRoundBegin.SetActive(true);
+        //if (PlayerPrefs.GetInt("InRound") == 0)
+        //{
+        isPaused = true;
+        UIRoundBegin.SetActive(true);
+        player.SetActive(false);
+        //UIRoundBegin.GetComponent<Button>().interactable = false;
+       // Time.timeScale = 0f;
+        StartCoroutine(Countdown(timeRemaining));
 
-            player.SetActive(false);
-            Time.timeScale = 0f;
-            _audio.clip = introClip;
-            _audio.Play();
-        }
-        else
-        {
-            _audio.clip = wordClip;
-        }
+        //UIRoundBegin.SetActive(false)
+        //player.SetActive(true);
+
+        //_audio.clip = introClip;
+        //_audio.Play();
+        //}
+        //else
+        //{
+        //  _audio.clip = wordClip;
+        //}
+        //int timer = 0;
+        //while (timer < 5000) {
+        //  Debug.Log("Waiting ....");// do nothing until game ready
+        //timer++;
+        //}
+        //Time.timeScale = 0f;
         targetIndex = 0;
         StartCoroutine(SpawnWaves());
+    }
+
+    IEnumerator Countdown(int seconds)
+    {
+        int counter = seconds;
+        while (counter >= 0)
+        {
+            yield return new WaitForSeconds(1);
+            UIRoundBegin.GetComponent<Text>().text = "Countdown \n" + counter;
+            Debug.Log("Countdown " + counter);
+            counter--;
+
+        }
+        //yield return new WaitForSeconds(1);
+        gameReady = true;
+        UIRoundBegin.SetActive(false);
+        player.SetActive(true);
     }
 
     // Update is called once per frame
@@ -217,10 +281,6 @@ public class GameController : MonoBehaviour
         _audio.clip = healthPickup;
         _audio.Play();
 
-       
-        //healthChangedText.SetActive(true);
-        //healthChangedText.GetComponent<Text>().text = "+" + amt + " HP";
-        //healthChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         if (health == healthMax)
         {
             return;
@@ -230,10 +290,9 @@ public class GameController : MonoBehaviour
             health += amt;
             if (health > healthMax)
                 health = healthMax;
-           
-            RefreshHealthBar();
         }
         StartCoroutine(HandleHealthText(3, amt, false));
+        RefreshHealthBar();
     }
 
     public void DecreaseHealth(float damageAmt)
@@ -255,9 +314,6 @@ public class GameController : MonoBehaviour
         }
 
         StartCoroutine(HandleHealthText(3, damageAmt, true));
-        //healthChangedText.SetActive(true);
-        //healthChangedText.GetComponent<Text>().text = "-" + damageAmt + " HP";
-        //healthChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         RefreshHealthBar();
     }
 
@@ -289,9 +345,9 @@ public class GameController : MonoBehaviour
 
     public void LevelUp()
     {
-        healthMax = CalculateHealthMax();
+        healthMax = GetHealthMax();
         health = healthMax;
-        PlayerPrefs.SetFloat("PlayerHealthMax", healthMax);
+        PlayerPrefs.DeleteKey("PlayerHealth");
     }
 
     public void HealthPickup()
@@ -325,6 +381,8 @@ public class GameController : MonoBehaviour
         gameOver = true;
         UIRoundOver.GetComponent<Text>().text = "Better luck next time, " + currentRankText.text + ". Click to continue playing.";
         UIRoundOver.SetActive(true);
+        PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey("PlayerStreak");
     }
 
     public void ContinuePlaying()
@@ -340,6 +398,7 @@ public class GameController : MonoBehaviour
 
     public void GoHome()
     {
+        PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.SetInt("InRound", 0);
         SceneManager.LoadScene("MainMenu");
     }
@@ -394,12 +453,12 @@ public class GameController : MonoBehaviour
             case 2:
                 break;
             case 3:
-                if (currentRank >= DataController.RECRUIT_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
+                if (currentRank > DataController.CADET_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
                 else if (currentRank > DataController.PILOT_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
-                else if (currentRank > DataController.CADET_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
+                else if (currentRank > DataController.CHIEF_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
                 else
                     Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
                 break;
@@ -426,11 +485,9 @@ public class GameController : MonoBehaviour
     {
         healthBar.maxValue = healthMax;
         healthBar.value = health;
-        Debug.Log("health bar max value = " + healthBar.maxValue);
-        Debug.Log("health bar value = " + healthBar.value);
     }
 
-    private float CalculateHealthMax()
+    private float GetHealthMax()
     {
         switch (currentRank)
         {
@@ -472,9 +529,7 @@ public class GameController : MonoBehaviour
             LevelUp();
 
         }
-        dataController.DisplayProgress(currentGameLevel);
         dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
-        dataController.DisplayProgress(currentGameLevel);
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
         if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
@@ -486,12 +541,16 @@ public class GameController : MonoBehaviour
     private string RandomWord()
     {
         WordData[] words = dataController.allLevelData[currentGameLevel].words;
-        return words[UnityEngine.Random.Range(0, words.Length)].word;
+        targetWordIndex = UnityEngine.Random.Range(0, words.Length);
+        return words[targetWordIndex].word;
     }
 
     private void CalculateWordScore()
     {
-        experiencePoints = experiencePoints + (targetWord.Length * wordExperienceModifier);
+        double xpEarned = Math.Round (targetWord.Length * (wordExperienceModifier + playerStreak), MidpointRounding.AwayFromZero);
+        //Debug.Log("word length * (word modifier + player streak) = " + targetWord.Length + " * (" + wordExperienceModifier + " + " + playerStreak + ") is XP earned of " + xpEarned);
+        xpAdded = (int)xpEarned;
+        experiencePoints = experiencePoints + xpAdded;
     }
 
     private void RoundWin()
@@ -503,9 +562,11 @@ public class GameController : MonoBehaviour
         UIRoundOver.GetComponent<Text>().text = "Good job, " + currentRankText.text + ". Click to continue.";
         UIRoundOver.SetActive(true);
         xpAddedText.SetActive(true);
-        xpAddedText.GetComponent<Text>().text = "+" + (targetWord.Length * wordExperienceModifier) + " xp ";
+        xpAddedText.GetComponent<Text>().text = "+" + xpAdded + " xp ";
         xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
         player.SetActive(false);
+        PlayerPrefs.SetFloat("PlayerHealth", health);
+        PlayerPrefs.SetFloat("PlayerStreak", playerStreak + streakModifier);
     }
 
     private void PopulateDebrisArray()

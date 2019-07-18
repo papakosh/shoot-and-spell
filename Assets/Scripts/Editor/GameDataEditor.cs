@@ -8,6 +8,7 @@ public class GameDataEditor : EditorWindow
 {
     public GameData gameData;
     private string gameDataFilename = "data.json";
+    Vector2 scrollPosition = Vector2.zero;
 
     [MenuItem("Window/Game Data Editor")]
     static void Init()
@@ -19,6 +20,8 @@ public class GameDataEditor : EditorWindow
     // Runs continuously (similar to OnUpdate)
     private void OnGUI()
     {
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(600), GUILayout.Height(600));
+
         if (gameData != null)
         {
             SerializedObject serializedObject = new SerializedObject(this);
@@ -30,12 +33,15 @@ public class GameDataEditor : EditorWindow
             {
                 SaveGameData();
             }
+            
         }
 
         if (GUILayout.Button("Load Data"))
         {
             LoadGameData();
         }
+        GUILayout.EndScrollView();
+
     }
 
     private void LoadGameData()

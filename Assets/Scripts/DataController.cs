@@ -34,16 +34,13 @@ public class DataController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         StartCoroutine(LoadGameData());
         LoadPlayerData();
+        PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey("PlayerStreak");
     }
 
     public void LoadGame()
     {
         SceneManager.LoadScene("MainMenu");
-    }
-
-    public void DisplayProgress(int level)
-    {
-        //Debug.Log("words solved so far is on level " + (level +  1) + " is " + getCompletedLevelList(level).Count + " out of " + allLevelData[level].words.Length);
     }
 
     public List<String> getCompletedLevelList(int level)
@@ -103,10 +100,6 @@ public class DataController : MonoBehaviour
         return playerData.xp;
     }
 
-    public void SavePlayerSettings (String difficulty)
-    {
-        PlayerPrefs.SetString("Difficulty", difficulty);
-    }
     IEnumerator Pause()
     {
         yield return new WaitForSeconds(2.0f);
