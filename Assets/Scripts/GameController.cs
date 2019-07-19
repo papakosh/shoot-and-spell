@@ -87,9 +87,8 @@ public class GameController : MonoBehaviour
     private float playerStreak = 0f;
     private const float streakModifier = 0.05f;
     private int targetWordIndex;
-    private int timeRemaining;
-    private bool gameReady;
-
+    public float startCountdown;
+    
     void Awake()
     {
         if (instance == null)
@@ -126,7 +125,7 @@ public class GameController : MonoBehaviour
         {
             playerStreak = 0;
         }
-        gameReady = false;
+        Time.timeScale = 1f;
     }
 
     private void SetLevelBackground()
@@ -139,85 +138,37 @@ public class GameController : MonoBehaviour
 
     private Texture GetBackGroundTexture(int gameLevel)
     {
-        switch (gameLevel)
-        {
-            case 0:
-                return Resources.Load<Texture>("Textures/level 1/tile_nebula_green");
-            case 1:
-                return Resources.Load<Texture>("Textures/level 2/tile_nebula_red");
-            case 2:
-                return Resources.Load<Texture>("Textures/level 3/tile_nebula_blue");
-            case 3:
-                return Resources.Load<Texture>("Textures/level 4/tile_nebula_aqua_pink");
-            case 4:
-                return Resources.Load<Texture>("Textures/level 5/tile_nebula_blue_black");
-            case 5:
-                return Resources.Load<Texture>("Textures/level 6/tile_nebula_blue_green_stars");
-            case 6:
-                return Resources.Load<Texture>("Textures/level 7/tile_nebula_blue_lizard");
-            case 7:
-                return Resources.Load<Texture>("Textures/level 8/tile_nebula_magenta");
-            case 8:
-                return Resources.Load<Texture>("Textures/level 9/tile_nebula_yellow");
-            case 9:
-                return Resources.Load<Texture>("Textures/level 10/tile_nebula_green_stars");
-            default:
-                return Resources.Load<Texture>("Textures/level 1/tile_nebula_green");
-        }
+        return Resources.Load<Texture>(dataController.allLevelData[currentGameLevel].backgroundPath);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        timeRemaining = 3;
         RefreshUI();
         gameOver = false;
-        isPaused = false;
-        wordExperienceModifier = currentGameLevel + 1;
-        //if (PlayerPrefs.GetInt("InRound") == 0)
-        //{
         isPaused = true;
+        wordExperienceModifier = currentGameLevel + 1;
         UIRoundBegin.SetActive(true);
         player.SetActive(false);
-        //UIRoundBegin.GetComponent<Button>().interactable = false;
-       // Time.timeScale = 0f;
-        StartCoroutine(Countdown(timeRemaining));
-
-        //UIRoundBegin.SetActive(false)
-        //player.SetActive(true);
-
-        //_audio.clip = introClip;
-        //_audio.Play();
-        //}
-        //else
-        //{
-        //  _audio.clip = wordClip;
-        //}
-        //int timer = 0;
-        //while (timer < 5000) {
-        //  Debug.Log("Waiting ....");// do nothing until game ready
-        //timer++;
-        //}
-        //Time.timeScale = 0f;
+        StartCoroutine(Countdown(startCountdown));
         targetIndex = 0;
         StartCoroutine(SpawnWaves());
     }
 
-    IEnumerator Countdown(int seconds)
+    IEnumerator Countdown(float seconds)
     {
-        int counter = seconds;
+        float counter = seconds;
         while (counter >= 0)
         {
             yield return new WaitForSeconds(1);
-            UIRoundBegin.GetComponent<Text>().text = "Countdown \n" + counter;
-            Debug.Log("Countdown " + counter);
+            UIRoundBegin.GetComponent<Text>().text = counter + "";
             counter--;
 
         }
-        //yield return new WaitForSeconds(1);
-        gameReady = true;
+        
         UIRoundBegin.SetActive(false);
         player.SetActive(true);
+        isPaused = false;
     }
 
     // Update is called once per frame
@@ -548,7 +499,6 @@ public class GameController : MonoBehaviour
     private void CalculateWordScore()
     {
         double xpEarned = Math.Round (targetWord.Length * (wordExperienceModifier + playerStreak), MidpointRounding.AwayFromZero);
-        //Debug.Log("word length * (word modifier + player streak) = " + targetWord.Length + " * (" + wordExperienceModifier + " + " + playerStreak + ") is XP earned of " + xpEarned);
         xpAdded = (int)xpEarned;
         experiencePoints = experiencePoints + xpAdded;
     }
@@ -799,7 +749,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator SpawnWaves()
     {
-        yield return new WaitForSeconds(startWait);
+        yield return new WaitForSeconds(startWait + startCountdown);
         StartCoroutine(DisplayWord(10.0f));
 
         _audio.Play();

@@ -7,5 +7,5 @@ public class LevelData
 {
     public string name;
     public WordData[] words;
-    //public bool isComplete = false;
+    public string backgroundPath;
 }
