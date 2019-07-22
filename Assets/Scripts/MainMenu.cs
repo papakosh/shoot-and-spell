@@ -245,23 +245,33 @@ public class MainMenu : MonoBehaviour
 
     public void SetEasyLevel()
     {
-        easyButton.GetComponent<Image>().color = chosenColor;
-        normalButton.GetComponent<Image>().color = defaultColor;
-        hardButton.GetComponent<Image>().color = defaultColor;
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
+        //easyButton.GetComponent<Image>().color = chosenColor;
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        //normalButton.GetComponent<Image>().color = defaultColor;
+        //hardButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_EASY);
     }
     public void SetNormalLevel()
     {
-        normalButton.GetComponent<Image>().color = chosenColor;
-        easyButton.GetComponent<Image>().color = defaultColor;
-        hardButton.GetComponent<Image>().color = defaultColor;
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
+        //normalButton.GetComponent<Image>().color = chosenColor;
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        //easyButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        //hardButton.GetComponent<Image>().color = defaultColor;
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_NORMAL);
     }
     public void SetHardLevel()
     {
-        hardButton.GetComponent<Image>().color = chosenColor;
-        easyButton.GetComponent<Image>().color = defaultColor;
-        normalButton.GetComponent<Image>().color = defaultColor;
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
+        //hardButton.GetComponent<Image>().color = chosenColor;
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        //easyButton.GetComponent<Image>().color = defaultColor;
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        //normalButton.GetComponent<Image>().color = defaultColor;
+
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_HARD);
     }
 }

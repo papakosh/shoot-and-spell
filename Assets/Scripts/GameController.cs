@@ -25,9 +25,9 @@ public class GameController : MonoBehaviour
     public GameObject xpAddedText;
     public GameObject healthChangedText;
     public GameObject levelUnlockedText;
-    public Image doubleBoltIcon;
-    public Image shieldIcon;
-    public Image wormholeIcon;
+    public GameObject doubleBoltStatusIcon;
+    public GameObject armorStatusIcon;
+    public GameObject teleportStatusIcon;
     public GameObject background;
 
     public AudioClip healthPickup;
@@ -72,9 +72,9 @@ public class GameController : MonoBehaviour
     [HideInInspector]
     public bool doubleBoltAbility;
     [HideInInspector]
-    public bool bufferAbility;
+    public bool armorAbility;
     [HideInInspector]
-    public bool wormholeAbility;
+    public bool teleportAbility;
 
     public float flashDelay = 0.125f;
     public int timesToFlash = 3;
@@ -102,7 +102,7 @@ public class GameController : MonoBehaviour
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
         wordClip = Resources.Load<AudioClip>(dataController.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
-        introClip = Resources.Load<AudioClip>("Audio/intro");
+        //introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = dataController.playerData.difficultySelected;
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
@@ -126,6 +126,7 @@ public class GameController : MonoBehaviour
             playerStreak = 0;
         }
         Time.timeScale = 1f;
+        _audio.clip = wordClip;
     }
 
     private void SetLevelBackground()
@@ -180,10 +181,13 @@ public class GameController : MonoBehaviour
             {
                 isPaused = true;
                 Time.timeScale = 0f;
+                //button_hangar_active
+                homeButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar_active");
                 homeButton.GetComponent<Button>().interactable = true;
             }
             else
             {
+                homeButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
                 homeButton.GetComponent<Button>().interactable = false;
                 isPaused = false;
                 Time.timeScale = 1f;
@@ -285,13 +289,14 @@ public class GameController : MonoBehaviour
         healthChangedText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
         healthChangedText.SetActive(false);
     }
-    public void BufferActivated()
+    public void ArmorActivated()
     {
-        shieldIcon.color = defaultColor;
+        //shieldIcon.color = defaultColor;
+        armorStatusIcon.SetActive(false);
         _audio.clip = bufferActivated;
         _audio.Play();
-        StartCoroutine(BufferedAbilityOn());
-        bufferAbility = false;
+        StartCoroutine(ArmorAbilityOn());
+        armorAbility = false;
     }
 
     public void LevelUp()
@@ -699,7 +704,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public IEnumerator BufferedAbilityOn()
+    public IEnumerator ArmorAbilityOn()
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
@@ -710,38 +715,42 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void WormholeActivated()
+    public void TeleportActivated()
     {
-        wormholeIcon.color = defaultColor;
+        teleportStatusIcon.SetActive(false);
+        //wormholeIcon.color = defaultColor;
         _audio.clip = wormholeActivated;
         _audio.Play();
     }
 
-    public void WormholePickup()
+    public void TeleportPickup()
     {
-        wormholeIcon.color = completedColor;
-        wormholeAbility = true;
+        //wormholeIcon.color = completedColor;
+        teleportStatusIcon.SetActive(true);
+        teleportAbility = true;
         _audio.clip = wormholePickup;
         _audio.Play();
     }
 
-    public void ShieldPickup()
+    public void ArmorPickup()
     {
-        shieldIcon.color = completedColor;
-        bufferAbility = true;
+        armorStatusIcon.SetActive(true);
+        armorAbility = true;
         _audio.clip = shieldPickup;
         _audio.Play();
     }
 
     public void ResetDoubleBolt()
     {
-        doubleBoltIcon.color = defaultColor;
+        doubleBoltStatusIcon.SetActive(false);
+        //doubleBoltIcon.color = defaultColor;
         doubleBoltAbility = false;
     }
 
     public void DoubleBoltPickup()
     {
-        doubleBoltIcon.color = completedColor;
+        doubleBoltStatusIcon.SetActive(true);
+        //doubleBoltIcon.color = completedColor;
         doubleBoltAbility = true;
         _audio.clip = doubleBoltPickup;
         _audio.Play();

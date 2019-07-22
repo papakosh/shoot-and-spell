@@ -51,18 +51,18 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                GameController.instance.ShieldPickup();
+                GameController.instance.ArmorPickup();
 
             return;
         }
 
-        if (gameObject.CompareTag("Wormhole"))
+        if (gameObject.CompareTag("Teleport"))
         {
             Destroy(gameObject);
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                GameController.instance.WormholePickup();
+                GameController.instance.TeleportPickup();
             return;
         }
 
@@ -73,9 +73,9 @@ public class DestroyByContact : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            if (GameController.instance.bufferAbility)
+            if (GameController.instance.armorAbility)
             {
-                GameController.instance.BufferActivated();
+                GameController.instance.ArmorActivated();
             }
             else
             {
