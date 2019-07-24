@@ -31,11 +31,11 @@ public class GameController : MonoBehaviour
     public GameObject background;
 
     public AudioClip healthPickup;
-    public AudioClip wormholePickup;
-    public AudioClip shieldPickup;
-    public AudioClip bufferActivated;
-    public AudioClip wormholeActivated;
-    public AudioClip doubleBoltPickup;
+    public AudioClip teleportPickup;
+    public AudioClip armorPickup;
+    public AudioClip armorActivated;
+    public AudioClip teleportActivated;
+    public AudioClip dualShotPickup;
 
     private DataController dataController;
     private bool panelSet;
@@ -82,7 +82,7 @@ public class GameController : MonoBehaviour
     public bool isDead;
     [HideInInspector]
     public bool isPaused;
-    public GameObject homeButton;
+    public GameObject hangarButton;
 
     private float playerStreak = 0f;
     private const float streakModifier = 0.05f;
@@ -115,7 +115,7 @@ public class GameController : MonoBehaviour
         {
             health = healthMax;
         }
-        homeButton.GetComponent<Button>().interactable = false;
+        hangarButton.GetComponent<Button>().interactable = false;
         SetLevelBackground();
 
         if (PlayerPrefs.HasKey("PlayerStreak")){
@@ -182,13 +182,13 @@ public class GameController : MonoBehaviour
                 isPaused = true;
                 Time.timeScale = 0f;
                 //button_hangar_active
-                homeButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar_active");
-                homeButton.GetComponent<Button>().interactable = true;
+                hangarButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar_active");
+                hangarButton.GetComponent<Button>().interactable = true;
             }
             else
             {
-                homeButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
-                homeButton.GetComponent<Button>().interactable = false;
+                hangarButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
+                hangarButton.GetComponent<Button>().interactable = false;
                 isPaused = false;
                 Time.timeScale = 1f;
             }
@@ -291,9 +291,8 @@ public class GameController : MonoBehaviour
     }
     public void ArmorActivated()
     {
-        //shieldIcon.color = defaultColor;
-        armorStatusIcon.SetActive(false);
-        _audio.clip = bufferActivated;
+        armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+        _audio.clip = armorActivated;
         _audio.Play();
         StartCoroutine(ArmorAbilityOn());
         armorAbility = false;
@@ -409,12 +408,12 @@ public class GameController : MonoBehaviour
             case 2:
                 break;
             case 3:
-                if (currentRank > DataController.CADET_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
+                if (currentRank > DataController.CHIEF_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
                 else if (currentRank > DataController.PILOT_RANK)
                     Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
-                else if (currentRank > DataController.CHIEF_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
+                else if (currentRank > DataController.CADET_RANK)
+                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
                 else
                     Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
                 break;
@@ -717,42 +716,45 @@ public class GameController : MonoBehaviour
 
     public void TeleportActivated()
     {
-        teleportStatusIcon.SetActive(false);
+        //teleportStatusIcon.SetActive(false);
+        teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         //wormholeIcon.color = defaultColor;
-        _audio.clip = wormholeActivated;
+        _audio.clip = teleportActivated;
         _audio.Play();
     }
 
     public void TeleportPickup()
     {
         //wormholeIcon.color = completedColor;
-        teleportStatusIcon.SetActive(true);
+        teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        //teleportStatusIcon.SetActive(true);
         teleportAbility = true;
-        _audio.clip = wormholePickup;
+        _audio.clip = teleportPickup;
         _audio.Play();
     }
 
     public void ArmorPickup()
     {
-        armorStatusIcon.SetActive(true);
+        //armorStatusIcon.SetActive(true);
+        armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         armorAbility = true;
-        _audio.clip = shieldPickup;
+        _audio.clip = armorPickup;
         _audio.Play();
     }
 
-    public void ResetDoubleBolt()
+    public void ResetDualShot()
     {
-        doubleBoltStatusIcon.SetActive(false);
+        //doubleBoltStatusIcon.SetActive(false);
+        doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         //doubleBoltIcon.color = defaultColor;
         doubleBoltAbility = false;
     }
 
-    public void DoubleBoltPickup()
+    public void DualShotPickup()
     {
-        doubleBoltStatusIcon.SetActive(true);
-        //doubleBoltIcon.color = completedColor;
+        doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         doubleBoltAbility = true;
-        _audio.clip = doubleBoltPickup;
+        _audio.clip = dualShotPickup;
         _audio.Play();
     }
 

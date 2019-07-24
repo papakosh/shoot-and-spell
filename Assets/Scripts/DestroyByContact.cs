@@ -22,7 +22,7 @@ public class DestroyByContact : MonoBehaviour
             return;
         if (gameObject.CompareTag("Double Bolt") && other.CompareTag("Bolt"))
             return;
-        if (gameObject.CompareTag("Wormhole") && other.CompareTag("Bolt"))
+        if (gameObject.CompareTag("Teleport") && other.CompareTag("Bolt"))
             return;
 
         if (gameObject.CompareTag("Health"))
@@ -41,7 +41,7 @@ public class DestroyByContact : MonoBehaviour
             if (!other.CompareTag("Player"))
                 Destroy(other.gameObject);
             else
-                GameController.instance.DoubleBoltPickup();
+                GameController.instance.DualShotPickup();
 
             return;
         }

@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour
                 _audio.Play();
                 _audio = audioSources[0];
 
-                GameController.instance.ResetDoubleBolt ();
+                GameController.instance.ResetDualShot ();
             }
            /* else if (GameController.instance.wormholeAbility)
             {
