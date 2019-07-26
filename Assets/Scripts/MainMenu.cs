@@ -44,6 +44,7 @@ public class MainMenu : MonoBehaviour
     private Color chosenColor = new Color32(212, 175, 55, 255);
 
     private DataController dataController;
+    private LevelOfDifficulty currentDifficulty;
 
     public void CallSettings()
     {
@@ -55,18 +56,24 @@ public class MainMenu : MonoBehaviour
         dataController = FindObjectOfType<DataController>();
     }
 
+    private void Update()
+    {
+        
+    }
+
     private void Start()
     {
-        level1.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[0];
-        level2.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[1];
-        level3.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[2];
-        level4.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[3];
-        level5.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[4];
-        level6.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[5];
-        level7.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[6];
-        level8.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[7];
-        level9.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[8];
-        level10.GetComponent<Button>().interactable = dataController.playerData.levelsUnlocked[9];
+        currentDifficulty = dataController.GetCurrentDifficulty();
+        level1.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[0];
+        level2.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[1];
+        level3.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[2];
+        level4.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[3];
+        level5.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[4];
+        level6.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[5];
+        level7.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[6];
+        level8.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[7];
+        level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
+        level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
 
 
         List<string> completedLevelList = dataController.getCompletedLevelList(0);
@@ -79,7 +86,7 @@ public class MainMenu : MonoBehaviour
         level2Progress.maxValue = dataController.allLevelData[1].words.Length;
         level2Progress.value = completedLevelList2.Count;
         string level2ProgressValue = completedLevelList2.Count + " out of " + dataController.allLevelData[1].words.Length;
-        if (!dataController.playerData.levelsUnlocked[1])
+        if (!currentDifficulty.levelsUnlocked[1])
             level2ProgressValue = "Locked";
         level2ProgressText.text = level2ProgressValue;
 
@@ -87,7 +94,7 @@ public class MainMenu : MonoBehaviour
         level3Progress.maxValue = dataController.allLevelData[2].words.Length;
         level3Progress.value = completedLevelList3.Count;
         string level3ProgressValue = completedLevelList3.Count + " out of " + dataController.allLevelData[2].words.Length;
-        if (!dataController.playerData.levelsUnlocked[2])
+        if (!currentDifficulty.levelsUnlocked[2])
             level3ProgressValue = "Locked";
         level3ProgressText.text = level3ProgressValue;
 
@@ -95,7 +102,7 @@ public class MainMenu : MonoBehaviour
         level4Progress.maxValue = dataController.allLevelData[3].words.Length;
         level4Progress.value = completedLevelList4.Count;
         string level4ProgressValue = completedLevelList4.Count + " out of " + dataController.allLevelData[3].words.Length;
-        if (!dataController.playerData.levelsUnlocked[3])
+        if (!currentDifficulty.levelsUnlocked[3])
             level4ProgressValue = "Locked";
         level4ProgressText.text = level4ProgressValue;
 
@@ -103,7 +110,7 @@ public class MainMenu : MonoBehaviour
         level5Progress.maxValue = dataController.allLevelData[4].words.Length;
         level5Progress.value = completedLevelList5.Count;
         string level5ProgressValue = completedLevelList5.Count + " out of " + dataController.allLevelData[4].words.Length;
-        if (!dataController.playerData.levelsUnlocked[4])
+        if (!currentDifficulty.levelsUnlocked[4])
             level5ProgressValue = "Locked";
         level5ProgressText.text = level5ProgressValue;
 
@@ -111,7 +118,7 @@ public class MainMenu : MonoBehaviour
         level6Progress.maxValue = dataController.allLevelData[5].words.Length;
         level6Progress.value = completedLevelList6.Count;
         string level6ProgressValue = completedLevelList6.Count + " out of " + dataController.allLevelData[5].words.Length;
-        if (!dataController.playerData.levelsUnlocked[5])
+        if (!currentDifficulty.levelsUnlocked[5])
             level6ProgressValue = "Locked";
         level6ProgressText.text = level6ProgressValue;
 
@@ -119,7 +126,7 @@ public class MainMenu : MonoBehaviour
         level7Progress.maxValue = dataController.allLevelData[6].words.Length;
         level7Progress.value = completedLevelList7.Count;
         string level7ProgressValue = completedLevelList7.Count + " out of " + dataController.allLevelData[6].words.Length;
-        if (!dataController.playerData.levelsUnlocked[6])
+        if (!currentDifficulty.levelsUnlocked[6])
             level7ProgressValue = "Locked";
         level7ProgressText.text = level7ProgressValue;
 
@@ -127,7 +134,7 @@ public class MainMenu : MonoBehaviour
         level8Progress.maxValue = dataController.allLevelData[7].words.Length;
         level8Progress.value = completedLevelList8.Count;
         string level8ProgressValue = completedLevelList8.Count + " out of " + dataController.allLevelData[7].words.Length;
-        if (!dataController.playerData.levelsUnlocked[7])
+        if (!currentDifficulty.levelsUnlocked[7])
             level8ProgressValue = "Locked";
         level8ProgressText.text = level8ProgressValue;
 
@@ -135,7 +142,7 @@ public class MainMenu : MonoBehaviour
         level9Progress.maxValue = dataController.allLevelData[8].words.Length;
         level9Progress.value = completedLevelList9.Count;
         string level9ProgressValue = completedLevelList9.Count + " out of " + dataController.allLevelData[8].words.Length;
-        if (!dataController.playerData.levelsUnlocked[8])
+        if (!currentDifficulty.levelsUnlocked[8])
             level9ProgressValue = "Locked";
         level9ProgressText.text = level9ProgressValue;
 
@@ -143,7 +150,7 @@ public class MainMenu : MonoBehaviour
         level10Progress.maxValue = dataController.allLevelData[9].words.Length;
         level10Progress.value = completedLevelList10.Count;
         string level10ProgressValue = completedLevelList10.Count + " out of " + dataController.allLevelData[9].words.Length;
-        if (!dataController.playerData.levelsUnlocked[9])
+        if (!currentDifficulty.levelsUnlocked[9])
             level10ProgressValue = "Locked";
         level10ProgressText.text = level10ProgressValue;
 
@@ -153,6 +160,100 @@ public class MainMenu : MonoBehaviour
     private double CalculatePercentComplete(int count, int total)
     {
         return ((double)count / total) * 100;
+    }
+
+    private void UpdateLevelDisplay()
+    {
+        currentDifficulty = dataController.GetCurrentDifficulty();
+        level1.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[0];
+        level2.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[1];
+        level3.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[2];
+        level4.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[3];
+        level5.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[4];
+        level6.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[5];
+        level7.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[6];
+        level8.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[7];
+        level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
+        level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
+
+
+        List<string> completedLevelList = dataController.getCompletedLevelList(0);
+        level1Progress.maxValue = dataController.allLevelData[0].words.Length;
+        level1Progress.value = completedLevelList.Count;
+        string level1ProgressValue = completedLevelList.Count + " out of " + dataController.allLevelData[0].words.Length;
+        level1ProgressText.text = level1ProgressValue;
+
+        List<string> completedLevelList2 = dataController.getCompletedLevelList(1);
+        level2Progress.maxValue = dataController.allLevelData[1].words.Length;
+        level2Progress.value = completedLevelList2.Count;
+        string level2ProgressValue = completedLevelList2.Count + " out of " + dataController.allLevelData[1].words.Length;
+        if (!currentDifficulty.levelsUnlocked[1])
+            level2ProgressValue = "Locked";
+        level2ProgressText.text = level2ProgressValue;
+
+        List<string> completedLevelList3 = dataController.getCompletedLevelList(2);
+        level3Progress.maxValue = dataController.allLevelData[2].words.Length;
+        level3Progress.value = completedLevelList3.Count;
+        string level3ProgressValue = completedLevelList3.Count + " out of " + dataController.allLevelData[2].words.Length;
+        if (!currentDifficulty.levelsUnlocked[2])
+            level3ProgressValue = "Locked";
+        level3ProgressText.text = level3ProgressValue;
+
+        List<string> completedLevelList4 = dataController.getCompletedLevelList(3);
+        level4Progress.maxValue = dataController.allLevelData[3].words.Length;
+        level4Progress.value = completedLevelList4.Count;
+        string level4ProgressValue = completedLevelList4.Count + " out of " + dataController.allLevelData[3].words.Length;
+        if (!currentDifficulty.levelsUnlocked[3])
+            level4ProgressValue = "Locked";
+        level4ProgressText.text = level4ProgressValue;
+
+        List<string> completedLevelList5 = dataController.getCompletedLevelList(4);
+        level5Progress.maxValue = dataController.allLevelData[4].words.Length;
+        level5Progress.value = completedLevelList5.Count;
+        string level5ProgressValue = completedLevelList5.Count + " out of " + dataController.allLevelData[4].words.Length;
+        if (!currentDifficulty.levelsUnlocked[4])
+            level5ProgressValue = "Locked";
+        level5ProgressText.text = level5ProgressValue;
+
+        List<string> completedLevelList6 = dataController.getCompletedLevelList(5);
+        level6Progress.maxValue = dataController.allLevelData[5].words.Length;
+        level6Progress.value = completedLevelList6.Count;
+        string level6ProgressValue = completedLevelList6.Count + " out of " + dataController.allLevelData[5].words.Length;
+        if (!currentDifficulty.levelsUnlocked[5])
+            level6ProgressValue = "Locked";
+        level6ProgressText.text = level6ProgressValue;
+
+        List<string> completedLevelList7 = dataController.getCompletedLevelList(6);
+        level7Progress.maxValue = dataController.allLevelData[6].words.Length;
+        level7Progress.value = completedLevelList7.Count;
+        string level7ProgressValue = completedLevelList7.Count + " out of " + dataController.allLevelData[6].words.Length;
+        if (!currentDifficulty.levelsUnlocked[6])
+            level7ProgressValue = "Locked";
+        level7ProgressText.text = level7ProgressValue;
+
+        List<string> completedLevelList8 = dataController.getCompletedLevelList(7);
+        level8Progress.maxValue = dataController.allLevelData[7].words.Length;
+        level8Progress.value = completedLevelList8.Count;
+        string level8ProgressValue = completedLevelList8.Count + " out of " + dataController.allLevelData[7].words.Length;
+        if (!currentDifficulty.levelsUnlocked[7])
+            level8ProgressValue = "Locked";
+        level8ProgressText.text = level8ProgressValue;
+
+        List<string> completedLevelList9 = dataController.getCompletedLevelList(8);
+        level9Progress.maxValue = dataController.allLevelData[8].words.Length;
+        level9Progress.value = completedLevelList9.Count;
+        string level9ProgressValue = completedLevelList9.Count + " out of " + dataController.allLevelData[8].words.Length;
+        if (!currentDifficulty.levelsUnlocked[8])
+            level9ProgressValue = "Locked";
+        level9ProgressText.text = level9ProgressValue;
+
+        List<string> completedLevelList10 = dataController.getCompletedLevelList(9);
+        level10Progress.maxValue = dataController.allLevelData[9].words.Length;
+        level10Progress.value = completedLevelList10.Count;
+        string level10ProgressValue = completedLevelList10.Count + " out of " + dataController.allLevelData[9].words.Length;
+        if (!currentDifficulty.levelsUnlocked[9])
+            level10ProgressValue = "Locked";
+        level10ProgressText.text = level10ProgressValue;
     }
     
 
@@ -252,6 +353,8 @@ public class MainMenu : MonoBehaviour
         //hardButton.GetComponent<Image>().color = defaultColor;
         hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_EASY);
+
+        UpdateLevelDisplay();
     }
     public void SetNormalLevel()
     {
@@ -262,6 +365,7 @@ public class MainMenu : MonoBehaviour
         hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
         //hardButton.GetComponent<Image>().color = defaultColor;
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_NORMAL);
+        UpdateLevelDisplay();
     }
     public void SetHardLevel()
     {
@@ -273,5 +377,6 @@ public class MainMenu : MonoBehaviour
         //normalButton.GetComponent<Image>().color = defaultColor;
 
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_HARD);
+        UpdateLevelDisplay();
     }
 }

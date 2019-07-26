@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
+    public GameObject pickupHelpMessage;
     public GameObject[] hazards;
     public GameObject[] blocks;
     public Vector3 spawnValues;
@@ -55,6 +56,7 @@ public class GameController : MonoBehaviour
     private AudioClip wordClip;
     private AudioClip introClip;
     private int currentRank;
+    private LevelOfDifficulty currentDifficulty;
 
     private int experiencePoints;
     //private int experienceNeededToLevelUp;
@@ -64,6 +66,7 @@ public class GameController : MonoBehaviour
     private Color normalColor = Color.white;
     private Color hitColor = Color.red;
     private Color bufferColor = Color.yellow;
+    private Color slowDownColor = Color.black;
 
     // player performance
     private float health = 1;
@@ -77,6 +80,7 @@ public class GameController : MonoBehaviour
     public bool teleportAbility;
 
     public float flashDelay = 0.125f;
+    public float slowFlashDelay = 0.25f;
     public int timesToFlash = 3;
     [HideInInspector]
     public bool isDead;
@@ -106,6 +110,7 @@ public class GameController : MonoBehaviour
         difficulty = dataController.playerData.difficultySelected;
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
+        currentDifficulty = dataController.GetCurrentDifficulty();
         healthMax = GetHealthMax();
         if (PlayerPrefs.HasKey("PlayerHealth"))
         {
@@ -189,6 +194,7 @@ public class GameController : MonoBehaviour
             {
                 hangarButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
                 hangarButton.GetComponent<Button>().interactable = false;
+                pickupHelpMessage.SetActive(false);
                 isPaused = false;
                 Time.timeScale = 1f;
             }
@@ -226,6 +232,7 @@ public class GameController : MonoBehaviour
         Time.timeScale = 1f;
         UIRoundBegin.SetActive(false);
         player.SetActive(true);
+        pickupHelpMessage.SetActive(false);
         PlayerPrefs.SetInt("InRound", 1);
         _audio.clip = wordClip;
         isPaused = false;
@@ -334,7 +341,7 @@ public class GameController : MonoBehaviour
     public void RoundLose()
     {
         gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Better luck next time, " + currentRankText.text + ". Click to continue playing.";
+        UIRoundOver.GetComponent<Text>().text = "Better luck next time, " + currentRankText.text + ". Tap to continue.";
         UIRoundOver.SetActive(true);
         PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
@@ -393,6 +400,7 @@ public class GameController : MonoBehaviour
             else
             {
                 StartCoroutine(DecreaseSpeed());
+                StartCoroutine(SlowDownEffect());
             }
         }
         return goodHit;
@@ -408,14 +416,48 @@ public class GameController : MonoBehaviour
             case 2:
                 break;
             case 3:
+                int pickupNum = 0;
                 if (currentRank > DataController.CHIEF_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 4)], pickupTransform.position, rotateQuaternion);
+                    pickupNum = UnityEngine.Random.Range(0, 4);
                 else if (currentRank > DataController.PILOT_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 3)], pickupTransform.position, rotateQuaternion);
+                    pickupNum = UnityEngine.Random.Range(0, 3);
                 else if (currentRank > DataController.CADET_RANK)
-                    Instantiate(pickups[UnityEngine.Random.Range(0, 2)], pickupTransform.position, rotateQuaternion);
+                    pickupNum = UnityEngine.Random.Range(0, 2);
+
+                bool firstPickup = IsFirstTimeForPickup(pickupNum);
+                if (firstPickup) // if first pickup, need to show a msg with pickup
+                {
+                    Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
+
+                    // determine msg text
+                    if (pickupNum == 0)
+                    {
+                        pickupHelpMessage.GetComponent<Text>().text = "A 'health pickup' restores 1 point to HP.\n\nTap to continue.";
+                        PlayerPrefs.SetString("HEALTHPICKUP", "YES");
+                    }
+                    else if (pickupNum == 1)
+                    {
+                        pickupHelpMessage.GetComponent<Text>().text = "A 'dual shot pickup' shoots two lasers next fire.\n\nTap to continue.";
+                        PlayerPrefs.SetString("DUALSHOTPICKUP", "YES");
+                    }
+                    else if (pickupNum == 2)
+                    {
+                        pickupHelpMessage.GetComponent<Text>().text = "An 'armor pickup' prevents damage next hit.\n\nTap to continue.";
+                        PlayerPrefs.SetString("ARMORPICKUP", "YES");
+                    }
+                    else if (pickupNum == 3)
+                    {
+                        pickupHelpMessage.GetComponent<Text>().text = "A 'teleport pickup' moves your ship to where you tap on screen.\n\nTap to continue.";
+                        PlayerPrefs.SetString("TELEPORTPICKUP", "YES");
+                    }
+
+                    // show msg
+                    pickupHelpMessage.SetActive(true);
+                    isPaused = true;
+                    Time.timeScale = 0f; // freeze game
+                }
                 else
-                    Instantiate(pickups[0], pickupTransform.position, rotateQuaternion);
+                    Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
                 break;
             case 4:
                 break;
@@ -426,6 +468,22 @@ public class GameController : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private bool IsFirstTimeForPickup(int number)
+    {
+        switch (number)
+        {
+            case 0: // Health
+                return !PlayerPrefs.HasKey("HEALTHPICKUP");
+            case 1: // Dual Shot
+                return !PlayerPrefs.HasKey("DUALSHOTPICKUP");
+            case 2: // Armor
+                return !PlayerPrefs.HasKey("ARMORPICKUP");
+            case 3: // Teleport
+                return !PlayerPrefs.HasKey("TELEPORTPICKUP");
+        }
+        return true;
     }
 
     private void RefreshUI()
@@ -486,7 +544,7 @@ public class GameController : MonoBehaviour
         }
         dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
-        if (currentGameLevel != 9 && !dataController.playerData.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        if (currentGameLevel != 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
             levelUnlockedText.SetActive(true);
@@ -712,7 +770,20 @@ public class GameController : MonoBehaviour
             player.GetComponent<Renderer>().material.color = normalColor;
             yield return new WaitForSeconds(flashDelay);
         }
+        
     }
+
+    public IEnumerator SlowDownEffect()
+    {
+        for (int i = 1; i <= timesToFlash; i++)
+        {
+            player.GetComponent<Renderer>().material.color = slowDownColor;
+            yield return new WaitForSeconds(slowFlashDelay);
+            player.GetComponent<Renderer>().material.color = normalColor;
+            yield return new WaitForSeconds(slowFlashDelay);
+        }
+    }
+
 
     public void TeleportActivated()
     {

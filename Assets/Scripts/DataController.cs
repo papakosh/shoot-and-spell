@@ -13,6 +13,7 @@ public class DataController : MonoBehaviour
     private string gameDataFilename = "data.json";
     private string playerDataFilename = "player.json";
     public PlayerData playerData;
+    public LevelOfDifficulty currentDifficulty;
 
     public const int RECRUIT_RANK = 0;
     public const int CADET_RANK = 1;
@@ -36,6 +37,7 @@ public class DataController : MonoBehaviour
         LoadPlayerData();
         PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
+        currentDifficulty = GetCurrentDifficulty();
     }
 
     public void LoadGame()
@@ -48,40 +50,54 @@ public class DataController : MonoBehaviour
         switch (level+1)
         {
             case 1:
-                return playerData.level1Completed;
+                return currentDifficulty.level1Completed;
             case 2:
-                return playerData.level2Completed;
+                return currentDifficulty.level2Completed;
             case 3:
-                return playerData.level3Completed;
+                return currentDifficulty.level3Completed;
             case 4:
-             return playerData.level4Completed;
+             return currentDifficulty.level4Completed;
             case 5:
-               return playerData.level5Completed;
+               return currentDifficulty.level5Completed;
             case 6:
-               return playerData.level6Completed;
+               return currentDifficulty.level6Completed;
             case 7:
-             return playerData.level7Completed;
+             return currentDifficulty.level7Completed;
             case 8:
-               return playerData.level8Completed;
+               return currentDifficulty.level8Completed;
             case 9:
-               return playerData.level9Completed;
+               return currentDifficulty.level9Completed;
             case 10:
-               return playerData.level10Completed;
+               return currentDifficulty.level10Completed;
             default:
                 return null;
+        }
+    }
+    public LevelOfDifficulty GetCurrentDifficulty()
+    {
+        switch (playerData.difficultySelected)
+        {
+            case "EASY":
+                return playerData.easyDifficulty;
+            case "NORMAL":
+                return playerData.normalDifficulty;
+            case "HARD":
+                return playerData.hardDifficulty;
+            default:
+                return playerData.easyDifficulty;
         }
     }
 
     public void UnlockNextLevel (int level)
     {
-        playerData.levelsUnlocked[level+1] = true;
+        currentDifficulty.levelsUnlocked[level+1] = true;
         SavePlayerData();
     }
 
     public void SavePlayerProgress(int rank, int xp, int level, string word )
     {
-        playerData.rank = rank;
-        playerData.xp = xp;
+        currentDifficulty.rank = rank;
+        currentDifficulty.xp = xp;
 
         List<string> levelCompleted = getCompletedLevelList(level);
         if (!levelCompleted.Contains(word))
@@ -92,12 +108,12 @@ public class DataController : MonoBehaviour
 
     public int GetPlayerRank()
     {
-        return playerData.rank;
+        return currentDifficulty.rank;
     }
 
     public int GetPlayerXP()
     {
-        return playerData.xp;
+        return currentDifficulty.xp;
     }
 
     IEnumerator Pause()
@@ -177,5 +193,6 @@ public class DataController : MonoBehaviour
             return;
         playerData.difficultySelected = difficultySelected;
         SavePlayerData();
+        currentDifficulty = GetCurrentDifficulty();
     }
 }
