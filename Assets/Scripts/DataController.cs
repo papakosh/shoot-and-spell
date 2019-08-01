@@ -35,9 +35,17 @@ public class DataController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         StartCoroutine(LoadGameData());
         LoadPlayerData();
-        PlayerPrefs.DeleteKey("PlayerHealth");
-        PlayerPrefs.DeleteKey("PlayerStreak");
         currentDifficulty = GetCurrentDifficulty();
+        // show splash screen
+        StartCoroutine(LoadTheGame());
+        //SceneManager.LoadScene("MainMenu");
+    }
+
+    private IEnumerator LoadTheGame()
+    {
+        yield return new WaitForSeconds(2.0f);
+        SceneManager.LoadScene("MainMenu");
+        yield return new WaitForSeconds(2.0f);
     }
 
     public void LoadGame()
@@ -91,6 +99,13 @@ public class DataController : MonoBehaviour
     public void UnlockNextLevel (int level)
     {
         currentDifficulty.levelsUnlocked[level+1] = true;
+        SavePlayerData();
+    }
+
+    public void UnlockNormalAndHardDifficulty()
+    {
+        playerData.difficultyUnlocked[1] = true;
+        playerData.difficultyUnlocked[2] = true;
         SavePlayerData();
     }
 

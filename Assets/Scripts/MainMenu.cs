@@ -45,7 +45,7 @@ public class MainMenu : MonoBehaviour
 
     private DataController dataController;
     private LevelOfDifficulty currentDifficulty;
-
+  
     public void CallSettings()
     {
         SceneManager.LoadScene("SettingsMenu");
@@ -58,12 +58,18 @@ public class MainMenu : MonoBehaviour
 
     private void Update()
     {
-        
+       
     }
 
     private void Start()
     {
         currentDifficulty = dataController.GetCurrentDifficulty();
+        PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey("PlayerStreak");
+        PlayerPrefs.DeleteKey("DualShot");
+        PlayerPrefs.DeleteKey("Armor");
+        PlayerPrefs.DeleteKey("Teleport");
+
         level1.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[0];
         level2.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[1];
         level3.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[2];
@@ -75,85 +81,134 @@ public class MainMenu : MonoBehaviour
         level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
         level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
 
+        List<string> completedLevelList = currentDifficulty.level1Completed;
+        if (level1Progress != null && level1Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[0].words.Length;
+            int numberOfCompletedWords = completedLevelList.Count;
+            level1Progress.maxValue = totalNumberOfWords;
+            level1Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            level1ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList = dataController.getCompletedLevelList(0);
-        level1Progress.maxValue = dataController.allLevelData[0].words.Length;
-        level1Progress.value = completedLevelList.Count;
-        string level1ProgressValue = completedLevelList.Count + " out of " + dataController.allLevelData[0].words.Length;
-        level1ProgressText.text = level1ProgressValue;
+        List<string> completedLevelList2 = currentDifficulty.level2Completed;
+        if (level2Progress != null && level2Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[1].words.Length;
+            int numberOfCompletedWords = completedLevelList2.Count;
+            level2Progress.maxValue = totalNumberOfWords;
+            level2Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[1])
+                progressValue = "Locked";
+            level2ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList2 = dataController.getCompletedLevelList(1);
-        level2Progress.maxValue = dataController.allLevelData[1].words.Length;
-        level2Progress.value = completedLevelList2.Count;
-        string level2ProgressValue = completedLevelList2.Count + " out of " + dataController.allLevelData[1].words.Length;
-        if (!currentDifficulty.levelsUnlocked[1])
-            level2ProgressValue = "Locked";
-        level2ProgressText.text = level2ProgressValue;
+        List<string> completedLevelList3 = currentDifficulty.level3Completed;
+        if (level3Progress != null && level3Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[2].words.Length;
+            int numberOfCompletedWords = completedLevelList3.Count;
+            level3Progress.maxValue = totalNumberOfWords;
+            level3Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[2])
+                progressValue = "Locked";
+            level3ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList3 = dataController.getCompletedLevelList(2);
-        level3Progress.maxValue = dataController.allLevelData[2].words.Length;
-        level3Progress.value = completedLevelList3.Count;
-        string level3ProgressValue = completedLevelList3.Count + " out of " + dataController.allLevelData[2].words.Length;
-        if (!currentDifficulty.levelsUnlocked[2])
-            level3ProgressValue = "Locked";
-        level3ProgressText.text = level3ProgressValue;
+        List<string> completedLevelList4 = currentDifficulty.level4Completed;
+        if (level4Progress != null && level4Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[3].words.Length;
+            int numberOfCompletedWords = completedLevelList4.Count;
+            level4Progress.maxValue = totalNumberOfWords;
+            level4Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[3])
+                progressValue = "Locked";
+            level4ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList4 = dataController.getCompletedLevelList(3);
-        level4Progress.maxValue = dataController.allLevelData[3].words.Length;
-        level4Progress.value = completedLevelList4.Count;
-        string level4ProgressValue = completedLevelList4.Count + " out of " + dataController.allLevelData[3].words.Length;
-        if (!currentDifficulty.levelsUnlocked[3])
-            level4ProgressValue = "Locked";
-        level4ProgressText.text = level4ProgressValue;
+        List<string> completedLevelList5 = currentDifficulty.level5Completed;
+        if (level5Progress != null && level5Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[4].words.Length;
+            int numberOfCompletedWords = completedLevelList5.Count;
+            level5Progress.maxValue = totalNumberOfWords;
+            level5Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[4])
+                progressValue = "Locked";
+            level5ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList5 = dataController.getCompletedLevelList(4);
-        level5Progress.maxValue = dataController.allLevelData[4].words.Length;
-        level5Progress.value = completedLevelList5.Count;
-        string level5ProgressValue = completedLevelList5.Count + " out of " + dataController.allLevelData[4].words.Length;
-        if (!currentDifficulty.levelsUnlocked[4])
-            level5ProgressValue = "Locked";
-        level5ProgressText.text = level5ProgressValue;
+        List<string> completedLevelList6 = currentDifficulty.level6Completed;
+        if (level6Progress != null && level6Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[5].words.Length;
+            int numberOfCompletedWords = completedLevelList6.Count;
+            level6Progress.maxValue = totalNumberOfWords;
+            level6Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[5])
+                progressValue = "Locked";
+            level6ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList6 = dataController.getCompletedLevelList(5);
-        level6Progress.maxValue = dataController.allLevelData[5].words.Length;
-        level6Progress.value = completedLevelList6.Count;
-        string level6ProgressValue = completedLevelList6.Count + " out of " + dataController.allLevelData[5].words.Length;
-        if (!currentDifficulty.levelsUnlocked[5])
-            level6ProgressValue = "Locked";
-        level6ProgressText.text = level6ProgressValue;
+        List<string> completedLevelList7 = currentDifficulty.level7Completed;
+        if (level7Progress != null && level7Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[6].words.Length;
+            int numberOfCompletedWords = completedLevelList7.Count;
+            level7Progress.maxValue = totalNumberOfWords;
+            level7Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[6])
+                progressValue = "Locked";
+            level7ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList7 = dataController.getCompletedLevelList(6);
-        level7Progress.maxValue = dataController.allLevelData[6].words.Length;
-        level7Progress.value = completedLevelList7.Count;
-        string level7ProgressValue = completedLevelList7.Count + " out of " + dataController.allLevelData[6].words.Length;
-        if (!currentDifficulty.levelsUnlocked[6])
-            level7ProgressValue = "Locked";
-        level7ProgressText.text = level7ProgressValue;
+        List<string> completedLevelList8 = currentDifficulty.level8Completed;
+        if (level8Progress != null && level8Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[7].words.Length;
+            int numberOfCompletedWords = completedLevelList8.Count;
+            level8Progress.maxValue = totalNumberOfWords;
+            level8Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[7])
+                progressValue = "Locked";
+            level8ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList8 = dataController.getCompletedLevelList(7);
-        level8Progress.maxValue = dataController.allLevelData[7].words.Length;
-        level8Progress.value = completedLevelList8.Count;
-        string level8ProgressValue = completedLevelList8.Count + " out of " + dataController.allLevelData[7].words.Length;
-        if (!currentDifficulty.levelsUnlocked[7])
-            level8ProgressValue = "Locked";
-        level8ProgressText.text = level8ProgressValue;
+        List<string> completedLevelList9 = currentDifficulty.level9Completed;
+        if (level9Progress != null && level9Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[8].words.Length;
+            int numberOfCompletedWords = completedLevelList9.Count;
+            level9Progress.maxValue = totalNumberOfWords;
+            level9Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[8])
+                progressValue = "Locked";
+            level9ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList9 = dataController.getCompletedLevelList(8);
-        level9Progress.maxValue = dataController.allLevelData[8].words.Length;
-        level9Progress.value = completedLevelList9.Count;
-        string level9ProgressValue = completedLevelList9.Count + " out of " + dataController.allLevelData[8].words.Length;
-        if (!currentDifficulty.levelsUnlocked[8])
-            level9ProgressValue = "Locked";
-        level9ProgressText.text = level9ProgressValue;
-
-        List<string> completedLevelList10 = dataController.getCompletedLevelList(9);
-        level10Progress.maxValue = dataController.allLevelData[9].words.Length;
-        level10Progress.value = completedLevelList10.Count;
-        string level10ProgressValue = completedLevelList10.Count + " out of " + dataController.allLevelData[9].words.Length;
-        if (!currentDifficulty.levelsUnlocked[9])
-            level10ProgressValue = "Locked";
-        level10ProgressText.text = level10ProgressValue;
-
+        List<string> completedLevelList10 = currentDifficulty.level10Completed;
+        if (level10Progress != null && level10Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[9].words.Length;
+            int numberOfCompletedWords = completedLevelList10.Count;
+            level10Progress.maxValue = totalNumberOfWords;
+            level10Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[9])
+                progressValue = "Locked";
+            level10ProgressText.text = progressValue;
+        }
+        
         SetDifficultyButton();
     }
 
@@ -176,84 +231,133 @@ public class MainMenu : MonoBehaviour
         level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
         level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
 
+        List<string> completedLevelList = currentDifficulty.level1Completed;
+        if (level1Progress != null && level1Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[0].words.Length;
+            int numberOfCompletedWords = completedLevelList.Count;
+            level1Progress.maxValue = totalNumberOfWords;
+            level1Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            level1ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList = dataController.getCompletedLevelList(0);
-        level1Progress.maxValue = dataController.allLevelData[0].words.Length;
-        level1Progress.value = completedLevelList.Count;
-        string level1ProgressValue = completedLevelList.Count + " out of " + dataController.allLevelData[0].words.Length;
-        level1ProgressText.text = level1ProgressValue;
+        List<string> completedLevelList2 = currentDifficulty.level2Completed;
+        if (level2Progress != null && level2Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[1].words.Length;
+            int numberOfCompletedWords = completedLevelList2.Count;
+            level2Progress.maxValue = totalNumberOfWords;
+            level2Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[1])
+                progressValue = "Locked";
+            level2ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList2 = dataController.getCompletedLevelList(1);
-        level2Progress.maxValue = dataController.allLevelData[1].words.Length;
-        level2Progress.value = completedLevelList2.Count;
-        string level2ProgressValue = completedLevelList2.Count + " out of " + dataController.allLevelData[1].words.Length;
-        if (!currentDifficulty.levelsUnlocked[1])
-            level2ProgressValue = "Locked";
-        level2ProgressText.text = level2ProgressValue;
+        List<string> completedLevelList3 = currentDifficulty.level3Completed;
+        if (level3Progress != null && level3Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[2].words.Length;
+            int numberOfCompletedWords = completedLevelList3.Count;
+            level3Progress.maxValue = totalNumberOfWords;
+            level3Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[2])
+                progressValue = "Locked";
+            level3ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList3 = dataController.getCompletedLevelList(2);
-        level3Progress.maxValue = dataController.allLevelData[2].words.Length;
-        level3Progress.value = completedLevelList3.Count;
-        string level3ProgressValue = completedLevelList3.Count + " out of " + dataController.allLevelData[2].words.Length;
-        if (!currentDifficulty.levelsUnlocked[2])
-            level3ProgressValue = "Locked";
-        level3ProgressText.text = level3ProgressValue;
+        List<string> completedLevelList4 = currentDifficulty.level4Completed;
+        if (level4Progress != null && level4Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[3].words.Length;
+            int numberOfCompletedWords = completedLevelList4.Count;
+            level4Progress.maxValue = totalNumberOfWords;
+            level4Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[3])
+                progressValue = "Locked";
+            level4ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList4 = dataController.getCompletedLevelList(3);
-        level4Progress.maxValue = dataController.allLevelData[3].words.Length;
-        level4Progress.value = completedLevelList4.Count;
-        string level4ProgressValue = completedLevelList4.Count + " out of " + dataController.allLevelData[3].words.Length;
-        if (!currentDifficulty.levelsUnlocked[3])
-            level4ProgressValue = "Locked";
-        level4ProgressText.text = level4ProgressValue;
+        List<string> completedLevelList5 = currentDifficulty.level5Completed;
+        if (level5Progress != null && level5Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[4].words.Length;
+            int numberOfCompletedWords = completedLevelList5.Count;
+            level5Progress.maxValue = totalNumberOfWords;
+            level5Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[4])
+                progressValue = "Locked";
+            level5ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList5 = dataController.getCompletedLevelList(4);
-        level5Progress.maxValue = dataController.allLevelData[4].words.Length;
-        level5Progress.value = completedLevelList5.Count;
-        string level5ProgressValue = completedLevelList5.Count + " out of " + dataController.allLevelData[4].words.Length;
-        if (!currentDifficulty.levelsUnlocked[4])
-            level5ProgressValue = "Locked";
-        level5ProgressText.text = level5ProgressValue;
+        List<string> completedLevelList6 = currentDifficulty.level6Completed;
+        if (level6Progress != null && level6Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[5].words.Length;
+            int numberOfCompletedWords = completedLevelList6.Count;
+            level6Progress.maxValue = totalNumberOfWords;
+            level6Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[5])
+                progressValue = "Locked";
+            level6ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList6 = dataController.getCompletedLevelList(5);
-        level6Progress.maxValue = dataController.allLevelData[5].words.Length;
-        level6Progress.value = completedLevelList6.Count;
-        string level6ProgressValue = completedLevelList6.Count + " out of " + dataController.allLevelData[5].words.Length;
-        if (!currentDifficulty.levelsUnlocked[5])
-            level6ProgressValue = "Locked";
-        level6ProgressText.text = level6ProgressValue;
+        List<string> completedLevelList7 = currentDifficulty.level7Completed;
+        if (level7Progress != null && level7Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[6].words.Length;
+            int numberOfCompletedWords = completedLevelList7.Count;
+            level7Progress.maxValue = totalNumberOfWords;
+            level7Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[6])
+                progressValue = "Locked";
+            level7ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList7 = dataController.getCompletedLevelList(6);
-        level7Progress.maxValue = dataController.allLevelData[6].words.Length;
-        level7Progress.value = completedLevelList7.Count;
-        string level7ProgressValue = completedLevelList7.Count + " out of " + dataController.allLevelData[6].words.Length;
-        if (!currentDifficulty.levelsUnlocked[6])
-            level7ProgressValue = "Locked";
-        level7ProgressText.text = level7ProgressValue;
+        List<string> completedLevelList8 = currentDifficulty.level8Completed;
+        if (level8Progress != null && level8Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[7].words.Length;
+            int numberOfCompletedWords = completedLevelList8.Count;
+            level8Progress.maxValue = totalNumberOfWords;
+            level8Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[7])
+                progressValue = "Locked";
+            level8ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList8 = dataController.getCompletedLevelList(7);
-        level8Progress.maxValue = dataController.allLevelData[7].words.Length;
-        level8Progress.value = completedLevelList8.Count;
-        string level8ProgressValue = completedLevelList8.Count + " out of " + dataController.allLevelData[7].words.Length;
-        if (!currentDifficulty.levelsUnlocked[7])
-            level8ProgressValue = "Locked";
-        level8ProgressText.text = level8ProgressValue;
+        List<string> completedLevelList9 = currentDifficulty.level9Completed;
+        if (level9Progress != null && level9Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[8].words.Length;
+            int numberOfCompletedWords = completedLevelList9.Count;
+            level9Progress.maxValue = totalNumberOfWords;
+            level9Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[8])
+                progressValue = "Locked";
+            level9ProgressText.text = progressValue;
+        }
 
-        List<string> completedLevelList9 = dataController.getCompletedLevelList(8);
-        level9Progress.maxValue = dataController.allLevelData[8].words.Length;
-        level9Progress.value = completedLevelList9.Count;
-        string level9ProgressValue = completedLevelList9.Count + " out of " + dataController.allLevelData[8].words.Length;
-        if (!currentDifficulty.levelsUnlocked[8])
-            level9ProgressValue = "Locked";
-        level9ProgressText.text = level9ProgressValue;
-
-        List<string> completedLevelList10 = dataController.getCompletedLevelList(9);
-        level10Progress.maxValue = dataController.allLevelData[9].words.Length;
-        level10Progress.value = completedLevelList10.Count;
-        string level10ProgressValue = completedLevelList10.Count + " out of " + dataController.allLevelData[9].words.Length;
-        if (!currentDifficulty.levelsUnlocked[9])
-            level10ProgressValue = "Locked";
-        level10ProgressText.text = level10ProgressValue;
+        List<string> completedLevelList10 = currentDifficulty.level10Completed;
+        if (level10Progress != null && level10Progress.isActiveAndEnabled)
+        {
+            int totalNumberOfWords = dataController.allLevelData[9].words.Length;
+            int numberOfCompletedWords = completedLevelList10.Count;
+            level10Progress.maxValue = totalNumberOfWords;
+            level10Progress.value = numberOfCompletedWords;
+            string progressValue = numberOfCompletedWords + " out of " + totalNumberOfWords;
+            if (!currentDifficulty.levelsUnlocked[9])
+                progressValue = "Locked";
+            level10ProgressText.text = progressValue;
+        }
     }
     
 

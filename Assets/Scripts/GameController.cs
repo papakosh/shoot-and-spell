@@ -54,14 +54,12 @@ public class GameController : MonoBehaviour
     private int[] targetIndices;
     private AudioSource _audio;
     private AudioClip wordClip;
-    private AudioClip introClip;
     private int currentRank;
     private LevelOfDifficulty currentDifficulty;
 
     private int experiencePoints;
-    //private int experienceNeededToLevelUp;
     private int xpAdded;
-    private int wordExperienceModifier = 1;
+    private int levelXPModifier = 1;
     private bool gameOver;
     private Color normalColor = Color.white;
     private Color hitColor = Color.red;
@@ -92,7 +90,10 @@ public class GameController : MonoBehaviour
     private const float streakModifier = 0.05f;
     private int targetWordIndex;
     public float startCountdown;
-    
+    private float rankModifier = 1.75f;
+    private float rankBaseXP = 50f;
+    private bool maxRank;
+
     void Awake()
     {
         if (instance == null)
@@ -106,7 +107,6 @@ public class GameController : MonoBehaviour
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
         wordClip = Resources.Load<AudioClip>(dataController.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
-        //introClip = Resources.Load<AudioClip>("Audio/intro");
         difficulty = dataController.playerData.difficultySelected;
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
@@ -132,6 +132,9 @@ public class GameController : MonoBehaviour
         }
         Time.timeScale = 1f;
         _audio.clip = wordClip;
+
+        if (currentRank == DataController.MASTER_RANK)
+            maxRank = true;
     }
 
     private void SetLevelBackground()
@@ -151,9 +154,24 @@ public class GameController : MonoBehaviour
     void Start()
     {
         RefreshUI();
+        if (PlayerPrefs.HasKey("DualShot"))
+        {
+            doubleBoltAbility = true;
+            doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        }
+        if (PlayerPrefs.HasKey("Armor"))
+        {
+            armorAbility = true;
+            armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        }
+        if (PlayerPrefs.HasKey("Teleport"))
+        {
+            teleportAbility = true;
+            teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        }
         gameOver = false;
         isPaused = true;
-        wordExperienceModifier = currentGameLevel + 1;
+        levelXPModifier = currentGameLevel + 1;
         UIRoundBegin.SetActive(true);
         player.SetActive(false);
         StartCoroutine(Countdown(startCountdown));
@@ -312,7 +330,7 @@ public class GameController : MonoBehaviour
         PlayerPrefs.DeleteKey("PlayerHealth");
     }
 
-    public void HealthPickup()
+   /* public void HealthPickup()
     {
         int num = UnityEngine.Random.Range(1, 6);
         switch (num)
@@ -336,7 +354,7 @@ public class GameController : MonoBehaviour
             default:
                 break;
         }
-    }
+    }*/
 
     public void RoundLose()
     {
@@ -345,6 +363,9 @@ public class GameController : MonoBehaviour
         UIRoundOver.SetActive(true);
         PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
+        PlayerPrefs.DeleteKey("DualShot");
+        PlayerPrefs.DeleteKey("Armor");
+        PlayerPrefs.DeleteKey("Teleport");
     }
 
     public void ContinuePlaying()
@@ -361,7 +382,11 @@ public class GameController : MonoBehaviour
     public void GoHome()
     {
         PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey("PlayerStreak");
         PlayerPrefs.SetInt("InRound", 0);
+        PlayerPrefs.DeleteKey("DualShot");
+        PlayerPrefs.DeleteKey("Armor");
+        PlayerPrefs.DeleteKey("Teleport");
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -489,8 +514,19 @@ public class GameController : MonoBehaviour
     private void RefreshUI()
     {
         currentRankText.text = GetRankText(currentRank);
-        levelUpBar.maxValue = (int)CalculateRankXP(currentRank);
-        levelUpBar.value = experiencePoints;
+        if (!maxRank)
+        {
+            levelUpBar.maxValue = (int)CalculateRankXP(currentRank);
+            levelUpBar.value = experiencePoints;
+        }
+        else
+        {
+            levelUpBar.maxValue = 1;
+            levelUpBar.value = 1;
+            xpAddedText.GetComponent<Text>().text = "MAXED";
+            xpAddedText.SetActive(true);
+        }
+   
         RefreshHealthBar();
     }
 
@@ -527,27 +563,45 @@ public class GameController : MonoBehaviour
 
     private double CalculateRankXP(int rank)
     {
-        double exponent = 1.5;
-        double baseXP = 50;
+        double exponent = rankModifier;
+        double baseXP = rankBaseXP;
         return Math.Floor(baseXP * Math.Pow(rank + 1, exponent));
     }
 
     private void CheckProgression()
     {
-        int currentRankXP = (int)CalculateRankXP(currentRank);
-        if (experiencePoints > currentRankXP)
+        if (!maxRank) // maxed out, can't level up anymore
         {
-            currentRank++;
-            experiencePoints = experiencePoints - currentRankXP;
-            LevelUp();
+            int currentRankXP = (int)CalculateRankXP(currentRank);
+            if (experiencePoints > currentRankXP)
+            {
+                currentRank++;
+                experiencePoints = experiencePoints - currentRankXP;
+                LevelUp();
 
+            }
+            dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         }
-        dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
+        else // still save words
+        {
+            dataController.SavePlayerProgress(currentRank, 0, currentGameLevel, targetWord);
+        }
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
         if (currentGameLevel != 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
             levelUnlockedText.SetActive(true);
+        }
+        else
+        {
+            // On easy difficulty, just completed the last level and normal difficulty not unlocked, then unlock normal and hard difficulty
+            if (dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
+            {
+                dataController.UnlockNormalAndHardDifficulty();
+                levelUnlockedText.GetComponent<Text>().text = "NORMAL & HARD DIFFICULTY UNLOCKED";
+                levelUnlockedText.GetComponent<Text>().transform.position = new Vector3(levelUnlockedText.GetComponent<Text>().transform.position.x, levelUnlockedText.GetComponent<Text>().transform.position.y + 50, 0);
+                levelUnlockedText.SetActive(true);
+            }
         }
     }
 
@@ -560,7 +614,7 @@ public class GameController : MonoBehaviour
 
     private void CalculateWordScore()
     {
-        double xpEarned = Math.Round (targetWord.Length * (wordExperienceModifier + playerStreak), MidpointRounding.AwayFromZero);
+        double xpEarned = Math.Round (targetWord.Length * (levelXPModifier + playerStreak), MidpointRounding.AwayFromZero);
         xpAdded = (int)xpEarned;
         experiencePoints = experiencePoints + xpAdded;
     }
@@ -573,12 +627,27 @@ public class GameController : MonoBehaviour
         gameOver = true;
         UIRoundOver.GetComponent<Text>().text = "Good job, " + currentRankText.text + ". Click to continue.";
         UIRoundOver.SetActive(true);
-        xpAddedText.SetActive(true);
-        xpAddedText.GetComponent<Text>().text = "+" + xpAdded + " xp ";
-        xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
+        if (!maxRank)
+        {
+            xpAddedText.SetActive(true);
+            xpAddedText.GetComponent<Text>().text = "+" + xpAdded + " xp ";
+            xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
+        }
         player.SetActive(false);
         PlayerPrefs.SetFloat("PlayerHealth", health);
         PlayerPrefs.SetFloat("PlayerStreak", playerStreak + streakModifier);
+        if (doubleBoltAbility)
+            PlayerPrefs.SetInt("DualShot", 1);
+        else
+            PlayerPrefs.DeleteKey("DualShot");
+        if (armorAbility)
+            PlayerPrefs.SetInt("Armor", 1);
+        else
+            PlayerPrefs.DeleteKey("Armor");
+        if (teleportAbility)
+            PlayerPrefs.SetInt("Teleport", 1);
+        else
+            PlayerPrefs.DeleteKey("Teleport");
     }
 
     private void PopulateDebrisArray()
@@ -588,13 +657,13 @@ public class GameController : MonoBehaviour
 
         if (targetIndex < 9)
             blocksArray = new GameObject[9];
-        else
+        /*else
         {
             UpdateActivePanel(targetStandard, CalculateTargetPanelIndex());
             blocksArray = new GameObject[9];
-        }
+        }*/
 
-        blocksArray[0] = blocks[targetIndices[targetIndex]]; // word mode
+        blocksArray[0] = blocks[targetIndices[targetIndex]];
 
         for (int j = 1; j < blocksArray.Length; j++)
         {
@@ -622,14 +691,10 @@ public class GameController : MonoBehaviour
                         break;
                     case 6:
                     case 7:
-                    case 8:
-                    case 9:
                         numHazards = 3;
                         break;
-                    case 10:
-                    case 11:
-                    case 12:
-                    case 13:
+                    case 8:
+                    case 9:
                         numHazards = 4;
                         break;
                 }
@@ -674,7 +739,7 @@ public class GameController : MonoBehaviour
                 {
                     debrisArray[i] = blocksArray[8];
                 }
-
+                
             }
         }
 
@@ -682,12 +747,13 @@ public class GameController : MonoBehaviour
 
     private int CalculateTargetPanelIndex()
     {
-        if (targetIndex < 9)
+        //if (targetIndex < 9)
             return 0;
-        else if (targetIndex > 8 && targetIndex < 18)
+        /*else if (targetIndex > 8 && targetIndex < 18)
             return 1;
         else
             return 2;
+            */
     }
 
     private GameObject[] GetTargetPanel()
@@ -695,21 +761,21 @@ public class GameController : MonoBehaviour
         return targetStandard;
     }
 
-    private void SetActivePanel(GameObject[] panel, bool status)
+    /*private void SetActivePanel(GameObject[] panel, bool status)
     {
         if (panel[0].activeSelf == status)
             return;
         for (int j = 0; j < panel.Length; j++)
         {
             panel[j].SetActive(status);
-        }
-    }
+        }\
+    }*/
 
-    private void UpdateActivePanel(GameObject[] panel, int targetPanelIndex)
+    /*private void UpdateActivePanel(GameObject[] panel, int targetPanelIndex)
     {
         if (targetPanelIndex == 0 || (targetIndex > 9 && targetIndex < 18) || (targetIndex > 18))
             return;
-    }
+    }*/
     private int[] CalculateTargetIndices()
     {
         int[] targetIndices = new int[targetWord.Length];
@@ -777,13 +843,20 @@ public class GameController : MonoBehaviour
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
-            player.GetComponent<Renderer>().material.color = slowDownColor;
-            yield return new WaitForSeconds(slowFlashDelay);
-            player.GetComponent<Renderer>().material.color = normalColor;
-            yield return new WaitForSeconds(slowFlashDelay);
+            if (player != null && player.activeSelf)
+            {
+                player.GetComponent<Renderer>().material.color = slowDownColor;
+                yield return new WaitForSeconds(slowFlashDelay);
+            }
+           
+            if (player != null && player.activeSelf)
+            {
+                player.GetComponent<Renderer>().material.color = normalColor;
+                yield return new WaitForSeconds(slowFlashDelay);
+            }
+           
         }
     }
-
 
     public void TeleportActivated()
     {
@@ -886,12 +959,18 @@ public class GameController : MonoBehaviour
                 {
                     if (i < targetIndices.Length)
                     {
-                        targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
-                        targetStandard[i].SetActive(false);
+                        if (targetStandard[i].GetComponent<Image>().color != completedColor)
+                        {
+                            targetStandard[i].GetComponent<Image>().sprite = panelLetters[targetIndices[i]].GetComponent<Image>().sprite;
+                            targetStandard[i].SetActive(false);
+                        }
                     }
                     else
                     {
-                        targetStandard[i].SetActive(false);
+                        if (targetStandard[i].GetComponent<Image>().color != completedColor)
+                        {
+                            targetStandard[i].SetActive(false);
+                        }
                     }
                 }
             }
@@ -914,6 +993,4 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
-
 }
