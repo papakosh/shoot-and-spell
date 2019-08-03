@@ -28,12 +28,12 @@ public class DestroyByContact : MonoBehaviour
                 Destroy(other.gameObject);
                 Instantiate(explosion, transform.position, transform.rotation);
             } else if (other.CompareTag("Player")){
-                GameController.instance.ProcessHit(gameObject.tag);
                 Destroy(gameObject);
                 Instantiate(explosion, transform.position, transform.rotation);
                 if (GameController.instance.armorAbility)
                 {
                     GameController.instance.ArmorActivated();
+                    GameController.instance.ProcessHit(gameObject.tag);
                 }
                 else
                 {
@@ -43,7 +43,9 @@ public class DestroyByContact : MonoBehaviour
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
                         GameController.instance.RoundLose();
+                        return;
                     }
+                    GameController.instance.ProcessHit(gameObject.tag);
                 }
             }
         }else if (gameObject.CompareTag("Health"))  // Is a Health pickup?
@@ -154,108 +156,6 @@ public class DestroyByContact : MonoBehaviour
             }
             return;
         }
-
-        /*if (gameObject.CompareTag("Health") && (other.CompareTag("Bolt") || other.CompareTag("Enemy"))) // Ignore collisions between health pickup and either bolt or enemy
-            return;
-        if (gameObject.CompareTag("Shield") && (other.CompareTag("Bolt") || other.CompareTag("Enemy"))) // Ignore collisions between shield pickup and either bolt or enemy
-            return;
-        if (gameObject.CompareTag("Double Bolt") && (other.CompareTag("Bolt") || other.CompareTag("Enemy"))) // Ignore collisions between double bolt pickup and either bolt or enemy
-            return;
-        if (gameObject.CompareTag("Teleport") && (other.CompareTag("Bolt") || other.CompareTag("Enemy"))) // Ignore collisions between teleport pickup and either bolt or enemy
-            return;
-
-        if (gameObject.CompareTag("Enemy") || other.CompareTag("Enemy"))
-        {
-            if (!other.CompareTag("Player") && !other.CompareTag ("Bolt"))
-                return;
-        }
-
-        if (gameObject.CompareTag("Health"))
-        {
-            Destroy(gameObject);
-            if (!other.CompareTag("Player"))
-                Destroy(other.gameObject);
-            else
-                GameController.instance.IncreaseHealth(damage);
-
-            return;
-        }
-        if (gameObject.CompareTag("Double Bolt"))
-        {
-            Destroy(gameObject);
-            if (!other.CompareTag("Player"))
-                Destroy(other.gameObject);
-            else
-                GameController.instance.DualShotPickup();
-
-            return;
-        }
-        if (gameObject.CompareTag("Shield"))
-        {
-            Destroy(gameObject);
-            if (!other.CompareTag("Player"))
-                Destroy(other.gameObject);
-            else
-                GameController.instance.ArmorPickup();
-
-            return;
-        }
-
-        if (gameObject.CompareTag("Teleport"))
-        {
-            Destroy(gameObject);
-            if (!other.CompareTag("Player"))
-                Destroy(other.gameObject);
-            else
-                GameController.instance.TeleportPickup();
-            return;
-        }*/
-
-            /* if (explosion != null)
-             {
-                 Instantiate(explosion, transform.position, transform.rotation);
-             }*/
-
-            /*if (other.CompareTag("Player"))
-            {
-                if (GameController.instance.armorAbility)
-                {
-                    GameController.instance.ArmorActivated();
-                }
-                else
-                {
-
-                    GameController.instance.DecreaseHealth(damage);
-                    if (GameController.instance.isDead)
-                    {
-                        Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
-                        Destroy(other.gameObject);
-                        GameController.instance.RoundLose();
-                    }
-                }
-            }
-            */
-            /*if (gameObject.CompareTag("Hazard"))
-            {
-                int num = UnityEngine.Random.Range(1, 6);
-                Transform pickupTransform = transform;
-                Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
-
-                Destroy(gameObject);
-                if (!other.CompareTag("Player"))
-                    Destroy(other.gameObject);
-                GameController.instance.SpawnRandomPickup(pickups, pickupTransform, rotateQuaternion);
-            }
-            else
-            {
-                    GameController.instance.ProcessHit(gameObject.tag);
-                    Destroy(gameObject);
-                    if (!other.CompareTag("Player"))
-                    {
-                        Destroy(other.gameObject);
-                    }
-
-            }*/
     }
 
     private bool ALetter(String tag)

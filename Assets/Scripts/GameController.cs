@@ -87,12 +87,18 @@ public class GameController : MonoBehaviour
     public GameObject hangarButton;
 
     private float playerStreak = 0f;
+
     private const float streakModifier = 0.05f;
     private int targetWordIndex;
     public float startCountdown;
     private float rankModifier = 1.75f;
     private float rankBaseXP = 50f;
     private bool maxRank;
+    public GameObject[] messages;
+    String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# ACHIEVED", "NORMAL & HARD UNLOCKED"};
+    bool levelUnlocked = false;
+    bool normalHardDifficultyUnlocked = false;
+    bool newRankAchieved = false;
 
     void Awake()
     {
@@ -330,36 +336,10 @@ public class GameController : MonoBehaviour
         PlayerPrefs.DeleteKey("PlayerHealth");
     }
 
-   /* public void HealthPickup()
-    {
-        int num = UnityEngine.Random.Range(1, 6);
-        switch (num)
-        {
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                if (health < 3.0f)
-                {
-                    health += 0.5f;
-                }
-                break;
-            case 4:
-                break;
-            case 5:
-                break;
-            case 6:
-                break;
-            default:
-                break;
-        }
-    }*/
-
     public void RoundLose()
     {
         gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Better luck next time, " + currentRankText.text + ". Tap to continue.";
+        UIRoundOver.GetComponent<Text>().text = "Better luck next time! Tap to continue.";
         UIRoundOver.SetActive(true);
         PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
@@ -526,7 +506,7 @@ public class GameController : MonoBehaviour
             xpAddedText.GetComponent<Text>().text = "MAXED";
             xpAddedText.SetActive(true);
         }
-   
+
         RefreshHealthBar();
     }
 
@@ -578,6 +558,9 @@ public class GameController : MonoBehaviour
                 currentRank++;
                 experiencePoints = experiencePoints - currentRankXP;
                 LevelUp();
+                //pickupHelpMessage.GetComponent<Text>().text = "You've Reached '" + GetRankText(currentRank) + "'";
+                //pickupHelpMessage.SetActive(true);
+                newRankAchieved = true;
 
             }
             dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
@@ -590,7 +573,8 @@ public class GameController : MonoBehaviour
         if (currentGameLevel != 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
-            levelUnlockedText.SetActive(true);
+            // levelUnlockedText.SetActive(true);
+            levelUnlocked = true;
         }
         else
         {
@@ -598,9 +582,10 @@ public class GameController : MonoBehaviour
             if (dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
             {
                 dataController.UnlockNormalAndHardDifficulty();
-                levelUnlockedText.GetComponent<Text>().text = "NORMAL & HARD DIFFICULTY UNLOCKED";
-                levelUnlockedText.GetComponent<Text>().transform.position = new Vector3(levelUnlockedText.GetComponent<Text>().transform.position.x, levelUnlockedText.GetComponent<Text>().transform.position.y + 50, 0);
-                levelUnlockedText.SetActive(true);
+                //levelUnlockedText.GetComponent<Text>().text = "NORMAL & HARD DIFFICULTY UNLOCKED";
+                //levelUnlockedText.GetComponent<Text>().transform.position = new Vector3(levelUnlockedText.GetComponent<Text>().transform.position.x, levelUnlockedText.GetComponent<Text>().transform.position.y + 50, 0);
+                //levelUnlockedText.SetActive(true);
+                normalHardDifficultyUnlocked = true;
             }
         }
     }
@@ -619,22 +604,79 @@ public class GameController : MonoBehaviour
         experiencePoints = experiencePoints + xpAdded;
     }
 
-    private void RoundWin()
+   IEnumerator EndOfRoundStats()
     {
-        CalculateWordScore();
-        CheckProgression();
-        RefreshUI();
-        gameOver = true;
-        UIRoundOver.GetComponent<Text>().text = "Good job, " + currentRankText.text + ". Click to continue.";
-        UIRoundOver.SetActive(true);
         if (!maxRank)
         {
             xpAddedText.SetActive(true);
             xpAddedText.GetComponent<Text>().text = "+" + xpAdded + " xp ";
-            xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 6.0f, true);
+            xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
         }
+
+        messages[0].SetActive(true);
+        messages[0].GetComponent<Image>().CrossFadeAlpha(0, 9.0f, true);
+        float playerStreakCount = playerStreak / 0.05f;
+
+        messages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace("#",""+((int)playerStreakCount + 1));
+        messages[1].SetActive(true);
+        messages[1].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+        yield return new WaitForSeconds(0.5f);
+
+        if (newRankAchieved && !levelUnlocked && !normalHardDifficultyUnlocked)
+        {
+            //String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# ACHIEVED", "NORMAL & HARD UNLOCKED"};
+            messages[2].SetActive(true);
+            messages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", "" + GetRankText(currentRank).ToUpper());
+            messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            yield return new WaitForSeconds(0.5f);
+        }else if (newRankAchieved && (levelUnlocked || normalHardDifficultyUnlocked))
+        {
+            messages[2].SetActive(true);
+            messages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", GetRankText(currentRank).ToUpper());
+            messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            if (levelUnlocked)
+            {
+                messages[3].SetActive(true);
+                messages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 1));
+                messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }
+            else
+            {
+                messages[3].SetActive(true);
+                messages[3].GetComponent<Text>().text = endOfRoundMsgs[3];
+                messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+        else if (levelUnlocked || normalHardDifficultyUnlocked)
+        {
+            if (levelUnlocked)
+            {
+                messages[2].SetActive(true);
+                messages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 1));
+                messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }
+            else
+            {
+                messages[2].SetActive(true);
+                messages[2].GetComponent<Text>().text = endOfRoundMsgs[3];
+                messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
+    private void RoundWin()
+    {
+        CalculateWordScore();
+        CheckProgression();
+        //RefreshUI();
+        gameOver = true;
+        UIRoundOver.GetComponent<Text>().text = "Good job! Tap to continue.";
+        UIRoundOver.SetActive(true);
         player.SetActive(false);
-        PlayerPrefs.SetFloat("PlayerHealth", health);
+        StartCoroutine(EndOfRoundStats());
+
         PlayerPrefs.SetFloat("PlayerStreak", playerStreak + streakModifier);
         if (doubleBoltAbility)
             PlayerPrefs.SetInt("DualShot", 1);
@@ -657,11 +699,6 @@ public class GameController : MonoBehaviour
 
         if (targetIndex < 9)
             blocksArray = new GameObject[9];
-        /*else
-        {
-            UpdateActivePanel(targetStandard, CalculateTargetPanelIndex());
-            blocksArray = new GameObject[9];
-        }*/
 
         blocksArray[0] = blocks[targetIndices[targetIndex]];
 
@@ -747,13 +784,7 @@ public class GameController : MonoBehaviour
 
     private int CalculateTargetPanelIndex()
     {
-        //if (targetIndex < 9)
             return 0;
-        /*else if (targetIndex > 8 && targetIndex < 18)
-            return 1;
-        else
-            return 2;
-            */
     }
 
     private GameObject[] GetTargetPanel()
@@ -761,21 +792,6 @@ public class GameController : MonoBehaviour
         return targetStandard;
     }
 
-    /*private void SetActivePanel(GameObject[] panel, bool status)
-    {
-        if (panel[0].activeSelf == status)
-            return;
-        for (int j = 0; j < panel.Length; j++)
-        {
-            panel[j].SetActive(status);
-        }\
-    }*/
-
-    /*private void UpdateActivePanel(GameObject[] panel, int targetPanelIndex)
-    {
-        if (targetPanelIndex == 0 || (targetIndex > 9 && targetIndex < 18) || (targetIndex > 18))
-            return;
-    }*/
     private int[] CalculateTargetIndices()
     {
         int[] targetIndices = new int[targetWord.Length];
@@ -860,18 +876,14 @@ public class GameController : MonoBehaviour
 
     public void TeleportActivated()
     {
-        //teleportStatusIcon.SetActive(false);
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
-        //wormholeIcon.color = defaultColor;
         _audio.clip = teleportActivated;
         _audio.Play();
     }
 
     public void TeleportPickup()
     {
-        //wormholeIcon.color = completedColor;
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
-        //teleportStatusIcon.SetActive(true);
         teleportAbility = true;
         _audio.clip = teleportPickup;
         _audio.Play();
@@ -879,7 +891,6 @@ public class GameController : MonoBehaviour
 
     public void ArmorPickup()
     {
-        //armorStatusIcon.SetActive(true);
         armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         armorAbility = true;
         _audio.clip = armorPickup;
@@ -888,9 +899,7 @@ public class GameController : MonoBehaviour
 
     public void ResetDualShot()
     {
-        //doubleBoltStatusIcon.SetActive(false);
         doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
-        //doubleBoltIcon.color = defaultColor;
         doubleBoltAbility = false;
     }
 
@@ -992,5 +1001,11 @@ public class GameController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (!isDead)
+            PlayerPrefs.SetFloat("PlayerHealth", health);
     }
 }

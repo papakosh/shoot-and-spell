@@ -38,7 +38,6 @@ public class DataController : MonoBehaviour
         currentDifficulty = GetCurrentDifficulty();
         // show splash screen
         StartCoroutine(LoadTheGame());
-        //SceneManager.LoadScene("MainMenu");
     }
 
     private IEnumerator LoadTheGame()
