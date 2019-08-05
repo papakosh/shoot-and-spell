@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    public GameObject pickupHelpMessage;
+    public GameObject[] pickupHelpMessage;
     public GameObject[] hazards;
     public GameObject[] blocks;
     public Vector3 spawnValues;
@@ -26,7 +26,7 @@ public class GameController : MonoBehaviour
     public GameObject xpAddedText;
     public GameObject healthChangedText;
     public GameObject levelUnlockedText;
-    public GameObject doubleBoltStatusIcon;
+    public GameObject dualShotStatusIcon;
     public GameObject armorStatusIcon;
     public GameObject teleportStatusIcon;
     public GameObject background;
@@ -71,7 +71,7 @@ public class GameController : MonoBehaviour
     private float healthMax = 1;
 
     [HideInInspector]
-    public bool doubleBoltAbility;
+    public bool dualShotAbility;
     [HideInInspector]
     public bool armorAbility;
     [HideInInspector]
@@ -95,10 +95,12 @@ public class GameController : MonoBehaviour
     private float rankBaseXP = 50f;
     private bool maxRank;
     public GameObject[] messages;
-    String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# ACHIEVED", "NORMAL & HARD UNLOCKED"};
+    String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED"};
+    String[] pickupMsgs = { "Restore Health", "Fire Double Bolts", "Absorb Damage", "Teleport Anywhere" };
     bool levelUnlocked = false;
     bool normalHardDifficultyUnlocked = false;
     bool newRankAchieved = false;
+
 
     void Awake()
     {
@@ -162,8 +164,8 @@ public class GameController : MonoBehaviour
         RefreshUI();
         if (PlayerPrefs.HasKey("DualShot"))
         {
-            doubleBoltAbility = true;
-            doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+            dualShotAbility = true;
+            dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         }
         if (PlayerPrefs.HasKey("Armor"))
         {
@@ -218,7 +220,9 @@ public class GameController : MonoBehaviour
             {
                 hangarButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
                 hangarButton.GetComponent<Button>().interactable = false;
-                pickupHelpMessage.SetActive(false);
+                pickupHelpMessage[0].SetActive(false);
+                pickupHelpMessage[1].SetActive(false);
+                pickupHelpMessage[2].SetActive(false);
                 isPaused = false;
                 Time.timeScale = 1f;
             }
@@ -256,7 +260,9 @@ public class GameController : MonoBehaviour
         Time.timeScale = 1f;
         UIRoundBegin.SetActive(false);
         player.SetActive(true);
-        pickupHelpMessage.SetActive(false);
+        pickupHelpMessage[0].SetActive(false);
+        pickupHelpMessage[1].SetActive(false);
+        pickupHelpMessage[2].SetActive(false);
         PlayerPrefs.SetInt("InRound", 1);
         _audio.clip = wordClip;
         isPaused = false;
@@ -433,31 +439,49 @@ public class GameController : MonoBehaviour
                 if (firstPickup) // if first pickup, need to show a msg with pickup
                 {
                     Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
+                    /*
+                     * /icon_armor
+/icon_dual_shot
+/icon_health_pack
+/icon_teleport
 
+                     */
                     // determine msg text
                     if (pickupNum == 0)
                     {
-                        pickupHelpMessage.GetComponent<Text>().text = "A 'health pickup' restores 1 point to HP.\n\nTap to continue.";
+                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[0];
+                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health_pack");
+                        //pickupHelpMessage.GetComponent<Text>().text = "A 'health pickup' restores 1 point to HP.\n\nTap to continue.";
                         PlayerPrefs.SetString("HEALTHPICKUP", "YES");
                     }
                     else if (pickupNum == 1)
                     {
-                        pickupHelpMessage.GetComponent<Text>().text = "A 'dual shot pickup' shoots two lasers next fire.\n\nTap to continue.";
+                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[1];
+                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_dual_shot");
+                        //pickupHelpMessage.GetComponent<Text>().text = "A 'dual shot pickup' shoots two lasers next fire.\n\nTap to continue.";
                         PlayerPrefs.SetString("DUALSHOTPICKUP", "YES");
                     }
                     else if (pickupNum == 2)
                     {
-                        pickupHelpMessage.GetComponent<Text>().text = "An 'armor pickup' prevents damage next hit.\n\nTap to continue.";
+                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[2];
+                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_armor");
+                        //pickupHelpMessage.GetComponent<Text>().text = "An 'armor pickup' prevents damage next hit.\n\nTap to continue.";
                         PlayerPrefs.SetString("ARMORPICKUP", "YES");
                     }
                     else if (pickupNum == 3)
                     {
-                        pickupHelpMessage.GetComponent<Text>().text = "A 'teleport pickup' moves your ship to where you tap on screen.\n\nTap to continue.";
+                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[3];
+                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_teleport");
+                        //pickupHelpMessage.GetComponent<Text>().text = "A 'teleport pickup' moves your ship to where you tap on screen.\n\nTap to continue.";
                         PlayerPrefs.SetString("TELEPORTPICKUP", "YES");
                     }
 
                     // show msg
-                    pickupHelpMessage.SetActive(true);
+                    for(int i =0; i < pickupHelpMessage.Length; i++)
+                    {
+                        pickupHelpMessage[i].SetActive(true);
+                    }
+                    //pickupHelpMessage.SetActive(true);
                     isPaused = true;
                     Time.timeScale = 0f; // freeze game
                 }
@@ -558,8 +582,6 @@ public class GameController : MonoBehaviour
                 currentRank++;
                 experiencePoints = experiencePoints - currentRankXP;
                 LevelUp();
-                //pickupHelpMessage.GetComponent<Text>().text = "You've Reached '" + GetRankText(currentRank) + "'";
-                //pickupHelpMessage.SetActive(true);
                 newRankAchieved = true;
 
             }
@@ -570,10 +592,9 @@ public class GameController : MonoBehaviour
             dataController.SavePlayerProgress(currentRank, 0, currentGameLevel, targetWord);
         }
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
-        if (currentGameLevel != 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        if (currentGameLevel < 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
-            // levelUnlockedText.SetActive(true);
             levelUnlocked = true;
         }
         else
@@ -582,9 +603,6 @@ public class GameController : MonoBehaviour
             if (dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
             {
                 dataController.UnlockNormalAndHardDifficulty();
-                //levelUnlockedText.GetComponent<Text>().text = "NORMAL & HARD DIFFICULTY UNLOCKED";
-                //levelUnlockedText.GetComponent<Text>().transform.position = new Vector3(levelUnlockedText.GetComponent<Text>().transform.position.x, levelUnlockedText.GetComponent<Text>().transform.position.y + 50, 0);
-                //levelUnlockedText.SetActive(true);
                 normalHardDifficultyUnlocked = true;
             }
         }
@@ -637,7 +655,9 @@ public class GameController : MonoBehaviour
             if (levelUnlocked)
             {
                 messages[3].SetActive(true);
-                messages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 1));
+                // current game level + 2 handles the fact that current game level is index based, meaning it starts at zero. To get
+                // the next level for display purposes, we need to add  2 - any better solution?
+                messages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 2));
                 messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
             }
             else
@@ -653,7 +673,7 @@ public class GameController : MonoBehaviour
             if (levelUnlocked)
             {
                 messages[2].SetActive(true);
-                messages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 1));
+                messages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 2));
                 messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
             }
             else
@@ -678,7 +698,7 @@ public class GameController : MonoBehaviour
         StartCoroutine(EndOfRoundStats());
 
         PlayerPrefs.SetFloat("PlayerStreak", playerStreak + streakModifier);
-        if (doubleBoltAbility)
+        if (dualShotAbility)
             PlayerPrefs.SetInt("DualShot", 1);
         else
             PlayerPrefs.DeleteKey("DualShot");
@@ -899,14 +919,14 @@ public class GameController : MonoBehaviour
 
     public void ResetDualShot()
     {
-        doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
-        doubleBoltAbility = false;
+        dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+        dualShotAbility = false;
     }
 
     public void DualShotPickup()
     {
-        doubleBoltStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
-        doubleBoltAbility = true;
+        dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        dualShotAbility = true;
         _audio.clip = dualShotPickup;
         _audio.Play();
     }

@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameController.instance.teleportAbility && !GameController.instance.isPaused && Input.GetButtonDown("Fire1") && Camera.main.ScreenToWorldPoint(Input.mousePosition).z >1)
+        if (GameController.instance.teleportAbility && !GameController.instance.isPaused && Input.GetButtonDown("Fire1") && Camera.main.ScreenToWorldPoint(Input.mousePosition).z >=0)
         {
            rb.position = new Vector3(Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, boundary.xMin, boundary.xMax),
              0.0f, Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).z, boundary.zMin, boundary.zMax));
@@ -64,9 +64,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (CrossPlatformInputManager.GetButtonDown("Jump") && canFire && !GameController.instance.isPaused)
         {
-            //Debug.Log("Open wormhole (X,Y) at '('" + Input.mousePosition.x + "," + Input.mousePosition.y + "')'");
-            // if double bolt ability is true, then spawn two shots - need new shot spawn
-            if (GameController.instance.doubleBoltAbility)
+            if (GameController.instance.dualShotAbility)
             {
                 Instantiate(shot, shotSpawnDual1.position, shotSpawnDual1.rotation);
                 Instantiate(shot, shotSpawnDual2.position, shotSpawnDual2.rotation);
@@ -78,16 +76,6 @@ public class PlayerController : MonoBehaviour
 
                 GameController.instance.ResetDualShot ();
             }
-           /* else if (GameController.instance.wormholeAbility)
-            {
-                rb.position = new Vector3(Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, boundary.xMin, boundary.xMax),
-            0.0f,Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).z, boundary.zMin, boundary.zMax));
-                
-                GameController.instance.WormholeActivated();
-                GameController.instance.wormholeAbility = false;
-                canFire = false;
-                return;
-            }*/
             else
             {
                 Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
@@ -106,23 +94,9 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 movement;
-        //if (Application.platform == RuntimePlatform.WindowsEditor)// windows editor movement
-        //{
-            //float movementHorizontal = Input.GetAxis("Horizontal"); // returns horizontal movement strength & direction in a range of 1 to -1
-            //float movementVertical = Input.GetAxis("Vertical"); // returns vertical movement strength & direction in a range of 1 to -1
-            //movement = new Vector3(movementHorizontal, 0.0f, movementVertical);
-
-            float movementHorizontal = CrossPlatformInputManager.GetAxis("Horizontal");
+           float movementHorizontal = CrossPlatformInputManager.GetAxis("Horizontal");
             float movementVertical = CrossPlatformInputManager.GetAxis("Vertical");
             movement = new Vector3(movementHorizontal*0.40f, 0.0f, movementVertical*0.20f);
-        //}
-        //else
-        //{
-            //accelerometer movement
-         //   Vector3 accelerationRaw = Input.acceleration;
-          //  Vector3 acceleration = FixAcceleration(accelerationRaw);
-          //  movement = new Vector3(acceleration.x, 0.0f, acceleration.y);
-        //}
         rb.velocity = movement * speed; // sets how many units / second to move and in what direction (s) using a Vector3
 
         rb.position = new Vector3(
