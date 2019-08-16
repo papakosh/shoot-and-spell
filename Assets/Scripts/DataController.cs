@@ -9,7 +9,8 @@ using System.Text;
 
 public class DataController : MonoBehaviour
 {
-    public LevelData[] allLevelData;
+    //public LevelData[] allLevelData;
+    public GameData gameData;
     private string gameDataFilename = "data.json";
     private string playerDataFilename = "player.json";
     public PlayerData playerData;
@@ -146,15 +147,15 @@ public class DataController : MonoBehaviour
             yield return www.SendWebRequest();
             dataAsJson = www.downloadHandler.text;
             // deserialize string into object
-            GameData loadData = JsonUtility.FromJson<GameData>(dataAsJson);
-            allLevelData = loadData.allLevelData;
+            gameData = JsonUtility.FromJson<GameData>(dataAsJson);
+            //allLevelData = loadData.allLevelData;
         }
         else if (File.Exists(filePath))
         {
             dataAsJson = File.ReadAllText(filePath);
             // deserialize string into object
-            GameData loadData = JsonUtility.FromJson<GameData>(dataAsJson);
-            allLevelData = loadData.allLevelData;
+            gameData = JsonUtility.FromJson<GameData>(dataAsJson);
+            //allLevelData = loadData.allLevelData;
         }
         else
         {
@@ -186,8 +187,8 @@ public class DataController : MonoBehaviour
 
     private void SaveGameData()
     {
-        GameData gameData = new GameData();
-        gameData.allLevelData = allLevelData;
+        //GameData gameData = new GameData();
+        //gameData.allLevelData = allLevelData;
         string dataAsJson = JsonUtility.ToJson(gameData);
         string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
         File.WriteAllText(filePath, dataAsJson);

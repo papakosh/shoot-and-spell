@@ -40,7 +40,7 @@ public class GameController : MonoBehaviour
 
     private DataController dataController;
     private bool panelSet;
-    private String targetWord;
+    public String targetWord;
     private int currentGameLevel;
     private Color defaultColor = new Color32(255, 255, 255, 255);
     private Color completedColor = new Color32(212, 175, 55, 255);
@@ -91,16 +91,18 @@ public class GameController : MonoBehaviour
     private const float streakModifier = 0.05f;
     private int targetWordIndex;
     public float startCountdown;
-    private float rankModifier = 1.75f;
-    private float rankBaseXP = 50f;
+    private float rankXPModifier;
+    private float rankBaseXP;
     private bool maxRank;
     public GameObject[] messages;
-    String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED"};
-    String[] pickupMsgs = { "Restore Health", "Fire Double Bolts", "Absorb Damage", "Teleport Anywhere" };
+    String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP"};
+    String[] pickupMsgs = { "Add 1 pt to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
     bool levelUnlocked = false;
     bool normalHardDifficultyUnlocked = false;
     bool newRankAchieved = false;
-
+    private int levelCompleteBonus;
+    private bool incompleteLevel;
+    private bool hasCompletedLevel = false;
 
     void Awake()
     {
@@ -114,7 +116,7 @@ public class GameController : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
-        wordClip = Resources.Load<AudioClip>(dataController.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
+        wordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
         difficulty = dataController.playerData.difficultySelected;
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
@@ -143,6 +145,41 @@ public class GameController : MonoBehaviour
 
         if (currentRank == DataController.MASTER_RANK)
             maxRank = true;
+        List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
+        if (completedLevelList.Count < dataController.gameData.allLevelData[currentGameLevel].words.Length)
+            incompleteLevel = true;
+
+        levelCompleteBonus = dataController.gameData.allLevelData[currentGameLevel].compXPBonus;
+        rankXPModifier = dataController.gameData.rankXPModifier;
+        rankBaseXP = dataController.gameData.rankBaseXP;
+
+        // read spawn wait from file?
+        // read wave wait from file?
+
+        // adjust spawn wait for level difficulty
+        if (currentGameLevel > 0)
+            spawnWait = spawnWait - (0.25f * currentGameLevel);
+
+        // adjust wave wait for level difficulty
+        switch (currentGameLevel)
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                waveWait = waveWait - 3;
+                break;
+            case 7:
+            case 8:
+                waveWait = waveWait - 4;
+                break;
+            case 9:
+                waveWait = waveWait - 5;
+                break;
+        }
     }
 
     private void SetLevelBackground()
@@ -155,7 +192,7 @@ public class GameController : MonoBehaviour
 
     private Texture GetBackGroundTexture(int gameLevel)
     {
-        return Resources.Load<Texture>(dataController.allLevelData[currentGameLevel].backgroundPath);
+        return Resources.Load<Texture>(dataController.gameData.allLevelData[currentGameLevel].backgroundPath);
     }
 
     // Start is called before the first frame update
@@ -439,13 +476,6 @@ public class GameController : MonoBehaviour
                 if (firstPickup) // if first pickup, need to show a msg with pickup
                 {
                     Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
-                    /*
-                     * /icon_armor
-/icon_dual_shot
-/icon_health_pack
-/icon_teleport
-
-                     */
                     // determine msg text
                     if (pickupNum == 0)
                     {
@@ -567,7 +597,7 @@ public class GameController : MonoBehaviour
 
     private double CalculateRankXP(int rank)
     {
-        double exponent = rankModifier;
+        double exponent = rankXPModifier;
         double baseXP = rankBaseXP;
         return Math.Floor(baseXP * Math.Pow(rank + 1, exponent));
     }
@@ -592,15 +622,38 @@ public class GameController : MonoBehaviour
             dataController.SavePlayerProgress(currentRank, 0, currentGameLevel, targetWord);
         }
         List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
-        if (currentGameLevel < 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
+        if (currentGameLevel < 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.gameData.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
             dataController.UnlockNextLevel(currentGameLevel);
             levelUnlocked = true;
+        }else if (incompleteLevel && completedLevelList.Count == dataController.gameData.allLevelData[currentGameLevel].words.Length)
+        {
+            experiencePoints = experiencePoints + levelCompleteBonus;
+            hasCompletedLevel = true;
+            // if not maxed out already, then check progression
+            if (currentRank != DataController.MASTER_RANK)
+            {
+                int currentRankXP = (int)CalculateRankXP(currentRank);
+                if (experiencePoints > currentRankXP)
+                {
+                    currentRank++;
+                    experiencePoints = experiencePoints - currentRankXP;
+                    LevelUp();
+                    newRankAchieved = true;
+
+                }
+                dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
+            }
+            else
+            {
+                maxRank = true;
+            }
+                
         }
         else
         {
             // On easy difficulty, just completed the last level and normal difficulty not unlocked, then unlock normal and hard difficulty
-            if (dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.allLevelData[currentGameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
+            if (currentGameLevel == 9  && dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.gameData.allLevelData[currentGameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
             {
                 dataController.UnlockNormalAndHardDifficulty();
                 normalHardDifficultyUnlocked = true;
@@ -610,7 +663,7 @@ public class GameController : MonoBehaviour
 
     private string RandomWord()
     {
-        WordData[] words = dataController.allLevelData[currentGameLevel].words;
+        WordData[] words = dataController.gameData.allLevelData[currentGameLevel].words;
         targetWordIndex = UnityEngine.Random.Range(0, words.Length);
         return words[targetWordIndex].word;
     }
@@ -640,14 +693,14 @@ public class GameController : MonoBehaviour
         messages[1].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
         yield return new WaitForSeconds(0.5f);
 
-        if (newRankAchieved && !levelUnlocked && !normalHardDifficultyUnlocked)
+        if (newRankAchieved && !levelUnlocked && !normalHardDifficultyUnlocked && !hasCompletedLevel)
         {
             //String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# ACHIEVED", "NORMAL & HARD UNLOCKED"};
             messages[2].SetActive(true);
             messages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", "" + GetRankText(currentRank).ToUpper());
             messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
             yield return new WaitForSeconds(0.5f);
-        }else if (newRankAchieved && (levelUnlocked || normalHardDifficultyUnlocked))
+        }else if (newRankAchieved && (levelUnlocked || normalHardDifficultyUnlocked || hasCompletedLevel))
         {
             messages[2].SetActive(true);
             messages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", GetRankText(currentRank).ToUpper());
@@ -660,15 +713,29 @@ public class GameController : MonoBehaviour
                 messages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 2));
                 messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
             }
-            else
+            else if (normalHardDifficultyUnlocked)
             {
                 messages[3].SetActive(true);
                 messages[3].GetComponent<Text>().text = endOfRoundMsgs[3];
                 messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }else if (hasCompletedLevel)
+            {
+                messages[3].SetActive(true);
+                
+                messages[3].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", ""+ levelCompleteBonus);
+                messages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+
+                if (!maxRank)
+                {
+                    xpAddedText.SetActive(true);
+                    xpAddedText.GetComponent<Text>().text = "+" + levelCompleteBonus + " xp ";
+                    xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+                }
+                hasCompletedLevel = false;
             }
             yield return new WaitForSeconds(0.5f);
         }
-        else if (levelUnlocked || normalHardDifficultyUnlocked)
+        else if (levelUnlocked || normalHardDifficultyUnlocked || hasCompletedLevel)
         {
             if (levelUnlocked)
             {
@@ -676,11 +743,23 @@ public class GameController : MonoBehaviour
                 messages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (currentGameLevel + 2));
                 messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
             }
-            else
+            else if (normalHardDifficultyUnlocked)
             {
                 messages[2].SetActive(true);
                 messages[2].GetComponent<Text>().text = endOfRoundMsgs[3];
                 messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            }else if (hasCompletedLevel)
+            {
+                messages[2].SetActive(true);
+                messages[2].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
+                messages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+                if (!maxRank)
+                {
+                    xpAddedText.SetActive(true);
+                    xpAddedText.GetComponent<Text>().text = "+" + levelCompleteBonus + " xp ";
+                    xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+                }
+                hasCompletedLevel = false;
             }
             yield return new WaitForSeconds(0.5f);
         }
@@ -759,7 +838,103 @@ public class GameController : MonoBehaviour
             }
             else // choose block
             {
+
                 int num = UnityEngine.Random.Range(0, 100);
+                if (num <= 44) // 45 % chance
+                {
+                    debrisArray[i] = blocksArray[0];
+                }
+                else if (num > 44 && num <= 54) // 10 % chance
+                {
+                    if (targetIndex + 1 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 1]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[1];
+                    }
+                }
+                else if (num > 54 && num <= 64) // 10 % chance
+                {
+                    if (targetIndex + 1 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 1]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[2];
+                    }
+                }
+                else if (num > 64 && num <= 74) // 10 % chance
+                {
+                    if (targetIndex + 2 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 2]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[3];
+                    }
+                }
+                else if (num > 74 && num <= 79) // 5 % chance
+                {
+                    if (targetIndex + 2 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 2]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[4];
+                    }
+                }
+                else if (num > 79 && num <= 84) // 5 % chance
+                {
+                    if (targetIndex + 3 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 3]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[5];
+                    }
+                }
+                else if (num > 84 && num <= 89) // 5 % chance
+                {
+                    if (targetIndex + 3 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 3]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[6];
+                    }
+                }
+                else if (num > 89 && num <= 94) // 5 % chance
+                {
+                    if (targetIndex + 4 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 4]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[7];
+                    }
+                }
+                else if (num > 94) // 5 % chance
+                {
+                    if (targetIndex + 4 <= targetIndices.Length - 1)
+                    {
+                        debrisArray[i] = blocks[targetIndices[targetIndex + 4]];
+                    }
+                    else
+                    {
+                        debrisArray[i] = blocksArray[8];
+                    }
+                }
+
+                /*
+                 * int num = UnityEngine.Random.Range(0, 100);
                 if (num <= 29) // 30 % chance
                 {
                     debrisArray[i] = blocksArray[0];
@@ -796,7 +971,8 @@ public class GameController : MonoBehaviour
                 {
                     debrisArray[i] = blocksArray[8];
                 }
-                
+                 */
+
             }
         }
 

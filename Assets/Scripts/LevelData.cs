@@ -8,4 +8,5 @@ public class LevelData
     public string name;
     public WordData[] words;
     public string backgroundPath;
+    public int compXPBonus;
 }

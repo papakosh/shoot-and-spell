@@ -5,5 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-    public LevelData[] allLevelData; 
+    public LevelData[] allLevelData;
+    public float rankXPModifier;
+    public float rankBaseXP;
 }

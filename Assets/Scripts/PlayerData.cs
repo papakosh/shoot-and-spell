@@ -10,6 +10,5 @@ public class PlayerData
     public LevelOfDifficulty easyDifficulty;
     public LevelOfDifficulty normalDifficulty;
     public LevelOfDifficulty hardDifficulty;
-
 }
 
