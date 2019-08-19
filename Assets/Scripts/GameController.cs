@@ -103,6 +103,7 @@ public class GameController : MonoBehaviour
     private int levelCompleteBonus;
     private bool incompleteLevel;
     private bool hasCompletedLevel = false;
+    private int enemyShipsAllowed;
 
     void Awake()
     {
@@ -152,13 +153,10 @@ public class GameController : MonoBehaviour
         levelCompleteBonus = dataController.gameData.allLevelData[currentGameLevel].compXPBonus;
         rankXPModifier = dataController.gameData.rankXPModifier;
         rankBaseXP = dataController.gameData.rankBaseXP;
-
-        // read spawn wait from file?
-        // read wave wait from file?
-
+       
         // adjust spawn wait for level difficulty
         if (currentGameLevel > 0)
-            spawnWait = spawnWait - (0.25f * currentGameLevel);
+            spawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnDecrement * currentGameLevel);
 
         // adjust wave wait for level difficulty
         switch (currentGameLevel)
@@ -170,15 +168,43 @@ public class GameController : MonoBehaviour
             case 4:
             case 5:
             case 6:
-                waveWait = waveWait - 3;
+                waveWait = dataController.gameData.waveWait - 0;
                 break;
             case 7:
             case 8:
-                waveWait = waveWait - 4;
+                waveWait = dataController.gameData.waveWait - 1;
                 break;
             case 9:
-                waveWait = waveWait - 5;
+                waveWait = dataController.gameData.waveWait - 2;
                 break;
+        }
+
+        SetEnemyShipsAllowed();
+    }
+
+    private void SetEnemyShipsAllowed()
+    {
+        switch (currentGameLevel)
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                enemyShipsAllowed = 0;
+                break;
+            case 5:
+                enemyShipsAllowed = 1;
+                break;
+            case 6:
+            case 7:
+                enemyShipsAllowed = 2;
+                break;
+            case 8:
+            case 9:
+                enemyShipsAllowed = 3;
+                break;
+
         }
     }
 
@@ -821,20 +847,46 @@ public class GameController : MonoBehaviour
                         break;
                     case 2:
                     case 3:
-                    case 4:
-                    case 5:
                         numHazards = 2;
                         break;
-                    case 6:
-                    case 7:
+                    case 4:
                         numHazards = 3;
                         break;
+                    case 5:
+                    case 6:
+                    case 7:
                     case 8:
                     case 9:
                         numHazards = 4;
                         break;
                 }
-                debrisArray[i] = hazards[UnityEngine.Random.Range(0, numHazards)];
+
+                // enemy ship allowed count 6 = 1, 7 = 2, 8 = 2, 9 = 3, 10 = 3
+                // enemy ship index count
+                /**
+                 * if (random number == 4) // enemy ship chosen, check if permitted
+                 *   if (enemy ship index count > 0)
+                 *       add enemy ship
+                 *   else
+                 *       random range (0, 3)
+                 * 
+                 */
+                int hazardChosen = UnityEngine.Random.Range(0, numHazards);
+                if (hazardChosen == 3)
+                { // enemy ship chosen, add if permitted
+                    if (enemyShipsAllowed > 0)
+                    {
+                        debrisArray[i] = hazards[hazardChosen];
+                        enemyShipsAllowed--;
+                    }
+                    else // else add asteroid
+                        debrisArray[i] = hazards[UnityEngine.Random.Range(0, 3)];
+                }
+                else 
+                {
+                    debrisArray[i] = hazards[hazardChosen];
+                }
+                
             }
             else // choose block
             {
@@ -932,7 +984,6 @@ public class GameController : MonoBehaviour
                         debrisArray[i] = blocksArray[8];
                     }
                 }
-
                 /*
                  * int num = UnityEngine.Random.Range(0, 100);
                 if (num <= 29) // 30 % chance
@@ -975,6 +1026,8 @@ public class GameController : MonoBehaviour
 
             }
         }
+
+        SetEnemyShipsAllowed();
 
     }
 
