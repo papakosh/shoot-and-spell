@@ -96,7 +96,9 @@ public class GameController : MonoBehaviour
     private bool maxRank;
     public GameObject[] messages;
     String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP"};
-    String[] pickupMsgs = { "Add 1 pt to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
+    String[] pickupHeaders = { "RESTORE HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
+    String[] pickupMsgs = { "Add 1 point to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
+    String pickUpResume = "Tap Screen to Resume";
     bool levelUnlocked = false;
     bool normalHardDifficultyUnlocked = false;
     bool newRankAchieved = false;
@@ -178,35 +180,8 @@ public class GameController : MonoBehaviour
                 waveWait = dataController.gameData.waveWait - 2;
                 break;
         }
-
-        SetEnemyShipsAllowed();
     }
 
-    private void SetEnemyShipsAllowed()
-    {
-        switch (currentGameLevel)
-        {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                enemyShipsAllowed = 0;
-                break;
-            case 5:
-                enemyShipsAllowed = 1;
-                break;
-            case 6:
-            case 7:
-                enemyShipsAllowed = 2;
-                break;
-            case 8:
-            case 9:
-                enemyShipsAllowed = 3;
-                break;
-
-        }
-    }
 
     private void SetLevelBackground()
     {
@@ -286,6 +261,7 @@ public class GameController : MonoBehaviour
                 pickupHelpMessage[0].SetActive(false);
                 pickupHelpMessage[1].SetActive(false);
                 pickupHelpMessage[2].SetActive(false);
+                pickupHelpMessage[3].SetActive(false);
                 isPaused = false;
                 Time.timeScale = 1f;
             }
@@ -326,6 +302,7 @@ public class GameController : MonoBehaviour
         pickupHelpMessage[0].SetActive(false);
         pickupHelpMessage[1].SetActive(false);
         pickupHelpMessage[2].SetActive(false);
+        pickupHelpMessage[3].SetActive(false);
         PlayerPrefs.SetInt("InRound", 1);
         _audio.clip = wordClip;
         isPaused = false;
@@ -505,29 +482,37 @@ public class GameController : MonoBehaviour
                     // determine msg text
                     if (pickupNum == 0)
                     {
-                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[0];
-                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health_pack");
+                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health_pack");
+                        pickupHelpMessage[1].GetComponent<Text>().text = pickupHeaders[0];
+                        pickupHelpMessage[2].GetComponent<Text>().text = pickupMsgs[0];
+                        pickupHelpMessage[3].GetComponent<Text>().text = pickUpResume;
                         //pickupHelpMessage.GetComponent<Text>().text = "A 'health pickup' restores 1 point to HP.\n\nTap to continue.";
                         PlayerPrefs.SetString("HEALTHPICKUP", "YES");
                     }
                     else if (pickupNum == 1)
                     {
-                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[1];
-                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_dual_shot");
+                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_dual_shot");
+                        pickupHelpMessage[1].GetComponent<Text>().text = pickupHeaders[1];
+                        pickupHelpMessage[2].GetComponent<Text>().text = pickupMsgs[1];
+                        pickupHelpMessage[3].GetComponent<Text>().text = pickUpResume;
                         //pickupHelpMessage.GetComponent<Text>().text = "A 'dual shot pickup' shoots two lasers next fire.\n\nTap to continue.";
                         PlayerPrefs.SetString("DUALSHOTPICKUP", "YES");
                     }
                     else if (pickupNum == 2)
                     {
-                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[2];
-                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_armor");
+                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_armor");
+                        pickupHelpMessage[1].GetComponent<Text>().text = pickupHeaders[2];
+                        pickupHelpMessage[2].GetComponent<Text>().text = pickupMsgs[2];
+                        pickupHelpMessage[3].GetComponent<Text>().text = pickUpResume;
                         //pickupHelpMessage.GetComponent<Text>().text = "An 'armor pickup' prevents damage next hit.\n\nTap to continue.";
                         PlayerPrefs.SetString("ARMORPICKUP", "YES");
                     }
                     else if (pickupNum == 3)
                     {
-                        pickupHelpMessage[0].GetComponent<Text>().text = pickupMsgs[3];
-                        pickupHelpMessage[1].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_teleport");
+                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_teleport");
+                        pickupHelpMessage[1].GetComponent<Text>().text = pickupHeaders[3];
+                        pickupHelpMessage[2].GetComponent<Text>().text = pickupMsgs[3];
+                        pickupHelpMessage[3].GetComponent<Text>().text = pickUpResume;
                         //pickupHelpMessage.GetComponent<Text>().text = "A 'teleport pickup' moves your ship to where you tap on screen.\n\nTap to continue.";
                         PlayerPrefs.SetString("TELEPORTPICKUP", "YES");
                     }
@@ -833,6 +818,31 @@ public class GameController : MonoBehaviour
             blocksArray[j] = blocks[num];
         }
 
+        switch (currentGameLevel)
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                enemyShipsAllowed = 0;
+                break;
+            case 5:
+                enemyShipsAllowed = 1;
+                break;
+            case 6:
+            case 7:
+                enemyShipsAllowed = 2;
+                break;
+            case 8:
+            case 9:
+                enemyShipsAllowed = 3;
+                break;
+
+        }
+
+        //Debug.Log("On level " + (currentGameLevel+1) + " and enemy ships allowed is " + enemyShipsAllowed);
+
         for (int i = 0; i < debrisCount; i++)
         {
             int random = UnityEngine.Random.Range(0, 3);
@@ -878,9 +888,13 @@ public class GameController : MonoBehaviour
                     {
                         debrisArray[i] = hazards[hazardChosen];
                         enemyShipsAllowed--;
+                        //Debug.Log("Enemy ships remaining is " + enemyShipsAllowed + " after adding " + hazards[hazardChosen].name);
                     }
-                    else // else add asteroid
+                    else
+                    { // else add asteroid
                         debrisArray[i] = hazards[UnityEngine.Random.Range(0, 3)];
+                        //Debug.Log("No more ships remaining");
+                    }
                 }
                 else 
                 {
@@ -1027,8 +1041,10 @@ public class GameController : MonoBehaviour
             }
         }
 
-        SetEnemyShipsAllowed();
-
+       /* for (int t = 0; t < debrisArray.Length; t++)
+        {
+            Debug.Log("Debris " + (t + 1) + " is " + debrisArray[t].name);
+        }*/
     }
 
     private int CalculateTargetPanelIndex()
@@ -1172,7 +1188,8 @@ public class GameController : MonoBehaviour
 
             for (int i = 0; i < debrisCount; i++)
             {
-                GameObject debris = debrisArray[UnityEngine.Random.Range(0, debrisArray.Length)];
+                //GameObject debris = debrisArray[UnityEngine.Random.Range(0, debrisArray.Length)];
+                GameObject debris = debrisArray[i];
                 Vector3 spawnPosition = new Vector3(
                     UnityEngine.Random.Range(-spawnValues.x, spawnValues.x),
                     spawnValues.y, spawnValues.z);
