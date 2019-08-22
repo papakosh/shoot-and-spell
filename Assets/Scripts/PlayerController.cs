@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     private AudioSource _audio;
     [HideInInspector]
     public float originalSpeed;
+    private AudioClip singleShot;
+    private AudioClip doubleShot;
 
     private void Awake()
     {
@@ -31,8 +33,11 @@ public class PlayerController : MonoBehaviour
         else
             Destroy(gameObject);
 
-        AudioSource[] audioSources = GetComponents<AudioSource>();
-        _audio = audioSources[0];
+        _audio = GetComponent<AudioSource>();
+        singleShot = Resources.Load<AudioClip>("Audio/weapon_player");
+        doubleShot = Resources.Load<AudioClip>("Audio/dual_shot");
+        _audio.clip = singleShot;
+        _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         originalSpeed = speed;
 
     }
@@ -65,15 +70,14 @@ public class PlayerController : MonoBehaviour
                 Instantiate(shot, shotSpawnDual1.position, shotSpawnDual1.rotation);
                 Instantiate(shot, shotSpawnDual2.position, shotSpawnDual2.rotation);
 
-                AudioSource[] audioSources = GetComponents<AudioSource>();
-                _audio = audioSources[1];
+                _audio.clip = doubleShot;
                 _audio.Play();
-                _audio = audioSources[0];
 
                 GameController.instance.ResetDualShot ();
             }
             else
             {
+                _audio.clip = singleShot;
                 Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
             }
             

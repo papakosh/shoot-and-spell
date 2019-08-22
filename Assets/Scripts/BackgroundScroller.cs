@@ -8,11 +8,13 @@ public class BackgroundScroller : MonoBehaviour
     public float tileSizeZ;
 
     private Vector3 startPosition;
-
+    private AudioSource _audio;
     // Start is called before the first frame update
     void Start()
     {
         startPosition = transform.position;
+        _audio = gameObject.GetComponent<AudioSource>();
+        _audio.volume = PlayerPrefs.GetFloat(DataController.MUSIC_VOLUME);
     }
 
     // Update is called once per frame

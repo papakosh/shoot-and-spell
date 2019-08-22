@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System;
-using UnityEngine.Networking;
 using System.Text;
 
 public class DataController : MonoBehaviour
@@ -29,6 +28,16 @@ public class DataController : MonoBehaviour
     public const string DIFFICULTY_NORMAL = "NORMAL";
     public const string DIFFICULTY_HARD = "HARD";
 
+    public const string MUSIC_VOLUME = "MUSIC_VOL";
+    public const string WEAPONS_VOLUME = "WEAPONS_VOL";
+    public const string EXPLOSIONS_VOLUME = "EXPLOSIONS_VOL";
+    public const string WORDS_VOLUME = "WORDS_VOL";
+
+    private float musicVolDefault = 0.25f;
+    private float weaponsVolDefault = 0.6f;
+    private float explosionsVolDefault = 0.6f; // 0.5 for block, 1 for enemy, 0.6 for asteroid, player
+    private float wordsVolDefault = 1.0f;
+    public const float DEFAULT_VOL = 0.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -37,10 +46,29 @@ public class DataController : MonoBehaviour
         StartCoroutine(LoadGameData());
         LoadPlayerData();
         currentDifficulty = GetCurrentDifficulty();
+        SettingsDefaults();
         // show splash screen
         StartCoroutine(LoadTheGame());
     }
 
+    private void SettingsDefaults() {
+        if (!PlayerPrefs.HasKey(MUSIC_VOLUME))
+        {   
+            PlayerPrefs.SetFloat(MUSIC_VOLUME, musicVolDefault);
+        }
+        if (!PlayerPrefs.HasKey(WEAPONS_VOLUME))
+        {
+            PlayerPrefs.SetFloat(WEAPONS_VOLUME, weaponsVolDefault);
+        }
+        if (!PlayerPrefs.HasKey(EXPLOSIONS_VOLUME))
+        {
+            PlayerPrefs.SetFloat(EXPLOSIONS_VOLUME, explosionsVolDefault);
+        }
+        if (!PlayerPrefs.HasKey(WORDS_VOLUME))
+        {
+            PlayerPrefs.SetFloat(WORDS_VOLUME, wordsVolDefault);
+        }
+    }
     private IEnumerator LoadTheGame()
     {
         yield return new WaitForSeconds(2.0f);

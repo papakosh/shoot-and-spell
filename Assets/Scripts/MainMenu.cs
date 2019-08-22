@@ -45,7 +45,9 @@ public class MainMenu : MonoBehaviour
 
     private DataController dataController;
     private LevelOfDifficulty currentDifficulty;
-  
+
+    private AudioSource _audio;
+
     public void CallSettings()
     {
         SceneManager.LoadScene("SettingsMenu");
@@ -54,6 +56,7 @@ public class MainMenu : MonoBehaviour
     void Awake()
     {
         dataController = FindObjectOfType<DataController>();
+        _audio = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -210,6 +213,7 @@ public class MainMenu : MonoBehaviour
         }
         
         SetDifficultyButton();
+        _audio.volume = PlayerPrefs.GetFloat(DataController.MUSIC_VOLUME);
     }
 
     private double CalculatePercentComplete(int count, int total)

@@ -266,6 +266,8 @@ public class GameController : MonoBehaviour
                 Time.timeScale = 1f;
             }
         }
+        if (!_audio.isPlaying)
+            _audio.volume = DataController.DEFAULT_VOL;
     }
 
     public String GetRankText(int rank)
@@ -402,6 +404,7 @@ public class GameController : MonoBehaviour
     public void PlayWord()
     {
         _audio.clip = wordClip;
+        _audio.volume = PlayerPrefs.GetFloat(DataController.WORDS_VOLUME);
         _audio.Play();
     }
 
@@ -1181,7 +1184,7 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(startWait + startCountdown);
         StartCoroutine(DisplayWord(10.0f));
 
-        _audio.Play();
+        PlayWord();
         while (true)
         {
             PopulateDebrisArray();
