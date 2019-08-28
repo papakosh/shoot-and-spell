@@ -1,48 +1,131 @@
 fileFormatVersion: 2
 guid: c899cb31343c593468d9e5777593cff8
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: BACK
-    100002: //RootNode
-    100004: BOTTOM
-    100006: Box
-    100008: FRONT
-    100010: LEFT
-    100012: RIGHT
-    100014: TOP
-    400000: BACK
-    400002: //RootNode
-    400004: BOTTOM
-    400006: Box
-    400008: FRONT
-    400010: LEFT
-    400012: RIGHT
-    400014: TOP
-    2100000: edgewoodMaterial
-    2100002: woodMaterial
-    2300000: BACK
-    2300002: BOTTOM
-    2300004: Box
-    2300006: FRONT
-    2300008: LEFT
-    2300010: RIGHT
-    2300012: TOP
-    3300000: BACK
-    3300002: BOTTOM
-    3300004: Box
-    3300006: FRONT
-    3300008: LEFT
-    3300010: RIGHT
-    3300012: TOP
-    4300000: RIGHT
-    4300002: BACK
-    4300004: TOP
-    4300006: LEFT
-    4300008: Box
-    4300010: BOTTOM
-    4300012: FRONT
+  serializedVersion: 26
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: BACK
+  - first:
+      1: 100002
+    second: //RootNode
+  - first:
+      1: 100004
+    second: BOTTOM
+  - first:
+      1: 100006
+    second: Box
+  - first:
+      1: 100008
+    second: FRONT
+  - first:
+      1: 100010
+    second: LEFT
+  - first:
+      1: 100012
+    second: RIGHT
+  - first:
+      1: 100014
+    second: TOP
+  - first:
+      4: 400000
+    second: BACK
+  - first:
+      4: 400002
+    second: //RootNode
+  - first:
+      4: 400004
+    second: BOTTOM
+  - first:
+      4: 400006
+    second: Box
+  - first:
+      4: 400008
+    second: FRONT
+  - first:
+      4: 400010
+    second: LEFT
+  - first:
+      4: 400012
+    second: RIGHT
+  - first:
+      4: 400014
+    second: TOP
+  - first:
+      21: 2100000
+    second: edgewoodMaterial
+  - first:
+      21: 2100002
+    second: woodMaterial
+  - first:
+      23: 2300000
+    second: BACK
+  - first:
+      23: 2300002
+    second: BOTTOM
+  - first:
+      23: 2300004
+    second: Box
+  - first:
+      23: 2300006
+    second: FRONT
+  - first:
+      23: 2300008
+    second: LEFT
+  - first:
+      23: 2300010
+    second: RIGHT
+  - first:
+      23: 2300012
+    second: TOP
+  - first:
+      33: 3300000
+    second: BACK
+  - first:
+      33: 3300002
+    second: BOTTOM
+  - first:
+      33: 3300004
+    second: Box
+  - first:
+      33: 3300006
+    second: FRONT
+  - first:
+      33: 3300008
+    second: LEFT
+  - first:
+      33: 3300010
+    second: RIGHT
+  - first:
+      33: 3300012
+    second: TOP
+  - first:
+      43: 4300000
+    second: RIGHT
+  - first:
+      43: 4300002
+    second: BACK
+  - first:
+      43: 4300004
+    second: TOP
+  - first:
+      43: 4300006
+    second: LEFT
+  - first:
+      43: 4300008
+    second: Box
+  - first:
+      43: 4300010
+    second: BOTTOM
+  - first:
+      43: 4300012
+    second: FRONT
   externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blockMaterial
+    second: {fileID: 2100000, guid: 2730251aa6063be4387b9fde01301521, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -51,8 +134,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: letter-borderMaterial
+    second: {fileID: 2100000, guid: 5049eb36f3e743a4c924dc076f344f5e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: woodMaterial
-    second: {fileID: 2100000, guid: 2fdbce96891083a429f3a313057bf585, type: 2}
+    second: {fileID: 2100000, guid: 2730251aa6063be4387b9fde01301521, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
@@ -87,6 +175,7 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -94,18 +183,19 @@ ModelImporter:
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -114,10 +204,11 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -127,6 +218,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0

@@ -32,12 +32,17 @@ public class DataController : MonoBehaviour
     public const string WEAPONS_VOLUME = "WEAPONS_VOL";
     public const string EXPLOSIONS_VOLUME = "EXPLOSIONS_VOL";
     public const string WORDS_VOLUME = "WORDS_VOL";
+    public const string PICKUPS_VOLUME = "PICKUPS_VOL";
+    public const string JOYSTICK_CONTROL = "JOYSTICK_CONTROL";
 
     private float musicVolDefault = 0.25f;
     private float weaponsVolDefault = 0.6f;
     private float explosionsVolDefault = 0.6f; // 0.5 for block, 1 for enemy, 0.6 for asteroid, player
     private float wordsVolDefault = 1.0f;
+    private float pickupsVolDefault = 0.5f;
     public const float DEFAULT_VOL = 0.5f;
+    public const string JOYSTICK_CONTROL_LEFT = "LEFT-HANDED";
+    public const string JOYSTICK_CONTROL_RIGHT = "RIGHT-HANDED";
 
     // Start is called before the first frame update
     void Start()
@@ -67,6 +72,14 @@ public class DataController : MonoBehaviour
         if (!PlayerPrefs.HasKey(WORDS_VOLUME))
         {
             PlayerPrefs.SetFloat(WORDS_VOLUME, wordsVolDefault);
+        }
+        if (!PlayerPrefs.HasKey(PICKUPS_VOLUME))
+        {
+            PlayerPrefs.SetFloat(PICKUPS_VOLUME, pickupsVolDefault);
+        }
+        if (!PlayerPrefs.HasKey(JOYSTICK_CONTROL))
+        {
+            PlayerPrefs.SetString(JOYSTICK_CONTROL, JOYSTICK_CONTROL_LEFT);
         }
     }
     private IEnumerator LoadTheGame()

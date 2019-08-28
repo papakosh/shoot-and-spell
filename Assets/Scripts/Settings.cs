@@ -9,19 +9,25 @@ public class Settings : MonoBehaviour
     public Slider weaponsVolSlider;
     public Slider explosionsVolSlider;
     public Slider wordsVolSlider;
+    public Slider pickupsVolSlider;
     public Text musicVolText;
     public Text weaponsVolText;
     public Text explosionsVolText;
     public Text wordsVolText;
+    public Text pickupsVolText;
     private AudioSource _audio;
     public GameObject testStopMusicButton;
     public GameObject testStopWeaponsButton;
     public GameObject testStopExplosionsButton;
     public GameObject testStopWordsButton;
+    public GameObject testStopPickupsButton;
     private bool musicIsPlaying;
     private bool weaponsIsPlaying;
     private bool explosionsIsPlaying;
     private bool wordsIsPlaying;
+    private bool pickupsIsPlaying;
+    public Toggle leftHandControlToggle;
+    public Toggle rightHandControlToggle;
 
     // Start is called before the first frame update
     void Start()
@@ -34,12 +40,19 @@ public class Settings : MonoBehaviour
         explosionsVolText.text = Mathf.Round (explosionsVolSlider.value * 100f) / 100f + "";
         wordsVolSlider.value = PlayerPrefs.GetFloat(DataController.WORDS_VOLUME);
         wordsVolText.text = Mathf.Round (wordsVolSlider.value * 100f) / 100f + "";
-        
+        pickupsVolSlider.value = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        pickupsVolText.text = Mathf.Round(pickupsVolSlider.value * 100f) / 100f + "";
+        if (PlayerPrefs.GetString(DataController.JOYSTICK_CONTROL).Equals(DataController.JOYSTICK_CONTROL_LEFT))
+            leftHandControlToggle.isOn = true;
+        else
+            rightHandControlToggle.isOn = true;
+
         _audio = GetComponent<AudioSource>();
         musicIsPlaying = false;
         weaponsIsPlaying = false;
         explosionsIsPlaying = false;
         wordsIsPlaying = false;
+        pickupsIsPlaying = false;
     }
 
     // Update is called once per frame
@@ -54,6 +67,11 @@ public class Settings : MonoBehaviour
         PlayerPrefs.SetFloat(DataController.WEAPONS_VOLUME, weaponsVolSlider.value);
         PlayerPrefs.SetFloat(DataController.EXPLOSIONS_VOLUME, explosionsVolSlider.value);
         PlayerPrefs.SetFloat(DataController.WORDS_VOLUME, wordsVolSlider.value);
+        PlayerPrefs.SetFloat(DataController.PICKUPS_VOLUME, pickupsVolSlider.value);
+        if (leftHandControlToggle.isOn)
+            PlayerPrefs.SetString(DataController.JOYSTICK_CONTROL, DataController.JOYSTICK_CONTROL_LEFT);
+        else
+            PlayerPrefs.SetString(DataController.JOYSTICK_CONTROL, DataController.JOYSTICK_CONTROL_RIGHT);
     }
 
     public void ResetAll()
@@ -63,6 +81,14 @@ public class Settings : MonoBehaviour
         PlayerPrefs.SetFloat(DataController.WEAPONS_VOLUME, weaponsVolSlider.value);
         PlayerPrefs.SetFloat(DataController.EXPLOSIONS_VOLUME, explosionsVolSlider.value);
         PlayerPrefs.SetFloat(DataController.WORDS_VOLUME, wordsVolSlider.value);
+        PlayerPrefs.SetFloat(DataController.PICKUPS_VOLUME, pickupsVolSlider.value);
+        if (leftHandControlToggle.isOn)
+            PlayerPrefs.SetString(DataController.JOYSTICK_CONTROL, DataController.JOYSTICK_CONTROL_LEFT);
+        else
+            PlayerPrefs.SetString(DataController.JOYSTICK_CONTROL, DataController.JOYSTICK_CONTROL_RIGHT);
+
+        // need to do reset back to defaults
+
     }
     public void CallHome()
     {
@@ -104,6 +130,15 @@ public class Settings : MonoBehaviour
         }
     }
 
+    public void UpdatePickupsVolumeText()
+    {
+        pickupsVolText.text = Mathf.Round(pickupsVolSlider.value * 100f) / 100f + "";
+        if (pickupsIsPlaying)
+        {
+            _audio.volume = pickupsVolSlider.value;
+        }
+    }
+
     public void TestMusicVolume()
     {
         // is audio playing
@@ -129,10 +164,15 @@ public class Settings : MonoBehaviour
                     testStopExplosionsButton.GetComponentInChildren<Text>().text = "Test";
                     explosionsIsPlaying = false;
                 }
-                else
+                else if (wordsIsPlaying)
                 {
                     testStopWordsButton.GetComponentInChildren<Text>().text = "Test";
                     wordsIsPlaying = false;
+                }
+                else
+                {
+                    testStopPickupsButton.GetComponentInChildren<Text>().text = "Test";
+                    pickupsIsPlaying = false;
                 }
                 musicIsPlaying = true;
                 _audio.volume = musicVolSlider.value;
@@ -174,10 +214,15 @@ public class Settings : MonoBehaviour
                     testStopExplosionsButton.GetComponentInChildren<Text>().text = "Test";
                     explosionsIsPlaying = false;
                 }
-                else
+                else if (wordsIsPlaying)
                 {
                     testStopWordsButton.GetComponentInChildren<Text>().text = "Test";
                     wordsIsPlaying = false;
+                }
+                else
+                {
+                    testStopPickupsButton.GetComponentInChildren<Text>().text = "Test";
+                    pickupsIsPlaying = false;
                 }
 
                 _audio.volume = weaponsVolSlider.value;
@@ -220,10 +265,15 @@ public class Settings : MonoBehaviour
                 {
                     testStopWeaponsButton.GetComponentInChildren<Text>().text = "Test";
                     weaponsIsPlaying = false;
-                }else
+                }else if  (wordsIsPlaying)
                 {
                     testStopWordsButton.GetComponentInChildren<Text>().text = "Test";
                     wordsIsPlaying = false;
+                }
+                else
+                {
+                    testStopPickupsButton.GetComponentInChildren<Text>().text = "Test";
+                    pickupsIsPlaying = false;
                 }
 
                 _audio.volume = explosionsVolSlider.value;
@@ -265,10 +315,15 @@ public class Settings : MonoBehaviour
                     testStopWeaponsButton.GetComponentInChildren<Text>().text = "Test";
                     weaponsIsPlaying = false;
                 }
-                else
+                else if (wordsIsPlaying)
                 {
                     testStopExplosionsButton.GetComponentInChildren<Text>().text = "Test";
                     explosionsIsPlaying = false;
+                }
+                else
+                {
+                    testStopPickupsButton.GetComponentInChildren<Text>().text = "Test";
+                    pickupsIsPlaying = false;
                 }
                 _audio.volume = wordsVolSlider.value;
                 _audio.clip = Resources.Load<AudioClip>("Audio/level 1/away");
@@ -286,6 +341,54 @@ public class Settings : MonoBehaviour
             wordsIsPlaying = true;
 
             testStopWordsButton.GetComponentInChildren<Text>().text = "Stop";
+        }
+    }
+
+    public void TestPickupsVolume()
+    {
+        if (_audio.isPlaying) {
+            _audio.Stop();
+            if (pickupsIsPlaying)
+            {
+                testStopPickupsButton.GetComponentInChildren<Text>().text = "Test";
+                pickupsIsPlaying = false;
+            }
+            else
+            {
+                if (musicIsPlaying)
+                {
+                    testStopMusicButton.GetComponentInChildren<Text>().text = "Test";
+                    musicIsPlaying = false;
+                } else if (weaponsIsPlaying)
+                {
+                    testStopWeaponsButton.GetComponentInChildren<Text>().text = "Test";
+                    weaponsIsPlaying = false;
+                } else if (explosionsIsPlaying)
+                {
+                    testStopExplosionsButton.GetComponentInChildren<Text>().text = "Test";
+                    explosionsIsPlaying = false;
+                } else
+                {
+                    testStopWordsButton.GetComponentInChildren<Text>().text = "Test";
+                    wordsIsPlaying = false;
+                }
+
+                _audio.volume = pickupsVolSlider.value;
+                _audio.clip = Resources.Load<AudioClip>("Audio/health_pickup");
+                _audio.Play();
+                pickupsIsPlaying = true;
+
+                testStopPickupsButton.GetComponentInChildren<Text>().text = "Stop";
+            }
+        }
+        else
+        {
+            _audio.volume = pickupsVolSlider.value;
+            _audio.clip = Resources.Load<AudioClip>("Audio/health_pickup");
+            _audio.Play();
+            pickupsIsPlaying = true;
+
+            testStopPickupsButton.GetComponentInChildren<Text>().text = "Stop";
         }
     }
 }

@@ -50,9 +50,12 @@ public class MainMenu : MonoBehaviour
 
     public void CallSettings()
     {
-        SceneManager.LoadScene("SettingsMenu");
+        SceneManager.LoadScene("Settings");
     }
-
+    public void CallInfo()
+    {
+        SceneManager.LoadScene("Info");
+    }
     void Awake()
     {
         dataController = FindObjectOfType<DataController>();

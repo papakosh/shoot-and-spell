@@ -96,7 +96,7 @@ public class GameController : MonoBehaviour
     private bool maxRank;
     public GameObject[] messages;
     String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP"};
-    String[] pickupHeaders = { "RESTORE HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
+    String[] pickupHeaders = { "GAIN HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
     String[] pickupMsgs = { "Add 1 point to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
     String pickUpResume = "Tap Screen to Resume";
     bool levelUnlocked = false;
@@ -106,6 +106,9 @@ public class GameController : MonoBehaviour
     private bool incompleteLevel;
     private bool hasCompletedLevel = false;
     private int enemyShipsAllowed;
+
+    public GameObject joystickControlLeft;
+    public GameObject joystickControlRight;
 
     void Awake()
     {
@@ -179,6 +182,17 @@ public class GameController : MonoBehaviour
             case 9:
                 waveWait = dataController.gameData.waveWait - 2;
                 break;
+        }
+
+        if (PlayerPrefs.GetString(DataController.JOYSTICK_CONTROL).Equals(DataController.JOYSTICK_CONTROL_LEFT))
+        {
+            joystickControlRight.SetActive(false);
+            joystickControlLeft.SetActive(true);
+        }
+        else
+        {
+            joystickControlLeft.SetActive(false);
+            joystickControlRight.SetActive(true);
         }
     }
 
@@ -312,6 +326,7 @@ public class GameController : MonoBehaviour
 
     public void IncreaseHealth(float amt)
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         _audio.clip = healthPickup;
         _audio.Play();
 
@@ -370,6 +385,7 @@ public class GameController : MonoBehaviour
     }
     public void ArmorActivated()
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         _audio.clip = armorActivated;
         _audio.Play();
@@ -485,7 +501,7 @@ public class GameController : MonoBehaviour
                     // determine msg text
                     if (pickupNum == 0)
                     {
-                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health_pack");
+                        pickupHelpMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health");
                         pickupHelpMessage[1].GetComponent<Text>().text = pickupHeaders[0];
                         pickupHelpMessage[2].GetComponent<Text>().text = pickupMsgs[0];
                         pickupHelpMessage[3].GetComponent<Text>().text = pickUpResume;
@@ -1144,6 +1160,7 @@ public class GameController : MonoBehaviour
 
     public void TeleportActivated()
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         _audio.clip = teleportActivated;
         _audio.Play();
@@ -1151,6 +1168,7 @@ public class GameController : MonoBehaviour
 
     public void TeleportPickup()
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         teleportAbility = true;
         _audio.clip = teleportPickup;
@@ -1159,6 +1177,7 @@ public class GameController : MonoBehaviour
 
     public void ArmorPickup()
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         armorAbility = true;
         _audio.clip = armorPickup;
@@ -1173,6 +1192,7 @@ public class GameController : MonoBehaviour
 
     public void DualShotPickup()
     {
+        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         dualShotAbility = true;
         _audio.clip = dualShotPickup;

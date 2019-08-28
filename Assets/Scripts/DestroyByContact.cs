@@ -15,6 +15,7 @@ public class DestroyByContact : MonoBehaviour
     // Game object can be health pickup, shield pickup, double bolt pickup, teleport pickup, asteroids, letters and enemy
     void OnTriggerEnter(Collider other)
     {
+
         if (other.CompareTag("Boundary")) // Ignore any collisions with boundary
             return;
 
@@ -26,9 +27,11 @@ public class DestroyByContact : MonoBehaviour
                 GameController.instance.ProcessHit(gameObject.tag);
                 Destroy(gameObject);
                 Destroy(other.gameObject);
+                explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                 Instantiate(explosion, transform.position, transform.rotation);
             } else if (other.CompareTag("Player")){
                 Destroy(gameObject);
+                explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                 Instantiate(explosion, transform.position, transform.rotation);
                 if (GameController.instance.armorAbility)
                 {
@@ -40,6 +43,7 @@ public class DestroyByContact : MonoBehaviour
                     GameController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
+                        playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
                         GameController.instance.RoundLose();
@@ -96,6 +100,7 @@ public class DestroyByContact : MonoBehaviour
             Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
 
             Destroy(gameObject);
+            explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
             Instantiate(explosion, transform.position, transform.rotation);
 
             if (other.CompareTag("Bolt"))
@@ -115,6 +120,7 @@ public class DestroyByContact : MonoBehaviour
                     GameController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
+                        playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
                         GameController.instance.RoundLose();
@@ -132,13 +138,19 @@ public class DestroyByContact : MonoBehaviour
                 Destroy(gameObject);
                 Destroy(other.gameObject);
                 if (explosion != null)
+                {
+                    explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                     Instantiate(explosion, transform.position, transform.rotation);
+                }
             }
             else if (other.CompareTag("Player"))
             {
                 Destroy(gameObject);
                 if (explosion != null)
+                {
+                    explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                     Instantiate(explosion, transform.position, transform.rotation);
+                }
                 if (GameController.instance.armorAbility)
                 {
                     GameController.instance.ArmorActivated();
@@ -148,6 +160,7 @@ public class DestroyByContact : MonoBehaviour
                     GameController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
+                        playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
                         GameController.instance.RoundLose();
