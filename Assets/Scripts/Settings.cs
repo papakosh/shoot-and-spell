@@ -176,7 +176,7 @@ public class Settings : MonoBehaviour
                 }
                 musicIsPlaying = true;
                 _audio.volume = musicVolSlider.value;
-                _audio.clip = Resources.Load<AudioClip>("Audio/music_background");
+                _audio.clip = Resources.Load<AudioClip>("Audio/background_music");
                 _audio.Play();
                 testStopMusicButton.GetComponentInChildren<Text>().text = "Stop";
             }
@@ -184,7 +184,7 @@ public class Settings : MonoBehaviour
         else
         {
             _audio.volume = musicVolSlider.value;
-            _audio.clip = Resources.Load<AudioClip>("Audio/music_background");
+            _audio.clip = Resources.Load<AudioClip>("Audio/background_music");
             _audio.Play();
             musicIsPlaying = true;
 
@@ -277,7 +277,7 @@ public class Settings : MonoBehaviour
                 }
 
                 _audio.volume = explosionsVolSlider.value;
-                _audio.clip = Resources.Load<AudioClip>("Audio/explosion_asteroid");
+                _audio.clip = Resources.Load<AudioClip>("Audio/asteroid_explosion");
                 _audio.Play();
                 explosionsIsPlaying = true;
                 testStopExplosionsButton.GetComponentInChildren<Text>().text = "Stop";
@@ -286,7 +286,7 @@ public class Settings : MonoBehaviour
         else
         {
             _audio.volume = explosionsVolSlider.value;
-            _audio.clip = Resources.Load<AudioClip>("Audio/explosion_asteroid");
+            _audio.clip = Resources.Load<AudioClip>("Audio/asteroid_explosion");
             _audio.Play();
             explosionsIsPlaying = true;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BackgroundScroller : MonoBehaviour
 {
@@ -9,6 +7,7 @@ public class BackgroundScroller : MonoBehaviour
 
     private Vector3 startPosition;
     private AudioSource _audio;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,11 +19,15 @@ public class BackgroundScroller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Calculate the new position of the background
-        //Using Mathf.Repeat, loop the value Time.time * scrollSpeed over tileSizeZ until the value is at zero or greater than length (then start over)
-        float newPosition = Mathf.Repeat(Time.time * scrollSpeed, tileSizeZ);
+        ScrollBackgroundToNextPosition();
+    }
 
-        //Set new position in transform to be: start positiom (likely 0) + 1 * new position
-        transform.position = startPosition + Vector3.forward * newPosition;
+    private void ScrollBackgroundToNextPosition()
+    {
+        // Calculates next position using Mathf.Repeat where t is negative and length is added to t until the result is between zero and length
+        float nextPosition = Mathf.Repeat(Time.time * scrollSpeed, tileSizeZ);
+
+        // Move transform forward to next position
+        transform.position = startPosition + Vector3.forward * nextPosition;
     }
 }

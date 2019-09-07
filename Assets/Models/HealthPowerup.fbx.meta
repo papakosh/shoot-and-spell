@@ -7,8 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: boxHealthMaterial
+    second: {fileID: 2100000, guid: f5134449c48b3ec43a479578be5b224e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: box_health_mat2Material
-    second: {fileID: 2100000, guid: 1837c710254a2e24d85e46364b833129, type: 2}
+    second: {fileID: 2100000, guid: f5134449c48b3ec43a479578be5b224e, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

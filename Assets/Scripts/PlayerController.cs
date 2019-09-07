@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         canFire = true;
-        CalibrateAccelerometer();
+        //CalibrateAccelerometer();
     }
 
 
@@ -67,8 +67,8 @@ public class PlayerController : MonoBehaviour
         {
             if (GameController.instance.dualShotAbility)
             {
-                Instantiate(shot, shotSpawnDual1.position, shotSpawnDual1.rotation);
-                Instantiate(shot, shotSpawnDual2.position, shotSpawnDual2.rotation);
+                Instantiate(shot, shotSpawnDual1.position, Quaternion.Euler(0, 0, 0));
+                Instantiate(shot, shotSpawnDual2.position, Quaternion.Euler(0, 0, 0));
 
                 _audio.clip = doubleShot;
                 _audio.Play();
@@ -78,7 +78,8 @@ public class PlayerController : MonoBehaviour
             else
             {
                 _audio.clip = singleShot;
-                Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+                //Debug.Log("Shot Spawn position is " + shotSpawn.position);
+                Instantiate(shot, shotSpawn.position, Quaternion.Euler (0, 0, 0));
             }
             
             canFire = false;
@@ -104,7 +105,7 @@ public class PlayerController : MonoBehaviour
             0.0f,
             Mathf.Clamp(rb.position.z, boundary.zMin, boundary.zMax));
 
-        rb.rotation = Quaternion.Euler(0.0f, 0.0f, rb.velocity.x * -tiltModifier);
+        rb.rotation = Quaternion.Euler(90.0f, 0.0f, rb.velocity.x * -tiltModifier);
     }
 
     void CalibrateAccelerometer()

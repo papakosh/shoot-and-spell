@@ -96,7 +96,7 @@ public class GameController : MonoBehaviour
     private bool maxRank;
     public GameObject[] messages;
     String[] endOfRoundMsgs = {"x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP"};
-    String[] pickupHeaders = { "GAIN HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
+    String[] pickupHeaders = { "HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
     String[] pickupMsgs = { "Add 1 point to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
     String pickUpResume = "Tap Screen to Resume";
     bool levelUnlocked = false;
