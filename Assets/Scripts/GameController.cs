@@ -1145,13 +1145,15 @@ public class GameController : MonoBehaviour
         {
             if (player != null && player.activeSelf)
             {
-                player.GetComponent<Renderer>().material.color = slowDownColor;
+                player.transform.GetChild(0).gameObject.SetActive(false);
+                //player.GetComponent<Renderer>().material.color = slowDownColor;
                 yield return new WaitForSeconds(slowFlashDelay);
             }
            
             if (player != null && player.activeSelf)
             {
-                player.GetComponent<Renderer>().material.color = normalColor;
+                //player.GetComponent<Renderer>().material.color = normalColor;
+                player.transform.GetChild(0).gameObject.SetActive(true);
                 yield return new WaitForSeconds(slowFlashDelay);
             }
            

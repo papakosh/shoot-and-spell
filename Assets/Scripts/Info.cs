@@ -54,13 +54,9 @@ public class Info : MonoBehaviour
     {
         Application.OpenURL("https://opengameart.org/users/jalastram");
     }
-    public void VisitFlocabulary()
+    public void VisitThorChristopherArisland()
     {
-        Application.OpenURL("https://flocabulary.com");
-    }
-    public void VisitKidzone()
-    {
-        Application.OpenURL("https://kidzone.ws");
+        Application.OpenURL("https://opengameart.org/users/tcarisland");
     }
     public void VisitDanSchuller()
     {
