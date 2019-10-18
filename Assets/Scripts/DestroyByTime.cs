@@ -1,7 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/**
+ * Description: Destroy attached game object after a specified time
+ * 
+ * Details: Start calls Destroy on the attached game object and
+ * destroys it after a specified time.
+ */
 public class DestroyByTime : MonoBehaviour
 {
     public float lifetime;

@@ -1,13 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/**
+ * Description: Destroy any game object leaving the boundaries of 
+ * the game.
+ * 
+ * Details: OnTriggerExit calls Destroy on exiting game object
+ */
 public class DestroyByBoundary : MonoBehaviour
 {
     private void OnTriggerExit(Collider other)
     {
-        //if (other.CompareTag("Health"))
-          //  Debug.Log("Contact with Boundary");
            Destroy(other.gameObject);
     }
 }

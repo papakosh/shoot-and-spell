@@ -43,9 +43,9 @@ public class DataController : MonoBehaviour
     private string playerDataFilename = "player.json";
 
     // Volume defaults
-    private float musicVolDefault = 0.25f;
-    private float weaponsVolDefault = 0.6f;
-    private float explosionsVolDefault = 0.6f;
+    private float musicVolDefault = 0.05f;
+    private float weaponsVolDefault = 0.2f;
+    private float explosionsVolDefault = 0.5f;
     private float wordsVolDefault = 1.0f;
     private float pickupsVolDefault = 0.5f;
 

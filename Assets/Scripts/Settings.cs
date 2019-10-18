@@ -326,7 +326,7 @@ public class Settings : MonoBehaviour
                     pickupsIsPlaying = false;
                 }
                 _audio.volume = wordsVolSlider.value;
-                _audio.clip = Resources.Load<AudioClip>("Audio/level 1/away");
+                _audio.clip = Resources.Load<AudioClip>("Audio/level 1/balloon");
                 _audio.Play();
                 wordsIsPlaying = true;
 
@@ -336,7 +336,7 @@ public class Settings : MonoBehaviour
         else
         {
             _audio.volume = wordsVolSlider.value;
-            _audio.clip = Resources.Load<AudioClip>("Audio/level 1/away");
+            _audio.clip = Resources.Load<AudioClip>("Audio/level 1/balloon");
             _audio.Play();
             wordsIsPlaying = true;
 
