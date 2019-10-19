@@ -4,7 +4,7 @@
  * Description: Destroy any game object leaving the boundaries of 
  * the game.
  * 
- * Details: OnTriggerExit calls Destroy on exiting game object
+ * Details: OnTriggerExit calls Destroy on the exiting game object
  */
 public class DestroyByBoundary : MonoBehaviour
 {

@@ -695,7 +695,7 @@ public class GameController : MonoBehaviour
     {
         WordData[] words = dataController.gameData.allLevelData[currentGameLevel].words;
         targetWordIndex = UnityEngine.Random.Range(0, words.Length);
-        return words[targetWordIndex].word;
+        return words[targetWordIndex].text;
     }
 
     private void CalculateWordScore()

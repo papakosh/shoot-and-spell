@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 /**
- * Description: Destroy attached game object after a specified time
+ * Description: Destroy the associated game object after a specified time
  * 
- * Details: Start calls Destroy on the attached game object and
+ * Details: Start calls Destroy on the asscoiated game object and
  * destroys it after a specified time.
  */
 public class DestroyByTime : MonoBehaviour
