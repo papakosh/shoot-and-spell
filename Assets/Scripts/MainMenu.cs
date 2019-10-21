@@ -44,7 +44,7 @@ public class MainMenu : MonoBehaviour
     private Color chosenColor = new Color32(212, 175, 55, 255);
 
     private DataController dataController;
-    private LevelOfDifficulty currentDifficulty;
+    private Difficulty currentDifficulty;
 
     private AudioSource _audio;
 
@@ -87,7 +87,7 @@ public class MainMenu : MonoBehaviour
         level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
         level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
 
-        List<string> completedLevelList = currentDifficulty.level1Completed;
+        List<string> completedLevelList = currentDifficulty.level1CompletedWords;
         if (level1Progress != null && level1Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[0].words.Length;
@@ -98,7 +98,7 @@ public class MainMenu : MonoBehaviour
             level1ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList2 = currentDifficulty.level2Completed;
+        List<string> completedLevelList2 = currentDifficulty.level2CompletedWords;
         if (level2Progress != null && level2Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[1].words.Length;
@@ -111,7 +111,7 @@ public class MainMenu : MonoBehaviour
             level2ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList3 = currentDifficulty.level3Completed;
+        List<string> completedLevelList3 = currentDifficulty.level3CompletedWords;
         if (level3Progress != null && level3Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[2].words.Length;
@@ -124,7 +124,7 @@ public class MainMenu : MonoBehaviour
             level3ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList4 = currentDifficulty.level4Completed;
+        List<string> completedLevelList4 = currentDifficulty.level4CompletedWords;
         if (level4Progress != null && level4Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[3].words.Length;
@@ -137,7 +137,7 @@ public class MainMenu : MonoBehaviour
             level4ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList5 = currentDifficulty.level5Completed;
+        List<string> completedLevelList5 = currentDifficulty.level5CompletedWords;
         if (level5Progress != null && level5Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[4].words.Length;
@@ -150,7 +150,7 @@ public class MainMenu : MonoBehaviour
             level5ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList6 = currentDifficulty.level6Completed;
+        List<string> completedLevelList6 = currentDifficulty.level6CompletedWords;
         if (level6Progress != null && level6Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[5].words.Length;
@@ -163,7 +163,7 @@ public class MainMenu : MonoBehaviour
             level6ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList7 = currentDifficulty.level7Completed;
+        List<string> completedLevelList7 = currentDifficulty.level7CompletedWords;
         if (level7Progress != null && level7Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[6].words.Length;
@@ -176,7 +176,7 @@ public class MainMenu : MonoBehaviour
             level7ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList8 = currentDifficulty.level8Completed;
+        List<string> completedLevelList8 = currentDifficulty.level8CompletedWords;
         if (level8Progress != null && level8Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[7].words.Length;
@@ -189,7 +189,7 @@ public class MainMenu : MonoBehaviour
             level8ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList9 = currentDifficulty.level9Completed;
+        List<string> completedLevelList9 = currentDifficulty.level9CompletedWords;
         if (level9Progress != null && level9Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[8].words.Length;
@@ -202,7 +202,7 @@ public class MainMenu : MonoBehaviour
             level9ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList10 = currentDifficulty.level10Completed;
+        List<string> completedLevelList10 = currentDifficulty.level10CompletedWords;
         if (level10Progress != null && level10Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[9].words.Length;
@@ -238,7 +238,7 @@ public class MainMenu : MonoBehaviour
         level9.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[8];
         level10.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[9];
 
-        List<string> completedLevelList = currentDifficulty.level1Completed;
+        List<string> completedLevelList = currentDifficulty.level1CompletedWords;
         if (level1Progress != null && level1Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[0].words.Length;
@@ -249,7 +249,7 @@ public class MainMenu : MonoBehaviour
             level1ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList2 = currentDifficulty.level2Completed;
+        List<string> completedLevelList2 = currentDifficulty.level2CompletedWords;
         if (level2Progress != null && level2Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[1].words.Length;
@@ -262,7 +262,7 @@ public class MainMenu : MonoBehaviour
             level2ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList3 = currentDifficulty.level3Completed;
+        List<string> completedLevelList3 = currentDifficulty.level3CompletedWords;
         if (level3Progress != null && level3Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[2].words.Length;
@@ -275,7 +275,7 @@ public class MainMenu : MonoBehaviour
             level3ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList4 = currentDifficulty.level4Completed;
+        List<string> completedLevelList4 = currentDifficulty.level4CompletedWords;
         if (level4Progress != null && level4Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[3].words.Length;
@@ -288,7 +288,7 @@ public class MainMenu : MonoBehaviour
             level4ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList5 = currentDifficulty.level5Completed;
+        List<string> completedLevelList5 = currentDifficulty.level5CompletedWords;
         if (level5Progress != null && level5Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[4].words.Length;
@@ -301,7 +301,7 @@ public class MainMenu : MonoBehaviour
             level5ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList6 = currentDifficulty.level6Completed;
+        List<string> completedLevelList6 = currentDifficulty.level6CompletedWords;
         if (level6Progress != null && level6Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[5].words.Length;
@@ -314,7 +314,7 @@ public class MainMenu : MonoBehaviour
             level6ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList7 = currentDifficulty.level7Completed;
+        List<string> completedLevelList7 = currentDifficulty.level7CompletedWords;
         if (level7Progress != null && level7Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[6].words.Length;
@@ -327,7 +327,7 @@ public class MainMenu : MonoBehaviour
             level7ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList8 = currentDifficulty.level8Completed;
+        List<string> completedLevelList8 = currentDifficulty.level8CompletedWords;
         if (level8Progress != null && level8Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[7].words.Length;
@@ -340,7 +340,7 @@ public class MainMenu : MonoBehaviour
             level8ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList9 = currentDifficulty.level9Completed;
+        List<string> completedLevelList9 = currentDifficulty.level9CompletedWords;
         if (level9Progress != null && level9Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[8].words.Length;
@@ -353,7 +353,7 @@ public class MainMenu : MonoBehaviour
             level9ProgressText.text = progressValue;
         }
 
-        List<string> completedLevelList10 = currentDifficulty.level10Completed;
+        List<string> completedLevelList10 = currentDifficulty.level10CompletedWords;
         if (level10Progress != null && level10Progress.isActiveAndEnabled)
         {
             int totalNumberOfWords = dataController.gameData.allLevelData[9].words.Length;

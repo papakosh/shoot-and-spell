@@ -10,7 +10,7 @@ public class DataController : MonoBehaviour
 {
     public GameData gameData;
     public PlayerData playerData;
-    public LevelOfDifficulty currentDifficulty;
+    public Difficulty currentDifficulty;
 
     // Rank Constants
     public const int RECRUIT_RANK = 0;
@@ -65,30 +65,30 @@ public class DataController : MonoBehaviour
         switch (levelIndex)
         {
             case 0:
-                return currentDifficulty.level1Completed;
+                return currentDifficulty.level1CompletedWords;
             case 1:
-                return currentDifficulty.level2Completed;
+                return currentDifficulty.level2CompletedWords;
             case 2:
-                return currentDifficulty.level3Completed;
+                return currentDifficulty.level3CompletedWords;
             case 3:
-                return currentDifficulty.level4Completed;
+                return currentDifficulty.level4CompletedWords;
             case 4:
-                return currentDifficulty.level5Completed;
+                return currentDifficulty.level5CompletedWords;
             case 5:
-                return currentDifficulty.level6Completed;
+                return currentDifficulty.level6CompletedWords;
             case 6:
-                return currentDifficulty.level7Completed;
+                return currentDifficulty.level7CompletedWords;
             case 7:
-                return currentDifficulty.level8Completed;
+                return currentDifficulty.level8CompletedWords;
             case 8:
-                return currentDifficulty.level9Completed;
+                return currentDifficulty.level9CompletedWords;
             case 9:
-                return currentDifficulty.level10Completed;
+                return currentDifficulty.level10CompletedWords;
             default:
                 return null;
         }
     }
-    public LevelOfDifficulty GetCurrentDifficulty()
+    public Difficulty GetCurrentDifficulty()
     {
         switch (playerData.difficultySelected)
         {
@@ -105,18 +105,18 @@ public class DataController : MonoBehaviour
 
     public int GetPlayerRank()
     {
-        return currentDifficulty.rank;
+        return currentDifficulty.playerRank;
     }
 
     public int GetPlayerXP()
     {
-        return currentDifficulty.xp;
+        return currentDifficulty.playerXP;
     }
 
     public void SavePlayerProgress(int rank, int xp, int levelIndex, string word)
     {
-        currentDifficulty.rank = rank;
-        currentDifficulty.xp = xp;
+        currentDifficulty.playerRank = rank;
+        currentDifficulty.playerXP = xp;
 
         List<string> levelCompleted = getCompletedLevelList(levelIndex);
         if (!levelCompleted.Contains(word))

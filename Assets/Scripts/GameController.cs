@@ -55,7 +55,7 @@ public class GameController : MonoBehaviour
     private AudioSource _audio;
     private AudioClip wordClip;
     private int currentRank;
-    private LevelOfDifficulty currentDifficulty;
+    private Difficulty currentDifficulty;
 
     private int experiencePoints;
     private int xpAdded;
@@ -155,13 +155,13 @@ public class GameController : MonoBehaviour
         if (completedLevelList.Count < dataController.gameData.allLevelData[currentGameLevel].words.Length)
             incompleteLevel = true;
 
-        levelCompleteBonus = dataController.gameData.allLevelData[currentGameLevel].compXPBonus;
-        rankXPModifier = dataController.gameData.rankXPModifier;
-        rankBaseXP = dataController.gameData.rankBaseXP;
+        levelCompleteBonus = dataController.gameData.allLevelData[currentGameLevel].completionBonus;
+        rankXPModifier = dataController.gameData.xpModifier;
+        rankBaseXP = dataController.gameData.baseXP;
        
         // adjust spawn wait for level difficulty
         if (currentGameLevel > 0)
-            spawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnDecrement * currentGameLevel);
+            spawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * currentGameLevel);
 
         // adjust wave wait for level difficulty
         switch (currentGameLevel)
