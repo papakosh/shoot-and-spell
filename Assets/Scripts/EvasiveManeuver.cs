@@ -10,7 +10,7 @@ public class EvasiveManeuver : MonoBehaviour
     public Vector2 startWait;
     public Vector2 maneuverTime;
     public Vector2 maneuverWait;
-    public Boundary boundary;
+    public GameBoundary gameBoundary;
 
     private float currentSpeed;
     private float targetManeuver;
@@ -43,9 +43,9 @@ public class EvasiveManeuver : MonoBehaviour
         float newManeuver = Mathf.MoveTowards(rb.velocity.x, targetManeuver, Time.deltaTime*smoothing);
         rb.velocity = new Vector3(newManeuver, 0.0f, currentSpeed);
         rb.position = new Vector3(
-            Mathf.Clamp(rb.position.x, boundary.xMin, boundary.xMax),
+            Mathf.Clamp(rb.position.x, gameBoundary.xMin, gameBoundary.xMax),
             0.0f, 
-            Mathf.Clamp(rb.position.z, boundary.zMin, boundary.zMax));
+            Mathf.Clamp(rb.position.z, gameBoundary.zMin, gameBoundary.zMax));
 
         rb.rotation = Quaternion.Euler(0.0f, 0.0f, rb.velocity.x * -tilt);
     }

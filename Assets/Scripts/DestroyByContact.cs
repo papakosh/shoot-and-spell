@@ -33,14 +33,16 @@ public class DestroyByContact : MonoBehaviour
                 Destroy(gameObject);
                 explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                 Instantiate(explosion, transform.position, transform.rotation);
-                if (GameController.instance.armorAbility)
+                if (PlayerController.instance.canAbsorbDamage) //GameController.instance.armorAbility
                 {
-                    GameController.instance.ArmorActivated();
+                    //GameController.instance.ArmorActivated();
+                    PlayerController.instance.AbsorbDamage();
                     GameController.instance.ProcessHit(gameObject.tag);
                 }
                 else
                 {
-                    GameController.instance.DecreaseHealth(damage);
+                    //GameController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -58,7 +60,8 @@ public class DestroyByContact : MonoBehaviour
                 return;
             else if (other.CompareTag("Player"))
             {
-                GameController.instance.IncreaseHealth(damage);
+                //GameController.instance.IncreaseHealth(damage);
+                PlayerController.instance.IncreaseHealth(damage);
                 Destroy(gameObject);
                 return;
             }
@@ -67,7 +70,8 @@ public class DestroyByContact : MonoBehaviour
             if (other.CompareTag("Bolt") || other.CompareTag("Enemy") || other.CompareTag("Hazard"))
                 return;
             else if (other.CompareTag("Player")) {
-                GameController.instance.DualShotPickup();
+                //GameController.instance.DualShotPickup();
+                PlayerController.instance.PickupDualShot();
                 Destroy(gameObject);
                 return;
             }
@@ -77,7 +81,8 @@ public class DestroyByContact : MonoBehaviour
                 return;
             else if (other.CompareTag("Player"))
             {
-                GameController.instance.ArmorPickup();
+                //GameController.instance.ArmorPickup();
+                PlayerController.instance.PickupArmor();
                 Destroy(gameObject);
                 return;
             }
@@ -87,7 +92,8 @@ public class DestroyByContact : MonoBehaviour
                 return;
             else if (other.CompareTag("Player"))
             {
-                GameController.instance.TeleportPickup();
+                //GameController.instance.TeleportPickup();
+                PlayerController.instance.PickupTeleport();
                 Destroy(gameObject);
                 return;
             }
@@ -111,13 +117,15 @@ public class DestroyByContact : MonoBehaviour
             }
             else if (other.CompareTag("Player"))
             {
-                if (GameController.instance.armorAbility)
+                if (PlayerController.instance.canAbsorbDamage) //GameController.instance.armorAbility
                 {
-                    GameController.instance.ArmorActivated();
+                    //GameController.instance.ArmorActivated();
+                    PlayerController.instance.AbsorbDamage();
                 }
                 else
                 {
-                    GameController.instance.DecreaseHealth(damage);
+                    //GameController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -151,13 +159,15 @@ public class DestroyByContact : MonoBehaviour
                     explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                     Instantiate(explosion, transform.position, transform.rotation);
                 }
-                if (GameController.instance.armorAbility)
+                if (PlayerController.instance.canAbsorbDamage) //GameController.instance.armorAbility
                 {
-                    GameController.instance.ArmorActivated();
+                    //GameController.instance.ArmorActivated();
+                    PlayerController.instance.AbsorbDamage();
                 }
                 else
                 {
-                    GameController.instance.DecreaseHealth(damage);
+                    // GameController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.DecreaseHealth(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);

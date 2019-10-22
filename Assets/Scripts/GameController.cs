@@ -32,10 +32,10 @@ public class GameController : MonoBehaviour
     public GameObject background;
 
     public AudioClip healthPickup;
-    public AudioClip teleportPickup;
-    public AudioClip armorPickup;
-    public AudioClip armorActivated;
-    public AudioClip teleportActivated;
+    //public AudioClip teleportPickup;
+    //public AudioClip armorPickup;
+    //public AudioClip armorActivated;
+    //public AudioClip teleportActivated;
     public AudioClip dualShotPickup;
 
     private DataController dataController;
@@ -67,15 +67,15 @@ public class GameController : MonoBehaviour
     private Color slowDownColor = Color.black;
 
     // player performance
-    private float health = 1;
-    private float healthMax = 1;
+    //private float health = 1;
+    //private float healthMax = 1;
 
-    [HideInInspector]
-    public bool dualShotAbility;
-    [HideInInspector]
-    public bool armorAbility;
-    [HideInInspector]
-    public bool teleportAbility;
+    //[HideInInspector]
+    //public bool dualShotAbility;
+    //[HideInInspector]
+    //public bool armorAbility;
+    //[HideInInspector]
+    //public bool teleportAbility;
 
     public float flashDelay = 0.125f;
     public float slowFlashDelay = 0.25f;
@@ -83,7 +83,7 @@ public class GameController : MonoBehaviour
     [HideInInspector]
     public bool isDead;
     [HideInInspector]
-    public bool isPaused;
+    public bool isGamePaused;
     public GameObject hangarButton;
 
     private float playerStreak = 0f;
@@ -127,14 +127,18 @@ public class GameController : MonoBehaviour
         experiencePoints = dataController.GetPlayerXP();
         currentRank = dataController.GetPlayerRank();
         currentDifficulty = dataController.GetCurrentDifficulty();
-        healthMax = GetHealthMax();
+        //healthMax = GetHealthMax();
+        PlayerController.instance.maxHealth = GetHealthMax();
         if (PlayerPrefs.HasKey("PlayerHealth"))
         {
-            health = PlayerPrefs.GetFloat("PlayerHealth");
+            //health = PlayerPrefs.GetFloat("PlayerHealth");
+            PlayerController.instance.currentHealth = PlayerPrefs.GetFloat("PlayerHealth");
+
         }
         else
         {
-            health = healthMax;
+            //health = healthMax;
+            PlayerController.instance.currentHealth = PlayerController.instance.maxHealth;
         }
         hangarButton.GetComponent<Button>().interactable = false;
         SetLevelBackground();
@@ -216,21 +220,23 @@ public class GameController : MonoBehaviour
         RefreshUI();
         if (PlayerPrefs.HasKey("DualShot"))
         {
-            dualShotAbility = true;
+            //dualShotAbility = true;
+            
             dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         }
         if (PlayerPrefs.HasKey("Armor"))
         {
-            armorAbility = true;
+            //armorAbility = true;
             armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         }
         if (PlayerPrefs.HasKey("Teleport"))
         {
-            teleportAbility = true;
+            //teleportAbility = true;
+            PlayerController.instance.canTeleport = true;
             teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         }
         gameOver = false;
-        isPaused = true;
+        isGamePaused = true;
         levelXPModifier = currentGameLevel + 1;
         UIRoundBegin.SetActive(true);
         player.SetActive(false);
@@ -252,7 +258,7 @@ public class GameController : MonoBehaviour
         
         UIRoundBegin.SetActive(false);
         player.SetActive(true);
-        isPaused = false;
+        isGamePaused = false;
     }
 
     // Update is called once per frame
@@ -260,9 +266,9 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (!isPaused)
+            if (!isGamePaused)
             {
-                isPaused = true;
+                isGamePaused = true;
                 Time.timeScale = 0f;
                 //button_hangar_active
                 hangarButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar_active");
@@ -276,7 +282,7 @@ public class GameController : MonoBehaviour
                 pickupHelpMessage[1].SetActive(false);
                 pickupHelpMessage[2].SetActive(false);
                 pickupHelpMessage[3].SetActive(false);
-                isPaused = false;
+                isGamePaused = false;
                 Time.timeScale = 1f;
             }
         }
@@ -321,10 +327,10 @@ public class GameController : MonoBehaviour
         pickupHelpMessage[3].SetActive(false);
         PlayerPrefs.SetInt("InRound", 1);
         _audio.clip = wordClip;
-        isPaused = false;
+        isGamePaused = false;
     }
 
-    public void IncreaseHealth(float amt)
+   /* public void IncreaseHealth(float amt)
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         _audio.clip = healthPickup;
@@ -342,9 +348,9 @@ public class GameController : MonoBehaviour
         }
         StartCoroutine(HandleHealthText(3, amt, false));
         RefreshHealthBar();
-    }
+    }*/   
 
-    public void DecreaseHealth(float damageAmt)
+   /* public void DecreaseHealth(float damageAmt)
     {
         if (health > 0.5f)
         {
@@ -364,7 +370,7 @@ public class GameController : MonoBehaviour
 
         StartCoroutine(HandleHealthText(3, damageAmt, true));
         RefreshHealthBar();
-    }
+    }*/
 
     public IEnumerator HandleHealthText(int delay, float amt, bool damage)
     {
@@ -383,20 +389,23 @@ public class GameController : MonoBehaviour
         healthChangedText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
         healthChangedText.SetActive(false);
     }
-    public void ArmorActivated()
+   /* public void ArmorActivated()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         _audio.clip = armorActivated;
         _audio.Play();
         StartCoroutine(ArmorAbilityOn());
+        PlayerController.instance.canAbsorbDamage = false;
         armorAbility = false;
-    }
+    }*/
 
     public void LevelUp()
     {
-        healthMax = GetHealthMax();
-        health = healthMax;
+        //healthMax = GetHealthMax();
+        PlayerController.instance.maxHealth = GetHealthMax();
+        PlayerController.instance.currentHealth = PlayerController.instance.maxHealth;
+        //health = healthMax;
         PlayerPrefs.DeleteKey("PlayerHealth");
     }
 
@@ -469,7 +478,7 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                StartCoroutine(DecreaseSpeed());
+                StartCoroutine(PlayerController.instance.DecreaseSpeed());
                 StartCoroutine(SlowDownEffect());
             }
         }
@@ -542,7 +551,7 @@ public class GameController : MonoBehaviour
                         pickupHelpMessage[i].SetActive(true);
                     }
                     //pickupHelpMessage.SetActive(true);
-                    isPaused = true;
+                    isGamePaused = true;
                     Time.timeScale = 0f; // freeze game
                 }
                 else
@@ -591,13 +600,17 @@ public class GameController : MonoBehaviour
             xpAddedText.SetActive(true);
         }
 
-        RefreshHealthBar();
+        //RefreshHealthBar();
+        healthBar.maxValue = PlayerController.instance.maxHealth;
+        healthBar.value = PlayerController.instance.currentHealth;
     }
 
-    private void RefreshHealthBar()
+    public void RefreshHealthBar(float amt, bool isDamaged)
     {
-        healthBar.maxValue = healthMax;
-        healthBar.value = health;
+        StartCoroutine(HandleHealthText(3, amt, isDamaged));
+
+        healthBar.maxValue = PlayerController.instance.maxHealth;
+        healthBar.value = PlayerController.instance.currentHealth;
     }
 
     private float GetHealthMax()
@@ -807,15 +820,15 @@ public class GameController : MonoBehaviour
         StartCoroutine(EndOfRoundStats());
 
         PlayerPrefs.SetFloat("PlayerStreak", playerStreak + streakModifier);
-        if (dualShotAbility)
+        if (PlayerController.instance.canFireDualShot) //dualShotAbility
             PlayerPrefs.SetInt("DualShot", 1);
         else
             PlayerPrefs.DeleteKey("DualShot");
-        if (armorAbility)
+        if (PlayerController.instance.canAbsorbDamage) //armorAbility
             PlayerPrefs.SetInt("Armor", 1);
         else
             PlayerPrefs.DeleteKey("Armor");
-        if (teleportAbility)
+        if (PlayerController.instance.canTeleport)//teleportAbility
             PlayerPrefs.SetInt("Teleport", 1);
         else
             PlayerPrefs.DeleteKey("Teleport");
@@ -1100,14 +1113,14 @@ public class GameController : MonoBehaviour
         return targetIndices;
     }
 
-    IEnumerator DecreaseSpeed()
+   /* IEnumerator DecreaseSpeed()
     {
-        PlayerController.instance.speed = PlayerController.instance.speed / 2;
+        PlayerController.instance.currentSpeed = PlayerController.instance.currentSpeed / 2;
         yield return new WaitForSeconds(3.0f);
-        PlayerController.instance.speed = PlayerController.instance.originalSpeed;
-    }
+        PlayerController.instance.currentSpeed = PlayerController.instance.maxSpeed;
+    }*/
 
-    IEnumerator BeenHit()
+   public IEnumerator BeenHit()
     {
         if (player != null && player.activeSelf)
         {
@@ -1127,7 +1140,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public IEnumerator ArmorAbilityOn()
+    public IEnumerator ArmorActivated()
     {
         for (int i = 1; i <= timesToFlash; i++)
         {
@@ -1160,46 +1173,71 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void TeleportActivated()
+    public void UpdateTeleportStatusIcon(String newStatus)
+    {
+        if ("ACTIVE".Equals(newStatus))
+            teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        else
+            teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+    }
+
+   /* public void TeleportActivated()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         _audio.clip = teleportActivated;
         _audio.Play();
-    }
+    }*/
 
-    public void TeleportPickup()
+    /*public void TeleportPickup()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         teleportAbility = true;
+        PlayerController.instance.canTeleport = true;
         _audio.clip = teleportPickup;
         _audio.Play();
-    }
+    }*/
 
-    public void ArmorPickup()
+    public void UpdateArmorStatusIcon(String newStatus)
+    {
+        if ("ACTIVE".Equals(newStatus))
+            armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        else
+            armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+    }
+    /*public void ArmorPickup()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         armorAbility = true;
+        PlayerController.instance.canAbsorbDamage = true;
         _audio.clip = armorPickup;
         _audio.Play();
-    }
+    }*/
 
-    public void ResetDualShot()
+    /*public void ResetDualShot()
     {
         dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
         dualShotAbility = false;
+    }*/
+
+    public void UpdateDualShotStatusIcon(String newStatus)
+    {
+        if ("ACTIVE".Equals(newStatus))
+            dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+        else
+            dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
     }
 
-    public void DualShotPickup()
+    /*public void DualShotPickup()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
         dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
         dualShotAbility = true;
         _audio.clip = dualShotPickup;
         _audio.Play();
-    }
+    }*/
 
     IEnumerator SpawnWaves()
     {
@@ -1297,6 +1335,7 @@ public class GameController : MonoBehaviour
     private void OnDestroy()
     {
         if (!isDead)
-            PlayerPrefs.SetFloat("PlayerHealth", health);
+            //PlayerPrefs.SetFloat("PlayerHealth", health);
+            PlayerPrefs.SetFloat("PlayerHealth", PlayerController.instance.currentHealth);
     }
 }
