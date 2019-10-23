@@ -1154,7 +1154,7 @@ public class GameController : MonoBehaviour
 
     public IEnumerator SlowDownEffect()
     {
-        for (int i = 1; i <= timesToFlash; i++)
+        for (int i = 1; i <= timesToFlash*2; i++)
         {
             if (player != null && player.activeSelf)
             {

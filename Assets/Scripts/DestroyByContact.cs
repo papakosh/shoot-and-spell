@@ -42,7 +42,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     //GameController.instance.DecreaseHealth(damage);
-                    PlayerController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.TakeDamage(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -61,7 +61,7 @@ public class DestroyByContact : MonoBehaviour
             else if (other.CompareTag("Player"))
             {
                 //GameController.instance.IncreaseHealth(damage);
-                PlayerController.instance.IncreaseHealth(damage);
+                PlayerController.instance.PickupHealth(damage);
                 Destroy(gameObject);
                 return;
             }
@@ -125,7 +125,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     //GameController.instance.DecreaseHealth(damage);
-                    PlayerController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.TakeDamage(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -167,7 +167,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     // GameController.instance.DecreaseHealth(damage);
-                    PlayerController.instance.DecreaseHealth(damage);
+                    PlayerController.instance.TakeDamage(damage);
                     if (GameController.instance.isDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
