@@ -7,13 +7,13 @@
  */
 public class Movement : MonoBehaviour
 {
-    public float speed;
+    public float speedZ;
 
     // Start is called before the first frame update
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.velocity = transform.forward * speed;
+        rb.velocity = transform.forward * speedZ;
     }
 
 }

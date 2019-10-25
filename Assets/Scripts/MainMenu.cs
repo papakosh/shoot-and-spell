@@ -69,7 +69,7 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        currentDifficulty = dataController.GetCurrentDifficulty();
+        currentDifficulty = dataController.currentDifficulty;
         PlayerPrefs.DeleteKey("PlayerHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
         PlayerPrefs.DeleteKey("DualShot");
@@ -226,7 +226,7 @@ public class MainMenu : MonoBehaviour
 
     private void UpdateLevelDisplay()
     {
-        currentDifficulty = dataController.GetCurrentDifficulty();
+        currentDifficulty = dataController.currentDifficulty;
         level1.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[0];
         level2.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[1];
         level3.GetComponent<Button>().interactable = currentDifficulty.levelsUnlocked[2];

@@ -48,7 +48,7 @@ public class GameController : MonoBehaviour
             "J", "K", "L", "M", "N", "O", "P", "Q", "R","S", "T", "U", "V", "W", "X", "Y", "Z"
         };
 
-    private String difficulty;
+    //private String difficulty;
     private GameObject[] debrisArray;
     private int targetIndex;
     private int[] targetIndices;
@@ -123,10 +123,10 @@ public class GameController : MonoBehaviour
         currentGameLevel = PlayerPrefs.GetInt("Level");
         targetWord = RandomWord();
         wordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[currentGameLevel].words[targetWordIndex].audioPath);
-        difficulty = dataController.playerData.difficultySelected;
-        experiencePoints = dataController.GetPlayerXP();
-        currentRank = dataController.GetPlayerRank();
-        currentDifficulty = dataController.GetCurrentDifficulty();
+        currentDifficulty = dataController.currentDifficulty;
+        //difficultyName = currentDifficulty.name;
+        experiencePoints = currentDifficulty.playerXP;
+        currentRank = currentDifficulty.playerRank;
         //healthMax = GetHealthMax();
         PlayerController.instance.maxHealth = GetHealthMax();
         if (PlayerPrefs.HasKey("PlayerHealth"))
@@ -155,7 +155,7 @@ public class GameController : MonoBehaviour
 
         if (currentRank == DataController.MASTER_RANK)
             maxRank = true;
-        List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
+        List<string> completedLevelList = currentDifficulty.ListOfLevelCompletedWords(currentGameLevel);
         if (completedLevelList.Count < dataController.gameData.allLevelData[currentGameLevel].words.Length)
             incompleteLevel = true;
 
@@ -658,16 +658,26 @@ public class GameController : MonoBehaviour
                 newRankAchieved = true;
 
             }
-            dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
+            currentDifficulty.playerXP = experiencePoints;
+            currentDifficulty.playerRank = currentRank;
+            currentDifficulty.AddToListOfLevelCompletedWords(currentGameLevel, targetWord);
+            dataController.SavePlayerData();
+            //dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
         }
         else // still save words
         {
-            dataController.SavePlayerProgress(currentRank, 0, currentGameLevel, targetWord);
+            currentDifficulty.playerXP = 0;
+            currentDifficulty.playerRank = currentRank;
+            currentDifficulty.AddToListOfLevelCompletedWords(currentGameLevel, targetWord);
+            dataController.SavePlayerData();
+            //dataController.SavePlayerProgress(currentRank, 0, currentGameLevel, targetWord);
         }
-        List<string> completedLevelList = dataController.getCompletedLevelList(currentGameLevel);
+        List<string> completedLevelList = dataController.currentDifficulty.ListOfLevelCompletedWords(currentGameLevel);
         if (currentGameLevel < 9 && !currentDifficulty.levelsUnlocked[currentGameLevel + 1] && completedLevelList.Count >= ((dataController.gameData.allLevelData[currentGameLevel].words.Length / 2) + 1)) // at least 51% of the words spelled correctly, then mark complete
         {
-            dataController.UnlockNextLevel(currentGameLevel);
+            //dataController.UnlockNextLevel(currentGameLevel);
+            currentDifficulty.levelsUnlocked[currentGameLevel + 1] = true;
+            dataController.SavePlayerData();
             levelUnlocked = true;
         }else if (incompleteLevel && completedLevelList.Count == dataController.gameData.allLevelData[currentGameLevel].words.Length)
         {
@@ -685,7 +695,11 @@ public class GameController : MonoBehaviour
                     newRankAchieved = true;
 
                 }
-                dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
+                currentDifficulty.playerXP = experiencePoints;
+                currentDifficulty.playerRank = currentRank;
+                currentDifficulty.AddToListOfLevelCompletedWords(currentGameLevel, targetWord);
+                dataController.SavePlayerData();
+                //dataController.SavePlayerProgress(currentRank, experiencePoints, currentGameLevel, targetWord);
             }
             else
             {
@@ -1272,7 +1286,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator DisplayWord(float delay)
     {
-        if (!difficulty.Equals(DataController.DIFFICULTY_HARD)) // if not hard, show the word
+        if (!currentDifficulty.name.Equals(DataController.DIFFICULTY_HARD)) // if not hard, show the word
         {
             targetIndices = CalculateTargetIndices();
 
@@ -1288,7 +1302,7 @@ public class GameController : MonoBehaviour
                     targetStandard[i].SetActive(false);
                 }
             }
-            if (difficulty.Equals(DataController.DIFFICULTY_NORMAL)) //if normal, after showing the word delay for set time and then turn off word
+            if (currentDifficulty.name.Equals(DataController.DIFFICULTY_NORMAL)) //if normal, after showing the word delay for set time and then turn off word
             {
                 yield return new WaitForSeconds(delay);
                 targetIndices = CalculateTargetIndices();

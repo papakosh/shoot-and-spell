@@ -1,16 +1,37 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
-using System;
 using System.Text;
-
+/**
+ * Description: Regulates the game's access to game and player data, including
+ * loading both from the file system and saving player data back to it.
+ * 
+ * Details:
+ * SavePlayerData: Write player data to json file
+ * UnlockNormalAndHardDifficulty: Unlock normal and hard difficulty and save changes
+ * UpdatePlayerDifficulty: Update player difficulty to new, if changed from current, and save changes
+ * Start: Indicate data controller not to be destroyed, then load game and player data, initialize 
+ * current difficulty and game settings, before finally loading main menu.
+ * DetermineDifficulty: Return difficulty object from player data based on difficulty selected
+ * LoadGameSettings: Set volume and control settings to default, if not set
+ * LoadMainMenu: Call load scene on main menu
+ * LoadPlayerData: Read player data from json file
+ * LoadGameData: Read game data from json file
+ * IsAndroidJar: Check file path is jar file or not
+ */
 public class DataController : MonoBehaviour
 {
     public GameData gameData;
     public PlayerData playerData;
     public Difficulty currentDifficulty;
+
+    // Scene Constants
+    public const string GAME_SCENE = "Game";
+    public const string PERSISTENT_SCENE = "Persistent";
+    public const string MAIN_MENU_SCENE = "MainMenu";
+    public const string INFO_SCENE = "Info";
+    public const string SETTINGS_SCENE = "Settings";
 
     // Rank Constants
     public const int RECRUIT_RANK = 0;
@@ -49,46 +70,41 @@ public class DataController : MonoBehaviour
     private float wordsVolDefault = 1.0f;
     private float pickupsVolDefault = 0.5f;
 
+    public void SavePlayerData()
+    {
+        string dataAsJson = JsonUtility.ToJson(playerData);
+        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
+        byte[] bytes = Encoding.ASCII.GetBytes(dataAsJson);
+        File.WriteAllBytes(filePath, bytes);
+    }
+
+    public void UnlockNormalAndHardDifficulty()
+    {
+        playerData.difficultyUnlocked[1] = true;
+        playerData.difficultyUnlocked[2] = true;
+        SavePlayerData();
+    }
+
+    public void UpdatePlayerDifficulty(string difficultySelected)
+    {
+        if (currentDifficulty.name.Equals(difficultySelected))
+            return;
+        playerData.difficultySelected = difficultySelected;
+        SavePlayerData();
+        currentDifficulty = DetermineDifficulty();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         DontDestroyOnLoad(gameObject);
         StartCoroutine(LoadGameData());
         LoadPlayerData();
-        currentDifficulty = GetCurrentDifficulty();
-        LoadSettings();
+        currentDifficulty = DetermineDifficulty();
+        LoadGameSettings();
         StartCoroutine(LoadMainMenu());
     }
-
-    public List<String> getCompletedLevelList(int levelIndex)
-    {
-        switch (levelIndex)
-        {
-            case 0:
-                return currentDifficulty.level1CompletedWords;
-            case 1:
-                return currentDifficulty.level2CompletedWords;
-            case 2:
-                return currentDifficulty.level3CompletedWords;
-            case 3:
-                return currentDifficulty.level4CompletedWords;
-            case 4:
-                return currentDifficulty.level5CompletedWords;
-            case 5:
-                return currentDifficulty.level6CompletedWords;
-            case 6:
-                return currentDifficulty.level7CompletedWords;
-            case 7:
-                return currentDifficulty.level8CompletedWords;
-            case 8:
-                return currentDifficulty.level9CompletedWords;
-            case 9:
-                return currentDifficulty.level10CompletedWords;
-            default:
-                return null;
-        }
-    }
-    public Difficulty GetCurrentDifficulty()
+    private Difficulty DetermineDifficulty()
     {
         switch (playerData.difficultySelected)
         {
@@ -103,119 +119,19 @@ public class DataController : MonoBehaviour
         }
     }
 
-    public int GetPlayerRank()
+    private void LoadGameSettings()
     {
-        return currentDifficulty.playerRank;
-    }
-
-    public int GetPlayerXP()
-    {
-        return currentDifficulty.playerXP;
-    }
-
-    public void SavePlayerProgress(int rank, int xp, int levelIndex, string word)
-    {
-        currentDifficulty.playerRank = rank;
-        currentDifficulty.playerXP = xp;
-
-        List<string> levelCompleted = getCompletedLevelList(levelIndex);
-        if (!levelCompleted.Contains(word))
-            levelCompleted.Add(word);
-
-        SavePlayerData();
-    }
-
-    public void UnlockNextLevel(int levelIndex)
-    {
-        currentDifficulty.levelsUnlocked[levelIndex + 1] = true;
-        SavePlayerData();
-    }
-
-    public void UnlockNormalAndHardDifficulty()
-    {
-        playerData.difficultyUnlocked[1] = true;
-        playerData.difficultyUnlocked[2] = true;
-        SavePlayerData();
-    }
-
-    public void UpdatePlayerDifficulty(String difficultySelected)
-    {
-        if (playerData.difficultySelected.Equals(difficultySelected))
-            return;
-        playerData.difficultySelected = difficultySelected;
-        SavePlayerData();
-        currentDifficulty = GetCurrentDifficulty();
-    }
-
-    IEnumerator Pause()
-    {
-        yield return new WaitForSeconds(2.0f);
-    }
-    IEnumerator LoadGameData()
-    {
-        string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
-
-        string dataAsJson;
-        if (AndroidJar(filePath))
-        {
-            UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(filePath);
-            yield return www.SendWebRequest();
-            dataAsJson = www.downloadHandler.text;
-            // deserialize string into object
-            gameData = JsonUtility.FromJson<GameData>(dataAsJson);
-        }
-        else
-        {
-            if (File.Exists(filePath))
-            {
-                dataAsJson = File.ReadAllText(filePath);
-                // deserialize string into object
-                gameData = JsonUtility.FromJson<GameData>(dataAsJson);
-            }
-            else
-            {
-                Debug.LogError("Cannot load game data!");
-            }
-        }
-        
-    }
-
-    private bool AndroidJar(String filePath)
-    {
-        return filePath.Contains("://") || filePath.Contains(":///");
-    }
-
-    private void LoadSettings()
-    {
-        if (!PlayerPrefs.HasKey(MUSIC_VOLUME))
-        {
-            PlayerPrefs.SetFloat(MUSIC_VOLUME, musicVolDefault);
-        }
-        if (!PlayerPrefs.HasKey(WEAPONS_VOLUME))
-        {
-            PlayerPrefs.SetFloat(WEAPONS_VOLUME, weaponsVolDefault);
-        }
-        if (!PlayerPrefs.HasKey(EXPLOSIONS_VOLUME))
-        {
-            PlayerPrefs.SetFloat(EXPLOSIONS_VOLUME, explosionsVolDefault);
-        }
-        if (!PlayerPrefs.HasKey(WORDS_VOLUME))
-        {
-            PlayerPrefs.SetFloat(WORDS_VOLUME, wordsVolDefault);
-        }
-        if (!PlayerPrefs.HasKey(PICKUPS_VOLUME))
-        {
-            PlayerPrefs.SetFloat(PICKUPS_VOLUME, pickupsVolDefault);
-        }
-        if (!PlayerPrefs.HasKey(JOYSTICK_CONTROL))
-        {
-            PlayerPrefs.SetString(JOYSTICK_CONTROL, JOYSTICK_CONTROL_LEFT);
-        }
+        if (!PlayerPrefs.HasKey(MUSIC_VOLUME)) PlayerPrefs.SetFloat(MUSIC_VOLUME, musicVolDefault);
+        if (!PlayerPrefs.HasKey(WEAPONS_VOLUME)) PlayerPrefs.SetFloat(WEAPONS_VOLUME, weaponsVolDefault);
+        if (!PlayerPrefs.HasKey(EXPLOSIONS_VOLUME)) PlayerPrefs.SetFloat(EXPLOSIONS_VOLUME, explosionsVolDefault);
+        if (!PlayerPrefs.HasKey(WORDS_VOLUME)) PlayerPrefs.SetFloat(WORDS_VOLUME, wordsVolDefault);
+        if (!PlayerPrefs.HasKey(PICKUPS_VOLUME)) PlayerPrefs.SetFloat(PICKUPS_VOLUME, pickupsVolDefault);
+        if (!PlayerPrefs.HasKey(JOYSTICK_CONTROL)) PlayerPrefs.SetString(JOYSTICK_CONTROL, JOYSTICK_CONTROL_LEFT);
     }
     private IEnumerator LoadMainMenu()
     {
         yield return new WaitForSeconds(2.0f);
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene(MAIN_MENU_SCENE);
         yield return new WaitForSeconds(2.0f);
     }
 
@@ -241,18 +157,31 @@ public class DataController : MonoBehaviour
         }
     }
 
-    private void SaveGameData()
+    IEnumerator LoadGameData()
     {
-        string dataAsJson = JsonUtility.ToJson(gameData);
         string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
-        File.WriteAllText(filePath, dataAsJson);
+
+        string dataAsJson;
+        if (IsAndroidJar(filePath))
+        {
+            UnityEngine.Networking.UnityWebRequest jarFile = UnityEngine.Networking.UnityWebRequest.Get(filePath);
+            yield return jarFile.SendWebRequest();
+            dataAsJson = jarFile.downloadHandler.text;
+            gameData = JsonUtility.FromJson<GameData>(dataAsJson);
+        }
+        else if(File.Exists(filePath))
+        {
+            dataAsJson = File.ReadAllText(filePath);
+            gameData = JsonUtility.FromJson<GameData>(dataAsJson);
+        }
+        else
+        {
+            Debug.LogError("Cannot load game data!");
+        }
     }
 
-    private void SavePlayerData()
+    private bool IsAndroidJar(string filePath)
     {
-        string dataAsJson = JsonUtility.ToJson(playerData);
-        string filePath = Path.Combine(Application.persistentDataPath, playerDataFilename);
-        byte[] bytes = Encoding.ASCII.GetBytes(dataAsJson);
-        File.WriteAllBytes(filePath, bytes);
+        return filePath.Contains("://") || filePath.Contains(":///");
     }
 }
