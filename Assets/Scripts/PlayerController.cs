@@ -64,7 +64,6 @@ public class PlayerController : MonoBehaviour
     private AudioClip healthPickupClip;
     private AudioClip takeDamageClip;
     private AudioClip slowDownClip;
-    private AudioClip speedUpClip;
     private float horizontalMovementSmoothing = 0.40f;
     private float verticalMovementSmoothing = 0.20f;
 
@@ -119,8 +118,6 @@ public class PlayerController : MonoBehaviour
         currentSpeed = currentSpeed / 2;
         yield return new WaitForSeconds(3.0f);
         currentSpeed = maxSpeed;
-        _audio.clip = speedUpClip;
-        _audio.Play();
     }
 
     public void AbsorbDamage()
@@ -174,7 +171,6 @@ public class PlayerController : MonoBehaviour
         healthPickupClip = Resources.Load<AudioClip>("Audio/health_pickup");
         takeDamageClip = Resources.Load<AudioClip>("Audio/takedamage");
         slowDownClip = Resources.Load<AudioClip>("Audio/slowdown");
-        speedUpClip = Resources.Load<AudioClip>("Audio/speedup");
         _audio.clip = singleShotClip;
         _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         currentSpeed = maxSpeed;
