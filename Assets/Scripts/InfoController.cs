@@ -1,68 +1,60 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Info : MonoBehaviour
+/**
+ * Description: Manages url linking for on-screen text
+ * Details: 
+ * LoadMainMenu: Returns to main menu
+ * Visit (Destination): Opens specified url
+ */
+public class InfoController : MonoBehaviour
 {
-    public void CallHome()
+    public void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void VisitDinvStudio()
+    public void VisitDinvStudioLink()
     {
         Application.OpenURL("https://assetstore.unity.com/publishers/26983");
     }
-    public void VisitViktor()
+    public void VisitViktorLink()
     {
         Application.OpenURL("https://v-ktor.itch.io");
     }
-    public void VisitSindwiller()
+    public void VisitSindwillerLink()
     {
         Application.OpenURL("https://opengameart.org/users/sindwiller");
     }
-    public void VisitCraftPix()
+    public void VisitCraftPixLink()
     {
         Application.OpenURL("https://craftpix.net");
     }
-    public void VisitAlucard()
+    public void VisitAlucardLink()
     {
         Application.OpenURL("https://opengameart.org/users/alucard");
     }
-    public void VisitLukeRustltd()
+    public void VisitLukeRustltdLink()
     {
         Application.OpenURL("https://opengameart.org/users/lukerustltd");
     }
-    public void VisitBuch()
+    public void VisitBuchLink()
     {
         Application.OpenURL("https://opengameart.org/users/buch");
     }
-    public void VisitOgreBane()
-    {
-        Application.OpenURL("https://opengameart.org/users/ogrebane");
-    }
-    public void VisitQuitschie()
-    {
-        Application.OpenURL("https://opengameart.org/users/quitschie");
-    }
-    public void VisitRemaxim()
-    {
-        Application.OpenURL("https://opengameart.org/users/remaxim");
-    }
-    public void VisitJesusLastra()
+    public void VisitJesusLastraLink()
     {
         Application.OpenURL("https://opengameart.org/users/jalastram");
     }
-    public void VisitThorChristopherArisland()
+    public void VisitThorChristopherArislandLink()
     {
         Application.OpenURL("https://opengameart.org/users/tcarisland");
     }
-    public void VisitDanSchuller()
+    public void VisitDanSchullerLink()
     {
         Application.OpenURL("http://howtomakeanrpg.com/a/pages/about.html");
     }
-    public void VisitUnityTechnologies()
+    public void VisitUnityTechnologiesLink()
     {
         Application.OpenURL("https://unity.com");
     }

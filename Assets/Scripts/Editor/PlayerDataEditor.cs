@@ -1,9 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
-
+/**
+  Description: Window editor for managing player data using a gui.
+ * 
+ * Details: 
+ * Init: Get the PlayerDataEditor window and show
+ * OnGui: Assign save and load functions to respective buttons
+ * LoadPlayerData: If a file exists, read data from the file into player data object, otherwise 
+ * create new player data object
+ * SavePlayerData: Write player data object to specified file as text
+ */
 public class PlayerDataEditor : EditorWindow
 {
     public PlayerData playerData;
@@ -25,15 +32,9 @@ public class PlayerDataEditor : EditorWindow
             EditorGUILayout.PropertyField(serializedProperty, true);
             serializedObject.ApplyModifiedProperties();
 
-            if (GUILayout.Button("Save Data"))
-            {
-                SavePlayerData();
-            }
+            if (GUILayout.Button("Save Data")) SavePlayerData();
         }
-        if (GUILayout.Button("Load Data"))
-        {
-            LoadPlayerData();
-        }
+        if (GUILayout.Button("Load Data")) LoadPlayerData();
     }
 
     private void LoadPlayerData()
@@ -45,9 +46,7 @@ public class PlayerDataEditor : EditorWindow
             playerData = JsonUtility.FromJson<PlayerData>(dataAsJson);
         }
         else
-        {
             playerData = new PlayerData();
-        }
     }
 
     private void SavePlayerData()

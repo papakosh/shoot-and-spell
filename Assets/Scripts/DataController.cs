@@ -60,7 +60,7 @@ public class DataController : MonoBehaviour
     public const float DEFAULT_VOL = 0.5f;
 
     // Game files
-    private string gameDataFilename = "data.json";
+    private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
 
     // Volume defaults
