@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
     public void PickupTeleport()
     {
-        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.clip = teleportPickupClip;
         _audio.Play();
         canTeleport = true;
@@ -77,7 +77,7 @@ public class PlayerController : MonoBehaviour
     }
     public void PickupArmor()
     {
-        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.clip = armorPickupClip;
         _audio.Play();
         canAbsorbDamage = true;
@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
 
     public void PickupDualShot()
     {
-        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.clip = dualShotPickup;
         _audio.Play();
         canFireDualShot = true;
@@ -95,7 +95,7 @@ public class PlayerController : MonoBehaviour
 
     public void PickupHealth(float amt)
     {
-        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         _audio.clip = healthPickupClip;
         _audio.Play();
 
@@ -122,7 +122,7 @@ public class PlayerController : MonoBehaviour
 
     public void AbsorbDamage()
     {
-        _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         _audio.clip = armorUsedClip;
         _audio.Play();
         StartCoroutine(GameController.instance.ArmorActivated());
@@ -195,7 +195,7 @@ public class PlayerController : MonoBehaviour
              Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, gameBoundary.xMin, gameBoundary.xMax),
              0.0f, 
              Mathf.Clamp(Camera.main.ScreenToWorldPoint(Input.mousePosition).z, gameBoundary.zMin, gameBoundary.zMax));
-            _audio.volume = PlayerPrefs.GetFloat(DataController.PICKUPS_VOLUME);
+            _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
             _audio.clip = teleportUsedClip;
             _audio.Play();
             canTeleport = false;

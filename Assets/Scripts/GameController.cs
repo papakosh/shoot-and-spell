@@ -10,6 +10,7 @@ public class GameController : MonoBehaviour
     public GameObject[] pickupHelpMessage;
     public GameObject[] hazards;
     public GameObject[] blocks;
+    public GameObject[] pickups;
     public Vector3 spawnValues;
     public int debrisCount;
     public float spawnWait, startWait, waveWait;
@@ -429,7 +430,7 @@ public class GameController : MonoBehaviour
     public void PlayWord()
     {
         _audio.clip = wordClip;
-        _audio.volume = PlayerPrefs.GetFloat(DataController.WORDS_VOLUME);
+        _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.Play();
     }
 
@@ -484,10 +485,10 @@ public class GameController : MonoBehaviour
         }
         return goodHit;
     }
-    public void SpawnRandomPickup(GameObject[] pickups, Transform pickupTransform, Quaternion rotateQuaternion)
+    public void SpawnRandomPickup(Transform pickupTransform)
     {
         int num = UnityEngine.Random.Range(1, 6);
-
+        Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
         switch (num)
         {
             case 1:

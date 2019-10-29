@@ -26,14 +26,12 @@ public class DataController : MonoBehaviour
     public PlayerData playerData;
     public Difficulty currentDifficulty;
 
-    // Scene Constants
     public const string GAME_SCENE = "Game";
     public const string PERSISTENT_SCENE = "Persistent";
     public const string MAIN_MENU_SCENE = "MainMenu";
     public const string INFO_SCENE = "Info";
     public const string SETTINGS_SCENE = "Settings";
 
-    // Rank Constants
     public const int RECRUIT_RANK = 0;
     public const int CADET_RANK = 1;
     public const int PILOT_RANK = 2;
@@ -43,32 +41,27 @@ public class DataController : MonoBehaviour
     public const int COMMANDER_RANK = 6;
     public const int MASTER_RANK = 7;
 
-    // Difficulty Constants
     public const string DIFFICULTY_EASY = "EASY";
     public const string DIFFICULTY_NORMAL = "NORMAL";
     public const string DIFFICULTY_HARD = "HARD";
 
-    // Setting Constants
     public const string MUSIC_VOLUME = "MUSIC_VOL";
     public const string WEAPONS_VOLUME = "WEAPONS_VOL";
     public const string EXPLOSIONS_VOLUME = "EXPLOSIONS_VOL";
-    public const string WORDS_VOLUME = "WORDS_VOL";
-    public const string PICKUPS_VOLUME = "PICKUPS_VOL";
+    public const string VOICES_VOLUME = "VOICES_VOL";
+    
     public const string JOYSTICK_CONTROL = "JOYSTICK_CONTROL";
     public const string JOYSTICK_CONTROL_LEFT = "LEFT-HANDED";
     public const string JOYSTICK_CONTROL_RIGHT = "RIGHT-HANDED";
     public const float DEFAULT_VOL = 0.5f;
 
-    // Game files
     private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
 
-    // Volume defaults
     private float musicVolDefault = 0.05f;
-    private float weaponsVolDefault = 0.2f;
-    private float explosionsVolDefault = 0.5f;
-    private float wordsVolDefault = 1.0f;
-    private float pickupsVolDefault = 0.5f;
+    private float weaponsVolDefault = 0.10f;
+    private float explosionsVolDefault = 0.15f;
+    private float voicesVolDefault = 0.8f;
 
     public void SavePlayerData()
     {
@@ -77,14 +70,12 @@ public class DataController : MonoBehaviour
         byte[] bytes = Encoding.ASCII.GetBytes(dataAsJson);
         File.WriteAllBytes(filePath, bytes);
     }
-
     public void UnlockNormalAndHardDifficulty()
     {
         playerData.difficultyUnlocked[1] = true;
         playerData.difficultyUnlocked[2] = true;
         SavePlayerData();
     }
-
     public void UpdatePlayerDifficulty(string difficultySelected)
     {
         if (currentDifficulty.name.Equals(difficultySelected))
@@ -118,14 +109,12 @@ public class DataController : MonoBehaviour
                 return playerData.easyDifficulty;
         }
     }
-
     private void LoadGameSettings()
     {
         if (!PlayerPrefs.HasKey(MUSIC_VOLUME)) PlayerPrefs.SetFloat(MUSIC_VOLUME, musicVolDefault);
         if (!PlayerPrefs.HasKey(WEAPONS_VOLUME)) PlayerPrefs.SetFloat(WEAPONS_VOLUME, weaponsVolDefault);
         if (!PlayerPrefs.HasKey(EXPLOSIONS_VOLUME)) PlayerPrefs.SetFloat(EXPLOSIONS_VOLUME, explosionsVolDefault);
-        if (!PlayerPrefs.HasKey(WORDS_VOLUME)) PlayerPrefs.SetFloat(WORDS_VOLUME, wordsVolDefault);
-        if (!PlayerPrefs.HasKey(PICKUPS_VOLUME)) PlayerPrefs.SetFloat(PICKUPS_VOLUME, pickupsVolDefault);
+        if (!PlayerPrefs.HasKey(VOICES_VOLUME)) PlayerPrefs.SetFloat(VOICES_VOLUME, voicesVolDefault);
         if (!PlayerPrefs.HasKey(JOYSTICK_CONTROL)) PlayerPrefs.SetString(JOYSTICK_CONTROL, JOYSTICK_CONTROL_LEFT);
     }
     private IEnumerator LoadMainMenu()
@@ -156,7 +145,6 @@ public class DataController : MonoBehaviour
             playerData = JsonUtility.FromJson<PlayerData>(dataAsJsonRead);
         }
     }
-
     IEnumerator LoadGameData()
     {
         string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFilename);
@@ -179,7 +167,6 @@ public class DataController : MonoBehaviour
             Debug.LogError("Cannot load game data!");
         }
     }
-
     private bool IsAndroidJar(string filePath)
     {
         return filePath.Contains("://") || filePath.Contains(":///");
