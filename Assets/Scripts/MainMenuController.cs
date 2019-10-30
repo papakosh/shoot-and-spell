@@ -147,7 +147,7 @@ public class MainMenuController : MonoBehaviour
     }
     private void ResetTempDataBeforeNewSession()
     {
-        PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey("PreviousRoundHealth");
         PlayerPrefs.DeleteKey("PlayerStreak");
         PlayerPrefs.DeleteKey("DualShot");
         PlayerPrefs.DeleteKey("Armor");
