@@ -49,7 +49,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     PlayerController.instance.TakeDamage(damage);
-                    if (GameController.instance.isDead)
+                    if (GameController.instance.isPlayerDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
@@ -99,7 +99,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     PlayerController.instance.TakeDamage(damage);
-                    if (GameController.instance.isDead)
+                    if (GameController.instance.isPlayerDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
@@ -132,7 +132,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     PlayerController.instance.TakeDamage(damage);
-                    if (GameController.instance.isDead)
+                    if (GameController.instance.isPlayerDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
@@ -158,7 +158,7 @@ public class DestroyByContact : MonoBehaviour
                 else
                 {
                     PlayerController.instance.TakeDamage(damage);
-                    if (GameController.instance.isDead)
+                    if (GameController.instance.isPlayerDead)
                     {
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);

@@ -140,14 +140,14 @@ public class PlayerController : MonoBehaviour
         {
             currentHealth -= damageAmt;
             if (currentHealth <= 0)
-                GameController.instance.isDead = true;
+                GameController.instance.isPlayerDead = true;
             else
                 StartCoroutine(GameController.instance.BeenHit());
         }
         else
         {
             currentHealth = 0;
-            GameController.instance.isDead = true;
+            GameController.instance.isPlayerDead = true;
         }
 
         GameController.instance.RefreshHealthBar(damageAmt, true);
