@@ -147,11 +147,11 @@ public class MainMenuController : MonoBehaviour
     }
     private void ResetTempDataBeforeNewSession()
     {
-        PlayerPrefs.DeleteKey("PreviousRoundHealth");
-        PlayerPrefs.DeleteKey("PlayerStreak");
-        PlayerPrefs.DeleteKey("DualShot");
-        PlayerPrefs.DeleteKey("Armor");
-        PlayerPrefs.DeleteKey("Teleport");
+        PlayerPrefs.DeleteKey(DataController.PLAYER_HEALTH_KEY);
+        PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
+        PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
+        PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
     }
 
     private void RefreshLevelProgress()
@@ -182,8 +182,8 @@ public class MainMenuController : MonoBehaviour
     
     private void LoadGame(int levelIndex)
     {
-        PlayerPrefs.SetInt("Level", levelIndex);
-        SceneManager.LoadScene("Game");
+        PlayerPrefs.SetInt(DataController.GAME_LEVEL_KEY, levelIndex);
+        SceneManager.LoadScene(DataController.GAME_SCENE);
     }
 
     private void SetDifficultyButtonState()

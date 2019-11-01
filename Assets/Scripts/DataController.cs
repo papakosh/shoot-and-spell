@@ -55,6 +55,13 @@ public class DataController : MonoBehaviour
     public const string JOYSTICK_CONTROL_RIGHT = "RIGHT-HANDED";
     public const float DEFAULT_VOL = 0.5f;
 
+    public const string GAME_LEVEL_KEY = "LEVEL";
+    public const string PLAYER_HEALTH_KEY = "HAVE_PLAYER_HEALTH";
+    public const string PLAYER_STREAK_KEY = "HAVE_PLAYER_STREAK";
+    public const string DUALSHOT_KEY = "HAVE_DUALSHOT";
+    public const string ARMOR_KEY = "HAVE_ARMOR";
+    public const string TELPORT_KEY = "HAVE_TELEPORT";
+
     private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
 

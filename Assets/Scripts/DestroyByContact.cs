@@ -54,7 +54,7 @@ public class DestroyByContact : MonoBehaviour
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
-                        GameController.instance.RoundLose();
+                        GameController.instance.LoseRound();
                         return;
                     }
                 }   
@@ -104,7 +104,7 @@ public class DestroyByContact : MonoBehaviour
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
-                        GameController.instance.RoundLose();
+                        GameController.instance.LoseRound();
                     }
                 }
             }
@@ -137,7 +137,7 @@ public class DestroyByContact : MonoBehaviour
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
-                        GameController.instance.RoundLose();
+                        GameController.instance.LoseRound();
                     }
                 }
             }
@@ -163,7 +163,7 @@ public class DestroyByContact : MonoBehaviour
                         playerExplosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
                         Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
                         Destroy(other.gameObject);
-                        GameController.instance.RoundLose();
+                        GameController.instance.LoseRound();
                     }
                 }
             }

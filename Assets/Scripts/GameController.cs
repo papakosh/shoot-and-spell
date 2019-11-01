@@ -43,12 +43,28 @@ public class GameController : MonoBehaviour
     public GameObject joystickControlRight;
     public GameObject mainMenuButton;
 
+    public const int HEALTH_PICKUP = 0;
+    public const int DUALSHOT_PICKUP = 1;
+    public const int ARMOR_PICKUP = 2;
+    public const int TELEPORT_PICKUP = 3;
+    public const string HEALTH_PICKUP_PATH = "Sprites/Pickups/icon_health";
+    public const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/icon_dual_shot";
+    public const string ARMOR_PICKUP_PATH = "Sprites/Pickups/icon_armor";
+    public const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/icon_teleport";
+    public const string HEALTH_PICKUP_KEY = "SEEN_HEALTH";
+    public const string DUALSHOT_PICKUP_KEY = "SEEN_DUALSHOT";
+    public const string ARMOR_PICKUP_KEY = "SEEN_ARMOR";
+    public const string TELEPORT_PICKUP_KEY = "SEEN_TELEPORT";
+    public const string ACTIVE_STATUS = "ACTIVE";
+    public const string INACTIVE_STATUS = "INACTIVE";
+    public const string MAXIMUM_RANK_TEXT = "MAXED";
+
     private DataController dataController;
     private Difficulty currentDifficulty;
     private AudioSource _audio;
 
     private int gameLevel;
-    private bool gameOver;
+    private bool roundOver;
     private int enemyShipsAllowed;
     private int levelXPModifier = 1;
     private int levelCompleteBonus;
@@ -77,47 +93,19 @@ public class GameController : MonoBehaviour
     private Color shipNormalColor = Color.white;
     private Color shipHitColor = Color.red;
     private Color shipAbsorbedDamageColor = Color.yellow;    
-    private int playerStreak = 0;
+    private float playerStreak = 0f;
     private const float playerStreakAdditive = 0.05f;
     private bool playerReachedMaxRank;
 
-    public void ResumeGame()
-    {
-        Time.timeScale = 1f;
-        displayRoundMessages[1].SetActive(false);
-        playerShip.SetActive(true);
-        displayPickupMessage[0].SetActive(false);
-        displayPickupMessage[1].SetActive(false);
-        displayPickupMessage[2].SetActive(false);
-        displayPickupMessage[3].SetActive(false);
-        PlayerPrefs.SetInt("InRound", 1);
-        _audio.clip = selectedWordClip;
-        isGamePaused = false;
-    }
     public void LoadMainMenu()
     {
-        PlayerPrefs.DeleteKey("PlayerHealth");
-        PlayerPrefs.DeleteKey("PlayerStreak");
-        PlayerPrefs.SetInt("InRound", 0);
-        PlayerPrefs.DeleteKey("DualShot");
-        PlayerPrefs.DeleteKey("Armor");
-        PlayerPrefs.DeleteKey("Teleport");
-        SceneManager.LoadScene("MainMenu");
-    }
-    public void RoundLose()
-    {
-        gameOver = true;
-        displayRoundMessages[6].GetComponent<Text>().text = "Better luck next time! Tap to continue.";
-        displayRoundMessages[6].SetActive(true);
-        PlayerPrefs.DeleteKey("PlayerHealth");
-        PlayerPrefs.DeleteKey("PlayerStreak");
-        PlayerPrefs.DeleteKey("DualShot");
-        PlayerPrefs.DeleteKey("Armor");
-        PlayerPrefs.DeleteKey("Teleport");
-    }
-    public void PlayAnotherRound()
-    {
-        SceneManager.LoadScene("Game");
+        PlayerPrefs.DeleteKey(DataController.PLAYER_HEALTH_KEY);
+        PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
+        PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
+        PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+
+        SceneManager.LoadScene(DataController.MAIN_MENU_SCENE);
     }
     public void PlayWord()
     {
@@ -125,114 +113,87 @@ public class GameController : MonoBehaviour
         _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.Play();
     }
-    public bool ProcessHit(string hitLetter)
+    public void ProcessHit(string hitLetter)
     {
-        bool goodHit = false;
-        if (targetLetterIndex < selectedWord.Length)
+        string targetLetter = "";
+        if (IsLastLetter()) targetLetter = selectedWord.Substring(targetLetterIndex);
+        else targetLetter = selectedWord.Substring(targetLetterIndex, 1);
+
+        if (LettersMatch(targetLetter, hitLetter))
         {
-            string targetLetter = "";
-            if (targetLetterIndex < selectedWord.Length - 1)
-                targetLetter = selectedWord.Substring(targetLetterIndex, 1);
-            else
-                targetLetter = selectedWord.Substring(targetLetterIndex);
+            selectedWordPanel[targetLetterIndex].SetActive(true);
+            selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedColor;
 
-            if (targetLetter.Equals(hitLetter))
-            {
-                goodHit = true;
-
-                //mark complete
-                GameObject[] targetPanel = GetTargetPanel();
-                int targetPanelIndex = CalculateTargetPanelIndex();
-                int elementIndex = 0;
-                elementIndex = targetLetterIndex - (targetPanel.Length * targetPanelIndex);
-                targetPanel[elementIndex].SetActive(true);
-                targetPanel[elementIndex].GetComponent<Image>().color = letterMatchedColor;
-
-                if (targetLetterIndex == selectedWord.Length - 1)
-                {
-                    RoundWin();
-                }
-                else
-                {
-                    targetLetterIndex++;
-                }
-            }
-            else
-            {
-                StartCoroutine(PlayerController.instance.DecreaseSpeed());
-                StartCoroutine(SlowDownEffect());
-            }
+            if (IsLastLetter()) RoundWin();
+            else targetLetterIndex++;
         }
-        return goodHit;
+        else StartCoroutine(SlowPlayerShip());
     }
     public void SpawnRandomPickup(Transform pickupTransform)
     {
-        int num = UnityEngine.Random.Range(1, 6);
-        Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
-        switch (num)
+        int randomNum = UnityEngine.Random.Range(1, 6);
+        switch (randomNum)
         {
             case 1:
             case 2:
                 break;
             case 3:
-                int pickupNum = 0;
-                if (playerRank > DataController.CHIEF_RANK) pickupNum = UnityEngine.Random.Range(0, 4);
-                else if (playerRank > DataController.PILOT_RANK) pickupNum = UnityEngine.Random.Range(0, 3);
-                else if (playerRank > DataController.CADET_RANK) pickupNum = UnityEngine.Random.Range(0, 2);
+                int pickupChosen = 0;
+                if (playerRank > DataController.CHIEF_RANK) pickupChosen = UnityEngine.Random.Range(0, 4);
+                else if (playerRank > DataController.PILOT_RANK) pickupChosen = UnityEngine.Random.Range(0, 3);
+                else if (playerRank > DataController.CADET_RANK) pickupChosen = UnityEngine.Random.Range(0, 2);
 
-                if (IsFirstTimeForPickup(pickupNum))
+                Quaternion rotateQuaternion = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
+                if (IsFirstTimeForPickup(pickupChosen))
                 {
-                    Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
+                    Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
 
-                    if (pickupNum == 0)
-                    {
-                        displayPickupMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_health");
-                        displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[0];
-                        displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[0];
-                        displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                        PlayerPrefs.SetString("HEALTHPICKUP", "YES");
-                    }
-                    else if (pickupNum == 1)
-                    {
-                        displayPickupMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_dual_shot");
-                        displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[1];
-                        displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[1];
-                        displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                        PlayerPrefs.SetString("DUALSHOTPICKUP", "YES");
-                    }
-                    else if (pickupNum == 2)
-                    {
-                        displayPickupMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_armor");
-                        displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[2];
-                        displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[2];
-                        displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                        PlayerPrefs.SetString("ARMORPICKUP", "YES");
-                    }
-                    else if (pickupNum == 3)
-                    {
-                        displayPickupMessage[0].GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/Pickups/icon_teleport");
-                        displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[3];
-                        displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[3];
-                        displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                        PlayerPrefs.SetString("TELEPORTPICKUP", "YES");
-                    }
+                    if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(HEALTH_PICKUP_KEY, "YES");
+                    else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(DUALSHOT_PICKUP_KEY, "YES");
+                    else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(ARMOR_PICKUP_KEY, "YES");
+                    else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(TELEPORT_PICKUP_KEY, "YES");
 
-                    for (int i = 0; i < displayPickupMessage.Length; i++)
-                    {
-                        displayPickupMessage[i].SetActive(true);
-                    }
-                    isGamePaused = true;
+                    displayPickupMessage[0].GetComponent<Image>().sprite = GetPickupSprite(pickupChosen);
+                    displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[pickupChosen];
+                    displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[pickupChosen];
+                    displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
+                    ShowPickupMessage();
+
                     Time.timeScale = 0f;
+                    isGamePaused = true;
                 }
                 else
-                    Instantiate(pickups[pickupNum], pickupTransform.position, rotateQuaternion);
+                    Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
                 break;
             case 4:
             case 5:
-            case 6: 
+            case 6:
                 break;
             default: break;
         }
+    }
+    public void ResumeGame()
+    {
+        HidePickupMessage();
+        ShowPlayerShip();
+        Time.timeScale = 1f;
+        isGamePaused = false;
+    }
+    public void LoseRound()
+    {
+        ShowRoundLostMessage();
+
+        PlayerPrefs.DeleteKey(DataController.PLAYER_HEALTH_KEY);
+        PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
+        PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
+        PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+
+        roundOver = true;
+    }
+    public void PlayAnotherRound()
+    {
+        SceneManager.LoadScene(DataController.GAME_SCENE);
     }
     public void RefreshHealthBar(float amt, bool isDamaged)
     {
@@ -241,26 +202,23 @@ public class GameController : MonoBehaviour
         hpBar.maxValue = PlayerController.instance.maxHealth;
         hpBar.value = PlayerController.instance.currentHealth;
     }
-    public IEnumerator BeenHit()
+    public IEnumerator PlayerShipHit()
     {
-        if (playerShip != null && playerShip.activeSelf)
+        for (int i = 1; i <= numberOfFlashes; i++)
         {
-            for (int i = 1; i <= numberOfFlashes; i++)
+            if (IsPlayerShipActive())
             {
-                if (playerShip != null && playerShip.activeSelf)
-                {
-                    playerShip.GetComponent<Renderer>().material.color = shipHitColor;
-                    yield return new WaitForSeconds(hitFlashWait);
-                }
-                if (playerShip != null && playerShip.activeSelf)
-                {
-                    playerShip.GetComponent<Renderer>().material.color = shipNormalColor;
-                    yield return new WaitForSeconds(hitFlashWait);
-                }
+                playerShip.GetComponent<Renderer>().material.color = shipHitColor;
+                yield return new WaitForSeconds(hitFlashWait);
+            }
+            if (IsPlayerShipActive())
+            {
+                playerShip.GetComponent<Renderer>().material.color = shipNormalColor;
+                yield return new WaitForSeconds(hitFlashWait);
             }
         }
     }
-    public IEnumerator ArmorActivated()
+    public IEnumerator ArmorActive()
     {
         for (int i = 1; i <= numberOfFlashes; i++)
         {
@@ -270,37 +228,17 @@ public class GameController : MonoBehaviour
             yield return new WaitForSeconds(hitFlashWait);
         }
     }
-    public IEnumerator SlowDownEffect()
-    {
-        for (int i = 1; i <= numberOfFlashes * 2; i++)
-        {
-            if (playerShip != null && playerShip.activeSelf)
-            {
-                playerShip.transform.GetChild(0).gameObject.SetActive(false);
-                yield return new WaitForSeconds(slowDownFlashWait);
-            }
-
-            if (playerShip != null && playerShip.activeSelf)
-            {
-                playerShip.transform.GetChild(0).gameObject.SetActive(true);
-                yield return new WaitForSeconds(slowDownFlashWait);
-            }
-        }
-    }
     public void UpdateTeleportStatusIcon(string newStatus)
     {
-        if ("ACTIVE".Equals(newStatus)) teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
-        else teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+        teleportStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(newStatus);
     }
     public void UpdateArmorStatusIcon(string newStatus)
     {
-        if ("ACTIVE".Equals(newStatus)) armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
-        else armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+        armorStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(newStatus);
     }
     public void UpdateDualShotStatusIcon(string newStatus)
     {
-        if ("ACTIVE".Equals(newStatus)) dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
-        else dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_deactive");
+        dualShotStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(newStatus);
     }
     void Awake()
     {
@@ -310,8 +248,6 @@ public class GameController : MonoBehaviour
         dataController = FindObjectOfType<DataController>();
         currentDifficulty = dataController.currentDifficulty;
         _audio = GetComponent<AudioSource>();
-
-        Time.timeScale = 1f;
     }
     // Start is called before the first frame update
     void Start()
@@ -326,86 +262,22 @@ public class GameController : MonoBehaviour
 
         StartCoroutine(SpawnWaves());
     }
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!isGamePaused)
-            {
-                isGamePaused = true;
-                Time.timeScale = 0f;
-                mainMenuButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar_active");
-                mainMenuButton.GetComponent<Button>().interactable = true;
-            }
-            else
-            {
-                mainMenuButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_hangar");
-                mainMenuButton.GetComponent<Button>().interactable = false;
-                displayPickupMessage[0].SetActive(false);
-                displayPickupMessage[1].SetActive(false);
-                displayPickupMessage[2].SetActive(false);
-                displayPickupMessage[3].SetActive(false);
-                isGamePaused = false;
-                Time.timeScale = 1f;
-            }
-        }
-        if (!_audio.isPlaying)
-            _audio.volume = DataController.DEFAULT_VOL;
-    }
     private void SetupGameLevel()
     {
-        gameLevel = PlayerPrefs.GetInt("Level");
-        gameOver = false;
-        isGamePaused = true;
+        gameLevel = PlayerPrefs.GetInt(DataController.GAME_LEVEL_KEY);
+        roundOver = false;
         levelXPModifier = gameLevel + 1;
-
-        Texture nebulaBackground = GetBackGroundTexture(gameLevel);
-        gameBackground.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
-        GameObject backgroundChild = gameBackground.transform.GetChild(0).gameObject;
-        backgroundChild.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
-
-        selectedWord = RandomWord();
-        selectedWordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[gameLevel].words[selectedWordIndex].audioPath);
-        _audio.clip = selectedWordClip;
-        
-        List<string> listOfLevelCompletedWords = currentDifficulty.ListOfLevelCompletedWords(gameLevel);
-        if (listOfLevelCompletedWords.Count < dataController.gameData.allLevelData[gameLevel].words.Length) levelIncomplete = true;
         levelCompleteBonus = dataController.gameData.allLevelData[gameLevel].completionBonus;
 
-        displayRoundMessages[5].SetActive(true);
+        if (!AllWordsSpelt ()) levelIncomplete = true;
 
-        targetLetterIndex = 0;
+        CustomizeLevelBackground();
 
         CustomizeLevelDebrisWaitTimes();
-    }
-    private Texture GetBackGroundTexture(int gameLevel)
-    {
-        return Resources.Load<Texture>(dataController.gameData.allLevelData[gameLevel].backgroundPath);
-    }
-    private void CustomizeLevelDebrisWaitTimes()
-    {
-        if (gameLevel > 0)
-            debrisSpawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * gameLevel);
-        switch (gameLevel)
-        {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                debrisWaveWait = dataController.gameData.waveWait - 0;
-                break;
-            case 7:
-            case 8:
-                debrisWaveWait = dataController.gameData.waveWait - 1;
-                break;
-            case 9:
-                debrisWaveWait = dataController.gameData.waveWait - 2;
-                break;
-        }
+
+        SetupWordSelected();
+
+        ShowCountdownMessage();
     }
     private void SetupPlayerData()
     {
@@ -413,26 +285,26 @@ public class GameController : MonoBehaviour
         playerRank = currentDifficulty.playerRank;
         PlayerController.instance.maxHealth = GetMaxHealth();
 
-        if (PlayerPrefs.HasKey("PreviousRoundHealth")) PlayerController.instance.currentHealth = PlayerPrefs.GetFloat("PreviousRoundHealth");
+        if (PlayerPrefs.HasKey(DataController.PLAYER_HEALTH_KEY)) PlayerController.instance.currentHealth = PlayerPrefs.GetFloat(DataController.PLAYER_HEALTH_KEY);
         else PlayerController.instance.currentHealth = PlayerController.instance.maxHealth;
 
-        if (PlayerPrefs.HasKey("PlayerStreak")) playerStreak = PlayerPrefs.GetInt("PlayerStreak");
-        else playerStreak = 0;
+        if (PlayerPrefs.HasKey(DataController.PLAYER_STREAK_KEY)) playerStreak = PlayerPrefs.GetFloat(DataController.PLAYER_STREAK_KEY);
+        else playerStreak = 0f;
 
-        if (PlayerPrefs.HasKey("DualShot"))
+        if (PlayerPrefs.HasKey(DataController.DUALSHOT_KEY))
         {
             PlayerController.instance.canFireDualShot = true;
-            dualShotStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+            dualShotStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(ACTIVE_STATUS);
         }
-        if (PlayerPrefs.HasKey("Armor"))
+        if (PlayerPrefs.HasKey(DataController.ARMOR_KEY))
         {
             PlayerController.instance.canAbsorbDamage = true;
-            armorStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+            armorStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(ACTIVE_STATUS);
         }
-        if (PlayerPrefs.HasKey("Teleport"))
+        if (PlayerPrefs.HasKey(DataController.TELPORT_KEY))
         {
             PlayerController.instance.canTeleport = true;
-            teleportStatusIcon.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/panel_active");
+            teleportStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(ACTIVE_STATUS);
         }
 
         if (playerRank == DataController.MASTER_RANK) playerReachedMaxRank = true;
@@ -448,7 +320,7 @@ public class GameController : MonoBehaviour
             joystickControlRight.SetActive(true);
         }
 
-        playerShip.SetActive(false);
+        HidePlayerShip();
     }
     private void SetupUI()
     {
@@ -457,14 +329,14 @@ public class GameController : MonoBehaviour
         rankText.text = GetRankText(playerRank);
         if (!playerReachedMaxRank)
         {
-            xpBar.maxValue = (int)CalculateRankXP(playerRank);
+            xpBar.maxValue = (int)CalculateXPForNextRank(playerRank);
             xpBar.value = playerXP;
         }
         else
         {
             xpBar.maxValue = 1;
             xpBar.value = 1;
-            xpAddedText.GetComponent<Text>().text = "MAXED";
+            xpAddedText.GetComponent<Text>().text = MAXIMUM_RANK_TEXT;
             xpAddedText.SetActive(true);
         }
         hpBar.maxValue = PlayerController.instance.maxHealth;
@@ -479,9 +351,79 @@ public class GameController : MonoBehaviour
             displayRoundMessages[5].GetComponent<Text>().text = counter + "";
             counter--;
         }
-        displayRoundMessages[5].SetActive(false);
-        playerShip.SetActive(true);
+        HideCountdownMessage();
+        ShowPlayerShip();
+        Time.timeScale = 1f;
         isGamePaused = false;
+    }
+    private IEnumerator SpawnWaves()
+    {
+        yield return new WaitForSeconds(debrisStartWait + countdown);
+        StartCoroutine(DisplayWord(10.0f));
+
+        PlayWord();
+        while (true)
+        {
+            PopulateDebrisArray();
+
+            for (int i = 0; i < debrisCount; i++)
+            {
+                GameObject debris = debrisArray[i];
+                Vector3 spawnPosition = new Vector3(
+                    UnityEngine.Random.Range(-debrisOrigin.x, debrisOrigin.x),
+                    debrisOrigin.y,
+                    debrisOrigin.z);
+                Quaternion spawnRotation = Quaternion.identity;
+                Instantiate(debris, spawnPosition, spawnRotation);
+                yield return new WaitForSeconds(debrisSpawnWait);
+            }
+            yield return new WaitForSeconds(debrisWaveWait);
+
+            if (roundOver) break;
+        }
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!isGamePaused)
+            {
+                mainMenuButton.GetComponent<Image>().sprite = GetMainMenuStatusSprite(ACTIVE_STATUS);
+                mainMenuButton.GetComponent<Button>().interactable = true;
+                Time.timeScale = 0f;
+                isGamePaused = true;
+            }
+            else
+            {
+                mainMenuButton.GetComponent<Image>().sprite = GetMainMenuStatusSprite(INACTIVE_STATUS);
+                mainMenuButton.GetComponent<Button>().interactable = false;
+                HidePickupMessage();
+                Time.timeScale = 1f;
+                isGamePaused = false;
+            }
+        }
+        if (!_audio.isPlaying)
+            _audio.volume = DataController.DEFAULT_VOL;
+    }
+    private IEnumerator SlowPlayerShip()
+    {
+        PlayerController.instance.DecreaseSpeed();
+        for (int i = 1; i <= numberOfFlashes * 2; i++)
+        {
+            if (IsPlayerShipActive())
+            {
+                playerShip.transform.GetChild(0).gameObject.SetActive(false);
+                yield return new WaitForSeconds(slowDownFlashWait);
+            }
+
+            if (IsPlayerShipActive())
+            {
+                playerShip.transform.GetChild(0).gameObject.SetActive(true);
+                yield return new WaitForSeconds(slowDownFlashWait);
+            }
+        }
+        PlayerController.instance.NormalizeSpeed();
     }
     private string GetRankText(int rank)
     {
@@ -522,16 +464,16 @@ public class GameController : MonoBehaviour
     {
         PlayerController.instance.maxHealth = GetMaxHealth();
         PlayerController.instance.currentHealth = PlayerController.instance.maxHealth;
-        PlayerPrefs.DeleteKey("PlayerHealth");
+        PlayerPrefs.DeleteKey(DataController.PLAYER_HEALTH_KEY);
     }
     private bool IsFirstTimeForPickup(int number)
     {
         switch (number)
         {
-            case 0: return !PlayerPrefs.HasKey("HEALTHPICKUP");
-            case 1: return !PlayerPrefs.HasKey("DUALSHOTPICKUP");
-            case 2: return !PlayerPrefs.HasKey("ARMORPICKUP");
-            case 3: return !PlayerPrefs.HasKey("TELEPORTPICKUP");
+            case 0: return !PlayerPrefs.HasKey(HEALTH_PICKUP_KEY);
+            case 1: return !PlayerPrefs.HasKey(DUALSHOT_PICKUP_KEY);
+            case 2: return !PlayerPrefs.HasKey(ARMOR_PICKUP_KEY);
+            case 3: return !PlayerPrefs.HasKey(TELEPORT_PICKUP_KEY);
         }
         return true;
     }
@@ -550,7 +492,7 @@ public class GameController : MonoBehaviour
             default: return 1.0f;
         }
     }
-    private double CalculateRankXP(int rank)
+    private double CalculateXPForNextRank(int rank)
     {
         double exponent = dataController.gameData.xpModifier;
         double baseXP = dataController.gameData.baseXP;
@@ -560,7 +502,7 @@ public class GameController : MonoBehaviour
     {
         if (!playerReachedMaxRank)
         {
-            int currentRankXP = (int)CalculateRankXP(playerRank);
+            int currentRankXP = (int)CalculateXPForNextRank(playerRank);
             if (playerXP > currentRankXP)
             {
                 playerRank++;
@@ -593,7 +535,7 @@ public class GameController : MonoBehaviour
             hasPlayerCompletedLevel = true;
             if (playerRank != DataController.MASTER_RANK)
             {
-                int currentRankXP = (int)CalculateRankXP(playerRank);
+                int currentRankXP = (int)CalculateXPForNextRank(playerRank);
                 if (playerXP > currentRankXP)
                 {
                     playerRank++;
@@ -632,84 +574,35 @@ public class GameController : MonoBehaviour
     }
    private IEnumerator EndOfRoundStats()
     {
-        if (!playerReachedMaxRank)
-        {
-            xpAddedText.SetActive(true);
-            xpAddedText.GetComponent<Text>().text = "+" + xpPlayerEarned + " xp ";
-            xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-        }
+        if (!playerReachedMaxRank) ShowXPEarnedMessage();
 
-        displayRoundMessages[0].SetActive(true);
-        displayRoundMessages[0].GetComponent<Image>().CrossFadeAlpha(0, 9.0f, true);
-        float playerStreakCount = playerStreak / 0.05f;
-
-        displayRoundMessages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace("#",""+((int)playerStreakCount + 1));
-        displayRoundMessages[1].SetActive(true);
-        displayRoundMessages[1].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+        ShowPlayerStreakBackground();
+        ShowPlayerStreakMessage();
         yield return new WaitForSeconds(0.5f);
 
         if (playerAchievedNextRank && !playerUnlockedNextLevel && !playerUnlockedNormalHardDifficulty && !hasPlayerCompletedLevel)
         {
-            displayRoundMessages[2].SetActive(true);
-            displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", "" + GetRankText(playerRank).ToUpper());
-            displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+            ShowRankAchievedMessage();
             yield return new WaitForSeconds(0.5f);
         }else if (playerAchievedNextRank && (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel))
         {
-            displayRoundMessages[2].SetActive(true);
-            displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", GetRankText(playerRank).ToUpper());
-            displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-            if (playerUnlockedNextLevel)
+            ShowRankAchievedMessage();
+            if (playerUnlockedNextLevel) ShowUnlockedLevelMessage();
+            else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage();
+            else if (hasPlayerCompletedLevel)
             {
-                displayRoundMessages[3].SetActive(true);
-                displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
-                displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-            }
-            else if (playerUnlockedNormalHardDifficulty)
-            {
-                displayRoundMessages[3].SetActive(true);
-                displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[3];
-                displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-            }else if (hasPlayerCompletedLevel)
-            {
-                displayRoundMessages[3].SetActive(true);
-                displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", ""+ levelCompleteBonus);
-                displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-
-                if (!playerReachedMaxRank)
-                {
-                    xpAddedText.SetActive(true);
-                    xpAddedText.GetComponent<Text>().text = "+" + levelCompleteBonus + " xp ";
-                    xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-                }
+                ShowLevelCompleteMessage();
                 hasPlayerCompletedLevel = false;
             }
             yield return new WaitForSeconds(0.5f);
         }
         else if (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel)
         {
-            if (playerUnlockedNextLevel)
+            if (playerUnlockedNextLevel) ShowUnlockedLevelMessage2();
+            else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage2();
+            else if (hasPlayerCompletedLevel)
             {
-                displayRoundMessages[2].SetActive(true);
-                displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
-                displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-            }
-            else if (playerUnlockedNormalHardDifficulty)
-            {
-                displayRoundMessages[2].SetActive(true);
-                displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[3];
-                displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-            }else if (hasPlayerCompletedLevel)
-            {
-                displayRoundMessages[2].SetActive(true);
-                displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
-                displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-                if (!playerReachedMaxRank)
-                {
-                    xpAddedText.SetActive(true);
-                    xpAddedText.GetComponent<Text>().text = "+" + levelCompleteBonus + " xp ";
-                    xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
-                }
+                ShowLevelCompleteMessage2();
                 hasPlayerCompletedLevel = false;
             }
             yield return new WaitForSeconds(0.5f);
@@ -717,21 +610,20 @@ public class GameController : MonoBehaviour
     }
     private void RoundWin()
     {
+        HidePlayerShip();
+        ShowRoundWonMessage();
         CalculateWordScore();
         CheckProgression();
-        gameOver = true;
-        displayRoundMessages[6].GetComponent<Text>().text = "Good job! Tap to continue.";
-        displayRoundMessages[6].SetActive(true);
-        playerShip.SetActive(false);
         StartCoroutine(EndOfRoundStats());
 
-        PlayerPrefs.SetFloat("PlayerStreak", playerStreak + playerStreakAdditive);
-        if (PlayerController.instance.canFireDualShot) PlayerPrefs.SetInt("DualShot", 1);
-        else PlayerPrefs.DeleteKey("DualShot");
-        if (PlayerController.instance.canAbsorbDamage) PlayerPrefs.SetInt("Armor", 1);
-        else PlayerPrefs.DeleteKey("Armor");
-        if (PlayerController.instance.canTeleport) PlayerPrefs.SetInt("Teleport", 1);
-        else PlayerPrefs.DeleteKey("Teleport");
+        PlayerPrefs.SetFloat(DataController.PLAYER_STREAK_KEY, playerStreak + playerStreakAdditive);
+        if (PlayerController.instance.canFireDualShot) PlayerPrefs.SetInt(DataController.DUALSHOT_KEY, 1);
+        else PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
+        if (PlayerController.instance.canAbsorbDamage) PlayerPrefs.SetInt(DataController.ARMOR_KEY, 1);
+        else PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
+        if (PlayerController.instance.canTeleport) PlayerPrefs.SetInt(DataController.TELPORT_KEY, 1);
+        else PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+        roundOver = true;
     }
     private void PopulateDebrisArray()
     {
@@ -855,14 +747,6 @@ public class GameController : MonoBehaviour
             }
         }
     }
-    private int CalculateTargetPanelIndex()
-    {
-            return 0;
-    }
-    private GameObject[] GetTargetPanel()
-    {
-        return selectedWordPanel;
-    }
     private int[] CalculateTargetIndices()
     {
         int[] targetIndices = new int[selectedWord.Length];
@@ -883,33 +767,7 @@ public class GameController : MonoBehaviour
         }
         return targetIndices;
     }
-    private IEnumerator SpawnWaves()
-    {
-        yield return new WaitForSeconds(debrisStartWait + countdown);
-        StartCoroutine(DisplayWord(10.0f));
-
-        PlayWord();
-        while (true)
-        {
-            PopulateDebrisArray();
-
-            for (int i = 0; i < debrisCount; i++)
-            {
-                GameObject debris = debrisArray[i];
-                Vector3 spawnPosition = new Vector3(
-                    UnityEngine.Random.Range(-debrisOrigin.x, debrisOrigin.x),
-                    debrisOrigin.y, 
-                    debrisOrigin.z);
-                Quaternion spawnRotation = Quaternion.identity;
-                Instantiate(debris, spawnPosition, spawnRotation);
-                yield return new WaitForSeconds(debrisSpawnWait);
-            }
-            yield return new WaitForSeconds(debrisWaveWait);
-
-            if (gameOver) break;
-        }
-    }
-   private IEnumerator DisplayWord(float delay)
+    private IEnumerator DisplayWord(float delay)
     {
         if (!currentDifficulty.name.Equals(DataController.DIFFICULTY_HARD))
         {
@@ -963,6 +821,191 @@ public class GameController : MonoBehaviour
     }
     private void OnDestroy()
     {
-        if (!isPlayerDead) PlayerPrefs.SetFloat("PreviousRoundHealth", PlayerController.instance.currentHealth);
+        if (!isPlayerDead) PlayerPrefs.SetFloat(DataController.PLAYER_HEALTH_KEY, PlayerController.instance.currentHealth);
+    }
+    private void HidePlayerShip()
+    {
+        playerShip.SetActive(false);
+    }
+    private void ShowPlayerShip()
+    {
+        playerShip.SetActive(true);
+    }
+    private void HidePickupMessage()
+    {
+        displayPickupMessage[0].SetActive(false);
+        displayPickupMessage[1].SetActive(false);
+        displayPickupMessage[2].SetActive(false);
+        displayPickupMessage[3].SetActive(false);
+    }
+    private void ShowPickupMessage()
+    {
+        displayPickupMessage[0].SetActive(true);
+        displayPickupMessage[1].SetActive(true);
+        displayPickupMessage[2].SetActive(true);
+        displayPickupMessage[3].SetActive(true);
+    }
+    private void ShowRoundLostMessage()
+    {
+        displayRoundMessages[6].GetComponent<Text>().text = "Better luck next time! Tap to continue.";
+        displayRoundMessages[6].SetActive(true);
+    }
+    private void ShowRoundWonMessage()
+    {
+        displayRoundMessages[6].GetComponent<Text>().text = "Good job! Tap to continue.";
+        displayRoundMessages[6].SetActive(true);
+    }
+    private bool IsLastLetter()
+    {
+        return targetLetterIndex == selectedWord.Length - 1;
+    }
+    private bool LettersMatch(string targetLetter, string hitLetter)
+    {
+        return targetLetter.Equals(hitLetter);
+    }
+    private Sprite GetPickupSprite(int pickupChosen)
+    {
+        switch (pickupChosen)
+        {
+            case HEALTH_PICKUP:
+                return Resources.Load<Sprite>(HEALTH_PICKUP_PATH);
+            case DUALSHOT_PICKUP:
+                return Resources.Load<Sprite>(DUALSHOT_PICKUP_PATH);
+            case ARMOR_PICKUP:
+                return Resources.Load<Sprite>(ARMOR_PICKUP_PATH);
+            case TELEPORT_PICKUP:
+                return Resources.Load<Sprite>(TELEPORT_PICKUP_PATH);
+            default: return null;
+        }
+    }
+
+    private bool IsPlayerShipActive()
+    {
+        return playerShip != null && playerShip.activeSelf;
+    }
+    private Sprite GetSkillStatusSprite(String status)
+    {
+        return "ACTIVE".Equals(status) ? Resources.Load<Sprite>("Sprites/panel_active") : Resources.Load<Sprite>("Sprites/panel_deactive");
+    }
+    private Sprite GetMainMenuStatusSprite(String status)
+    {
+        return "ACTIVE".Equals(status) ? Resources.Load<Sprite>("Sprites/button_hangar_active") : Resources.Load<Sprite>("Sprites/button_hangar");
+    }
+    private void ShowCountdownMessage()
+    {
+        displayRoundMessages[5].SetActive(true);
+    }
+    private void HideCountdownMessage()
+    {
+        displayRoundMessages[5].SetActive(false);
+    }
+    private Texture GetBackGroundTexture(int gameLevel)
+    {
+        return Resources.Load<Texture>(dataController.gameData.allLevelData[gameLevel].backgroundPath);
+    }
+    private void CustomizeLevelBackground()
+    {
+        Texture nebulaBackground = GetBackGroundTexture(gameLevel);
+        gameBackground.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
+        GameObject backgroundChild = gameBackground.transform.GetChild(0).gameObject;
+        backgroundChild.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
+    }
+    private void SetupWordSelected()
+    {
+        targetLetterIndex = 0;
+        selectedWord = RandomWord();
+        selectedWordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[gameLevel].words[selectedWordIndex].audioPath);
+        _audio.clip = selectedWordClip;
+    }
+
+    private bool AllWordsSpelt()
+    {
+        return currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count == dataController.gameData.allLevelData[gameLevel].words.Length;
+    }
+    private void CustomizeLevelDebrisWaitTimes()
+    {
+        debrisSpawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * (gameLevel + 1));
+        switch (gameLevel)
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                debrisWaveWait = dataController.gameData.waveWait - 0;
+                break;
+            case 7:
+            case 8:
+                debrisWaveWait = dataController.gameData.waveWait - 1;
+                break;
+            case 9:
+                debrisWaveWait = dataController.gameData.waveWait - 2;
+                break;
+        }
+    }
+    private void ShowPlayerStreakBackground()
+    {
+        displayRoundMessages[0].SetActive(true);
+        displayRoundMessages[0].GetComponent<Image>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowPlayerStreakMessage()
+    {
+        float playerStreakCount = playerStreak / 0.05f;
+        displayRoundMessages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace("#", "" + ((int)playerStreakCount + 1));
+        displayRoundMessages[1].SetActive(true);
+        displayRoundMessages[1].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowRankAchievedMessage()
+    {
+        displayRoundMessages[2].SetActive(true);
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", "" + GetRankText(playerRank).ToUpper());
+        displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowUnlockedLevelMessage()
+    {
+        displayRoundMessages[3].SetActive(true);
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
+        displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+
+    private void ShowUnlockedLevelMessage2()
+    {
+        displayRoundMessages[2].SetActive(true);
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
+        displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    
+    private void ShowUnlockedDifficultyMessage()
+    {
+        displayRoundMessages[3].SetActive(true);
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[3];
+        displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowUnlockedDifficultyMessage2()
+    {
+        displayRoundMessages[2].SetActive(true);
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[3];
+        displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+
+    private void ShowLevelCompleteMessage()
+    {
+        displayRoundMessages[3].SetActive(true);
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
+        displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowLevelCompleteMessage2()
+    {
+        displayRoundMessages[2].SetActive(true);
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
+        displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowXPEarnedMessage()
+    {
+        xpAddedText.SetActive(true);
+        xpAddedText.GetComponent<Text>().text = "+" + xpPlayerEarned + " xp ";
+        xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 /**
@@ -12,7 +11,8 @@ using UnityStandardAssets.CrossPlatformInput;
  * PickupArmor - Play sfx, set skill to true and update game controller
  * PickupDualShot - Play sfx, set skill to true and update game controller
  * PickupHealth - Play sfx, increase health and update game controller
- * DecreaseSpeed - Play sfx, reduce speed, wait 3 seconds, play sfx and increase speed
+ * DecreaseSpeed - Play sfx, reduce speed
+ * NormalizeSpeed - Set speed to maximum
  * AbsorbDamage - Play sfx,  play vfx, set skill to false and update game controller
  * TakeDamage - Play sfx,  play vfx, and update game controller
  * On Awake: instantiate and initialize audio sources, player speed, and skills (fire, dualshot, teleport, absorb damage)
@@ -109,14 +109,15 @@ public class PlayerController : MonoBehaviour
         }
         GameController.instance.RefreshHealthBar(amt, false);
     }
-
-    public IEnumerator DecreaseSpeed()
+    public void DecreaseSpeed()
     {
         _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         _audio.clip = slowDownClip;
         _audio.Play();
         currentSpeed = currentSpeed / 2;
-        yield return new WaitForSeconds(3.0f);
+    }
+    public void NormalizeSpeed()
+    {
         currentSpeed = maxSpeed;
     }
 
@@ -125,7 +126,7 @@ public class PlayerController : MonoBehaviour
         _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         _audio.clip = armorUsedClip;
         _audio.Play();
-        StartCoroutine(GameController.instance.ArmorActivated());
+        StartCoroutine(GameController.instance.ArmorActive());
         canAbsorbDamage = false;
         GameController.instance.UpdateArmorStatusIcon("DEACTIVE");
     }
@@ -142,7 +143,7 @@ public class PlayerController : MonoBehaviour
             if (currentHealth <= 0)
                 GameController.instance.isPlayerDead = true;
             else
-                StartCoroutine(GameController.instance.BeenHit());
+                StartCoroutine(GameController.instance.PlayerShipHit());
         }
         else
         {
