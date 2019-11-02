@@ -58,6 +58,21 @@ public class GameController : MonoBehaviour
     public const string ACTIVE_STATUS = "ACTIVE";
     public const string INACTIVE_STATUS = "INACTIVE";
     public const string MAXIMUM_RANK_TEXT = "MAXED";
+    public const int DELAY = 3;
+
+    public const int LEVEL_ONE = 0;
+    public const int LEVEL_TWO = 1;
+    public const int LEVEL_THREE = 2;
+    public const int LEVEL_FOUR = 3;
+    public const int LEVEL_FIVE = 4;
+    public const int LEVEL_SIX = 5;
+    public const int LEVEL_SEVEN = 6;
+    public const int LEVEL_EIGHT = 7;
+    public const int LEVEL_NINE = 8;
+    public const int LEVEL_TEN = 9;
+
+    public const int ENEMY_HAZARD = 3;
+    public const int ASTEROID_OR_ENEMY=0;
 
     private DataController dataController;
     private Difficulty currentDifficulty;
@@ -65,7 +80,6 @@ public class GameController : MonoBehaviour
 
     private int gameLevel;
     private bool roundOver;
-    private int enemyShipsAllowed;
     private int levelXPModifier = 1;
     private int levelCompleteBonus;
     private bool levelIncomplete;
@@ -92,10 +106,9 @@ public class GameController : MonoBehaviour
     private bool hasPlayerCompletedLevel = false;
     private Color shipNormalColor = Color.white;
     private Color shipHitColor = Color.red;
-    private Color shipAbsorbedDamageColor = Color.yellow;    
+    private Color shipAbsorbedDamageColor = Color.yellow;
     private float playerStreak = 0f;
     private const float playerStreakAdditive = 0.05f;
-    private bool playerReachedMaxRank;
 
     public void LoadMainMenu()
     {
@@ -103,7 +116,9 @@ public class GameController : MonoBehaviour
         PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
         PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
         PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
-        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELEPORT_KEY);
+        Time.timeScale = 1f;
+        isGamePaused = false;
 
         SceneManager.LoadScene(DataController.MAIN_MENU_SCENE);
     }
@@ -124,7 +139,7 @@ public class GameController : MonoBehaviour
             selectedWordPanel[targetLetterIndex].SetActive(true);
             selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedColor;
 
-            if (IsLastLetter()) RoundWin();
+            if (IsLastLetter()) RoundWon();
             else targetLetterIndex++;
         }
         else StartCoroutine(SlowPlayerShip());
@@ -187,7 +202,7 @@ public class GameController : MonoBehaviour
         PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
         PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
         PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
-        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELEPORT_KEY);
 
         roundOver = true;
     }
@@ -197,7 +212,7 @@ public class GameController : MonoBehaviour
     }
     public void RefreshHealthBar(float amt, bool isDamaged)
     {
-        StartCoroutine(DisplayHPChangeText(3, amt, isDamaged));
+        StartCoroutine(DisplayHPChangeText(DELAY, amt, isDamaged));
 
         hpBar.maxValue = PlayerController.instance.maxHealth;
         hpBar.value = PlayerController.instance.currentHealth;
@@ -269,7 +284,7 @@ public class GameController : MonoBehaviour
         levelXPModifier = gameLevel + 1;
         levelCompleteBonus = dataController.gameData.allLevelData[gameLevel].completionBonus;
 
-        if (!AllWordsSpelt ()) levelIncomplete = true;
+        if (!AllWordsSpelt()) levelIncomplete = true;
 
         CustomizeLevelBackground();
 
@@ -301,13 +316,11 @@ public class GameController : MonoBehaviour
             PlayerController.instance.canAbsorbDamage = true;
             armorStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(ACTIVE_STATUS);
         }
-        if (PlayerPrefs.HasKey(DataController.TELPORT_KEY))
+        if (PlayerPrefs.HasKey(DataController.TELEPORT_KEY))
         {
             PlayerController.instance.canTeleport = true;
             teleportStatusIcon.GetComponent<Image>().sprite = GetSkillStatusSprite(ACTIVE_STATUS);
         }
-
-        if (playerRank == DataController.MASTER_RANK) playerReachedMaxRank = true;
 
         if (PlayerPrefs.GetString(DataController.JOYSTICK_CONTROL).Equals(DataController.JOYSTICK_CONTROL_LEFT))
         {
@@ -327,7 +340,7 @@ public class GameController : MonoBehaviour
         mainMenuButton.GetComponent<Button>().interactable = false;
 
         rankText.text = GetRankText(playerRank);
-        if (!playerReachedMaxRank)
+        if (!HasPlayerReachedMaxRank())
         {
             xpBar.maxValue = (int)CalculateXPForNextRank(playerRank);
             xpBar.value = playerXP;
@@ -449,26 +462,28 @@ public class GameController : MonoBehaviour
                 return "Undefined";
         }
     }
-    private IEnumerator DisplayHPChangeText(int delay, float amt, bool isDamage)
+    private IEnumerator DisplayHPChangeText(int delay, float amt, bool isDamaged)
     {
-        hpChangedText.SetActive(true);
-        if (isDamage) hpChangedText.GetComponent<Text>().text = "-" + amt + " HP";
+        ShowHPChangedText();
+
+        if (isDamaged) hpChangedText.GetComponent<Text>().text = "-" + amt + " HP";
         else hpChangedText.GetComponent<Text>().text = "+" + amt + " HP";
 
         hpChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         yield return new WaitForSeconds(delay);
         hpChangedText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
-        hpChangedText.SetActive(false);
+
+        HideHPChangedText();
     }
-    private void LevelUp()
+    private void IncreaseStats()
     {
         PlayerController.instance.maxHealth = GetMaxHealth();
         PlayerController.instance.currentHealth = PlayerController.instance.maxHealth;
         PlayerPrefs.DeleteKey(DataController.PLAYER_HEALTH_KEY);
     }
-    private bool IsFirstTimeForPickup(int number)
+    private bool IsFirstTimeForPickup(int pickupNumber)
     {
-        switch (number)
+        switch (pickupNumber)
         {
             case 0: return !PlayerPrefs.HasKey(HEALTH_PICKUP_KEY);
             case 1: return !PlayerPrefs.HasKey(DUALSHOT_PICKUP_KEY);
@@ -485,7 +500,7 @@ public class GameController : MonoBehaviour
             case DataController.CADET_RANK: return 2.0f;
             case DataController.PILOT_RANK: return 3.0f;
             case DataController.ACE_RANK: return 4.0f;
-            case DataController.CHIEF_RANK:  return 5.0f;
+            case DataController.CHIEF_RANK: return 5.0f;
             case DataController.CAPTAIN_RANK: return 6.0f;
             case DataController.COMMANDER_RANK: return 7.0f;
             case DataController.MASTER_RANK: return 8.0f;
@@ -500,83 +515,90 @@ public class GameController : MonoBehaviour
     }
     private void CheckProgression()
     {
-        if (!playerReachedMaxRank)
+        currentDifficulty.AddToListOfLevelCompletedWords(gameLevel, selectedWord);
+        if (!HasPlayerReachedMaxRank())
         {
-            int currentRankXP = (int)CalculateXPForNextRank(playerRank);
-            if (playerXP > currentRankXP)
+            int nextRankXP = (int)CalculateXPForNextRank(playerRank);
+            if (playerXP > nextRankXP)
             {
                 playerRank++;
-                playerXP = playerXP - currentRankXP;
-                LevelUp();
+                playerXP = playerXP - nextRankXP;
+                IncreaseStats();
                 playerAchievedNextRank = true;
             }
             currentDifficulty.playerXP = playerXP;
             currentDifficulty.playerRank = playerRank;
-            currentDifficulty.AddToListOfLevelCompletedWords(gameLevel, selectedWord);
-            dataController.SavePlayerData();
         }
         else
         {
             currentDifficulty.playerXP = 0;
             currentDifficulty.playerRank = playerRank;
-            currentDifficulty.AddToListOfLevelCompletedWords(gameLevel, selectedWord);
-            dataController.SavePlayerData();
         }
-        List<string> completedLevelList = dataController.currentDifficulty.ListOfLevelCompletedWords(gameLevel);
-        if (gameLevel < 9 && !currentDifficulty.levelsUnlocked[gameLevel + 1] && completedLevelList.Count >= ((dataController.gameData.allLevelData[gameLevel].words.Length / 2) + 1)) 
-            // at least 51% of the words spelled correctly, then mark complete
+
+        if (HasUnlockedNextLevel())
         {
             currentDifficulty.levelsUnlocked[gameLevel + 1] = true;
-            dataController.SavePlayerData();
             playerUnlockedNextLevel = true;
-        }else if (levelIncomplete && completedLevelList.Count == dataController.gameData.allLevelData[gameLevel].words.Length)
+        } else if (HasSpeltAllLevelWords())
         {
             playerXP = playerXP + levelCompleteBonus;
             hasPlayerCompletedLevel = true;
-            if (playerRank != DataController.MASTER_RANK)
+            if (!HasPlayerReachedMaxRank())
             {
                 int currentRankXP = (int)CalculateXPForNextRank(playerRank);
                 if (playerXP > currentRankXP)
                 {
                     playerRank++;
                     playerXP = playerXP - currentRankXP;
-                    LevelUp();
+                    IncreaseStats();
                     playerAchievedNextRank = true;
                 }
                 currentDifficulty.playerXP = playerXP;
                 currentDifficulty.playerRank = playerRank;
-                currentDifficulty.AddToListOfLevelCompletedWords(gameLevel, selectedWord);
-                dataController.SavePlayerData();
             }
-            else playerReachedMaxRank = true;
+            else
+            {
+                currentDifficulty.playerXP = 0;
+                currentDifficulty.playerRank = playerRank;
+            }
         }
         else
         {
-            // On easy difficulty, just completed the last level and normal difficulty not unlocked, then unlock normal and hard difficulty
-            if (gameLevel == 9  && dataController.playerData.difficultySelected.Equals(DataController.DIFFICULTY_EASY) && completedLevelList.Count >= ((dataController.gameData.allLevelData[gameLevel].words.Length / 2) + 1) && dataController.playerData.difficultyUnlocked[1] == false)
+            if (CanUnlockNormalAndHardDifficulty())
             {
                 dataController.UnlockNormalAndHardDifficulty();
                 playerUnlockedNormalHardDifficulty = true;
             }
         }
+
+        dataController.SavePlayerData();
     }
     private string RandomWord()
     {
         WordData[] words = dataController.gameData.allLevelData[gameLevel].words;
-        selectedWordIndex = UnityEngine.Random.Range(0, words.Length);
-        return words[selectedWordIndex].text;
+        string wordChosen = "";
+        bool foundWord = false;
+        int counter = 0;
+        while (counter < 10 && !foundWord)
+        {
+            selectedWordIndex = UnityEngine.Random.Range(0, words.Length);
+            wordChosen = words[selectedWordIndex].text;
+            if (ListDoesNotContainWord(wordChosen)) {foundWord = true;}
+            else counter++;
+        }
+
+        return wordChosen;
     }
     private void CalculateWordScore()
     {
-        double xpEarned = Math.Round (selectedWord.Length * (double)(levelXPModifier + playerStreak), MidpointRounding.AwayFromZero);
+        double xpEarned = Math.Round(selectedWord.Length * (double)(levelXPModifier + playerStreak), MidpointRounding.AwayFromZero);
         xpPlayerEarned = (int)xpEarned;
         playerXP = playerXP + xpPlayerEarned;
     }
-   private IEnumerator EndOfRoundStats()
+    private IEnumerator EndOfRoundStats()
     {
-        if (!playerReachedMaxRank) ShowXPEarnedMessage();
+        if (!HasPlayerReachedMaxRank()) ShowXPEarnedMessage();
 
-        ShowPlayerStreakBackground();
         ShowPlayerStreakMessage();
         yield return new WaitForSeconds(0.5f);
 
@@ -584,31 +606,23 @@ public class GameController : MonoBehaviour
         {
             ShowRankAchievedMessage();
             yield return new WaitForSeconds(0.5f);
-        }else if (playerAchievedNextRank && (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel))
+        } else if (playerAchievedNextRank && (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel))
         {
             ShowRankAchievedMessage();
             if (playerUnlockedNextLevel) ShowUnlockedLevelMessage();
             else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage();
-            else if (hasPlayerCompletedLevel)
-            {
-                ShowLevelCompleteMessage();
-                hasPlayerCompletedLevel = false;
-            }
+            else if (hasPlayerCompletedLevel)ShowLevelCompleteMessage();
             yield return new WaitForSeconds(0.5f);
         }
         else if (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel)
         {
             if (playerUnlockedNextLevel) ShowUnlockedLevelMessage2();
             else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage2();
-            else if (hasPlayerCompletedLevel)
-            {
-                ShowLevelCompleteMessage2();
-                hasPlayerCompletedLevel = false;
-            }
+            else if (hasPlayerCompletedLevel) ShowLevelCompleteMessage2();
             yield return new WaitForSeconds(0.5f);
         }
     }
-    private void RoundWin()
+    private void RoundWon()
     {
         HidePlayerShip();
         ShowRoundWonMessage();
@@ -617,132 +631,88 @@ public class GameController : MonoBehaviour
         StartCoroutine(EndOfRoundStats());
 
         PlayerPrefs.SetFloat(DataController.PLAYER_STREAK_KEY, playerStreak + playerStreakAdditive);
-        if (PlayerController.instance.canFireDualShot) PlayerPrefs.SetInt(DataController.DUALSHOT_KEY, 1);
+        if (PlayerController.instance.canFireDualShot) PlayerPrefs.SetString(DataController.DUALSHOT_KEY, "YES");
         else PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
-        if (PlayerController.instance.canAbsorbDamage) PlayerPrefs.SetInt(DataController.ARMOR_KEY, 1);
+        if (PlayerController.instance.canAbsorbDamage) PlayerPrefs.SetString(DataController.ARMOR_KEY, "YES");
         else PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
-        if (PlayerController.instance.canTeleport) PlayerPrefs.SetInt(DataController.TELPORT_KEY, 1);
-        else PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+        if (PlayerController.instance.canTeleport) PlayerPrefs.SetString(DataController.TELEPORT_KEY, "YES");
+        else PlayerPrefs.DeleteKey(DataController.TELEPORT_KEY);
+
         roundOver = true;
     }
     private void PopulateDebrisArray()
     {
         debrisArray = new GameObject[debrisCount];
-        GameObject[] blocksArray = new GameObject[9];
-        blocksArray[0] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex]];
+        GameObject[] randomBlocksArray = new GameObject[8];
+        int enemyShipsAllowed = DetermineNumberOfEnemyShipsAllowed();
+        int numHazards = DetermineNumberOfHazards();
 
-        for (int j = 1; j < blocksArray.Length; j++)
+        for (int j = 0; j < randomBlocksArray.Length; j++)
         {
-            int num = UnityEngine.Random.Range(0, 26);
-            blocksArray[j] = blocks[num];
-        }
-
-        switch (gameLevel)
-        {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                enemyShipsAllowed = 0;
-                break;
-            case 5:
-                enemyShipsAllowed = 1;
-                break;
-            case 6:
-            case 7:
-                enemyShipsAllowed = 2;
-                break;
-            case 8:
-            case 9:
-                enemyShipsAllowed = 3;
-                break;
-
+            int randomNum = UnityEngine.Random.Range(0, 26);
+            randomBlocksArray[j] = blocks[randomNum];
         }
 
         for (int i = 0; i < debrisCount; i++)
         {
-            int random = UnityEngine.Random.Range(0, 3);
-            if (random == 0)
+            int randomDebrisNum = UnityEngine.Random.Range(0, 3);
+            if (randomDebrisNum == ASTEROID_OR_ENEMY)
             {
-                int numHazards = 0;
-                switch (gameLevel)
-                {
-                    case 0:
-                    case 1:
-                        numHazards = 1;
-                        break;
-                    case 2:
-                    case 3:
-                        numHazards = 2;
-                        break;
-                    case 4:
-                        numHazards = 3;
-                        break;
-                    case 5:
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                        numHazards = 4;
-                        break;
-                }
-
-                int hazardChosen = UnityEngine.Random.Range(0, numHazards);
-                if (hazardChosen == 3)
+                int chooseHazard = UnityEngine.Random.Range(0, numHazards);
+                if (chooseHazard == ENEMY_HAZARD)
                 {
                     if (enemyShipsAllowed > 0)
                     {
-                        debrisArray[i] = hazards[hazardChosen];
+                        debrisArray[i] = hazards[chooseHazard];
                         enemyShipsAllowed--;
                     }
                     else debrisArray[i] = hazards[UnityEngine.Random.Range(0, 3)];
                 }
-                else debrisArray[i] = hazards[hazardChosen];
+                else debrisArray[i] = hazards[chooseHazard];
             }
             else
             {
-                int num = UnityEngine.Random.Range(0, 100);
-                if (num <= 44) debrisArray[i] = blocksArray[0]; // 45 % chance 
-                else if (num > 44 && num <= 54) // 10 % chance
+                int randomBlockNum = UnityEngine.Random.Range(0, 100);
+                if (randomBlockNum <= 44) debrisArray[i] = PickALetterBlock (targetLetterIndex);
+                else if (BetweenNumbers (randomBlockNum, 44, 54))
                 {
-                    if (targetLetterIndex + 1 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 1]];
-                    else debrisArray[i] = blocksArray[1];
+                    if (MoreThanOneLetterLeft()) debrisArray[i] = PickALetterBlock (targetLetterIndex+1);
+                    else debrisArray[i] = randomBlocksArray[0];
                 }
-                else if (num > 54 && num <= 64) // 10 % chance
+                else if (BetweenNumbers(randomBlockNum, 54, 64))
                 {
-                    if (targetLetterIndex + 1 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 1]];
-                    else debrisArray[i] = blocksArray[2];
+                    if (MoreThanOneLetterLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 1);
+                    else debrisArray[i] = randomBlocksArray[1];
                 }
-                else if (num > 64 && num <= 74) // 10 % chance
+                else if (BetweenNumbers(randomBlockNum, 64, 74))
                 {
-                    if (targetLetterIndex + 2 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 2]];
-                    else debrisArray[i] = blocksArray[3];
+                    if (MoreThanTwoLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 2);
+                    else debrisArray[i] = randomBlocksArray[2];
                 }
-                else if (num > 74 && num <= 79) // 5 % chance
+                else if (BetweenNumbers(randomBlockNum, 74, 79))
                 {
-                    if (targetLetterIndex + 2 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 2]];
-                    else debrisArray[i] = blocksArray[4];
+                    if (MoreThanTwoLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 2);
+                    else debrisArray[i] = randomBlocksArray[3];
                 }
-                else if (num > 79 && num <= 84) // 5 % chance
+                else if (BetweenNumbers(randomBlockNum, 79, 84))
                 {
-                    if (targetLetterIndex + 3 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 3]];
-                    else debrisArray[i] = blocksArray[5];
+                    if (MoreThanThreeLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 3);
+                    else debrisArray[i] = randomBlocksArray[4];
                 }
-                else if (num > 84 && num <= 89) // 5 % chance
+                else if (BetweenNumbers(randomBlockNum, 84, 89))
                 {
-                    if (targetLetterIndex + 3 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 3]];
-                    else debrisArray[i] = blocksArray[6];
+                    if (MoreThanThreeLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 3);
+                    else debrisArray[i] = randomBlocksArray[5];
                 }
-                else if (num > 89 && num <= 94) // 5 % chance
+                else if (BetweenNumbers(randomBlockNum, 89, 94))
                 {
-                    if (targetLetterIndex + 4 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 4]];
-                    else debrisArray[i] = blocksArray[7];
+                    if (MoreThanFourLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 4);
+                    else debrisArray[i] = randomBlocksArray[6];
                 }
-                else if (num > 94) // 5 % chance
+                else if (randomBlockNum > 94)
                 {
-                    if (targetLetterIndex + 4 <= indicesForLettersFromSelectedWord.Length - 1) debrisArray[i] = blocks[indicesForLettersFromSelectedWord[targetLetterIndex + 4]];
-                    else debrisArray[i] = blocksArray[8];
+                    if (MoreThanFourLettersLeft()) debrisArray[i] = PickALetterBlock(targetLetterIndex + 4);
+                    else debrisArray[i] = randomBlocksArray[7];
                 }
             }
         }
@@ -945,13 +915,11 @@ public class GameController : MonoBehaviour
                 break;
         }
     }
-    private void ShowPlayerStreakBackground()
+    private void ShowPlayerStreakMessage()
     {
         displayRoundMessages[0].SetActive(true);
         displayRoundMessages[0].GetComponent<Image>().CrossFadeAlpha(0, 9.0f, true);
-    }
-    private void ShowPlayerStreakMessage()
-    {
+
         float playerStreakCount = playerStreak / 0.05f;
         displayRoundMessages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace("#", "" + ((int)playerStreakCount + 1));
         displayRoundMessages[1].SetActive(true);
@@ -976,7 +944,7 @@ public class GameController : MonoBehaviour
         displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
-    
+
     private void ShowUnlockedDifficultyMessage()
     {
         displayRoundMessages[3].SetActive(true);
@@ -1007,5 +975,119 @@ public class GameController : MonoBehaviour
         xpAddedText.SetActive(true);
         xpAddedText.GetComponent<Text>().text = "+" + xpPlayerEarned + " xp ";
         xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+    }
+    private void ShowHPChangedText()
+    {
+        hpChangedText.SetActive(true);
+    }
+    private void HideHPChangedText()
+    {
+        hpChangedText.SetActive(false);
+    }
+    private bool HasPlayerReachedMaxRank()
+    {
+        return playerRank == DataController.MASTER_RANK;
+    }
+    private bool HasUnlockedNextLevel()
+    {
+        return gameLevel < 9 && NextLevelIsLocked() && SpeltAtleast51PercentOfLevelWords();
+    }
+    private bool NextLevelIsLocked()
+    {
+        return !currentDifficulty.levelsUnlocked[gameLevel + 1];
+    }
+    private bool SpeltAtleast51PercentOfLevelWords()
+    {
+        return currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count >= ((dataController.gameData.allLevelData[gameLevel].words.Length / 2) + 1);
+    }
+    private bool HasSpeltAllLevelWords()
+    {
+        return levelIncomplete && currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count == dataController.gameData.allLevelData[gameLevel].words.Length;
+    }
+    private bool CanUnlockNormalAndHardDifficulty()
+    {
+        return gameLevel == 9 && SpeltAtleast51PercentOfLevelWords() && IsEasyDifficulty() && NormalDifficultyIsLocked();
+    }
+    private bool IsEasyDifficulty()
+    {
+        return DataController.DIFFICULTY_EASY.Equals(currentDifficulty.name);
+    }
+    private bool NormalDifficultyIsLocked()
+    {
+        return !dataController.playerData.difficultyUnlocked[1];
+    }
+    private bool ListDoesNotContainWord(string word)
+    {
+        return !currentDifficulty.ListOfLevelCompletedWords(gameLevel).Contains(word);
+    }
+    private int DetermineNumberOfEnemyShipsAllowed()
+    {
+        switch (gameLevel)
+        {
+            case LEVEL_ONE:
+            case LEVEL_TWO:
+            case LEVEL_THREE:
+            case LEVEL_FOUR:
+            case LEVEL_FIVE:
+                return 0;
+            case LEVEL_SIX:
+                return 1;
+            case LEVEL_SEVEN:
+            case LEVEL_EIGHT:
+                return 2;
+            case LEVEL_NINE:
+            case LEVEL_TEN:
+                return 3;
+            default:
+                return -1;
+        }
+    }
+    private int DetermineNumberOfHazards()
+    {
+        switch (gameLevel)
+        {
+            case LEVEL_ONE:
+            case LEVEL_TWO:
+                return 1;
+            case LEVEL_THREE:
+            case LEVEL_FOUR:
+                return 2;
+            case LEVEL_FIVE:
+                return 3;
+            case LEVEL_SIX:
+            case LEVEL_SEVEN:
+            case LEVEL_EIGHT:
+            case LEVEL_NINE:
+            case LEVEL_TEN:
+               return 4;
+            default:
+                return -1;
+        }
+    }
+
+    private bool MoreThanOneLetterLeft()
+    {
+        return targetLetterIndex + 1 <= (indicesForLettersFromSelectedWord.Length - 1);
+    }
+    private bool MoreThanTwoLettersLeft()
+    {
+        return targetLetterIndex + 2 <= (indicesForLettersFromSelectedWord.Length - 1);
+    }
+    private bool MoreThanThreeLettersLeft()
+    {
+        return targetLetterIndex + 3 <= (indicesForLettersFromSelectedWord.Length - 1);
+    }
+    private bool MoreThanFourLettersLeft()
+    {
+        return targetLetterIndex + 4 <= (indicesForLettersFromSelectedWord.Length - 1);
+    }
+
+    private bool BetweenNumbers(int num, int num1, int num2)
+    {
+        return num > num1 && num <= num2;
+    }
+    private GameObject PickALetterBlock(int index)
+    {
+        return blocks[indicesForLettersFromSelectedWord[index]];
     }
 }

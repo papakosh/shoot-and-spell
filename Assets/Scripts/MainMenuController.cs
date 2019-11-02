@@ -151,7 +151,7 @@ public class MainMenuController : MonoBehaviour
         PlayerPrefs.DeleteKey(DataController.PLAYER_STREAK_KEY);
         PlayerPrefs.DeleteKey(DataController.DUALSHOT_KEY);
         PlayerPrefs.DeleteKey(DataController.ARMOR_KEY);
-        PlayerPrefs.DeleteKey(DataController.TELPORT_KEY);
+        PlayerPrefs.DeleteKey(DataController.TELEPORT_KEY);
     }
 
     private void RefreshLevelProgress()
