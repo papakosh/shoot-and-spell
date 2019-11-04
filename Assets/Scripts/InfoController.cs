@@ -11,7 +11,7 @@ public class InfoController : MonoBehaviour
 {
     public void LoadMainMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene(DataController.MAIN_MENU_SCENE);
     }
 
     public void VisitDinvStudioLink()

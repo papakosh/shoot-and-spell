@@ -162,16 +162,16 @@ public class PlayerController : MonoBehaviour
             Destroy(gameObject);
 
         _audio = GetComponent<AudioSource>();
-        singleShotClip = Resources.Load<AudioClip>("Audio/weapon_player");
-        dualShotClip = Resources.Load<AudioClip>("Audio/dual_shot");
-        teleportUsedClip = Resources.Load<AudioClip>("Audio/teleport_used");
-        teleportPickupClip = Resources.Load<AudioClip>("Audio/teleport_pickup");
-        armorPickupClip = Resources.Load<AudioClip>("Audio/armor_pickup");
-        armorUsedClip = Resources.Load<AudioClip>("Audio/armor_used");
-        dualShotPickup = Resources.Load<AudioClip>("Audio/dualshot_pickup");
-        healthPickupClip = Resources.Load<AudioClip>("Audio/health_pickup");
-        takeDamageClip = Resources.Load<AudioClip>("Audio/takedamage");
-        slowDownClip = Resources.Load<AudioClip>("Audio/slowdown");
+        singleShotClip = Resources.Load<AudioClip>("Audio/Player/weapon_player");
+        dualShotClip = Resources.Load<AudioClip>("Audio/Player/dual_shot");
+        teleportUsedClip = Resources.Load<AudioClip>("Audio/Player/teleport_used");
+        teleportPickupClip = Resources.Load<AudioClip>("Audio/Pickups/teleport_pickup");
+        armorPickupClip = Resources.Load<AudioClip>("Audio/Pickups/armor_pickup");
+        armorUsedClip = Resources.Load<AudioClip>("Audio/Player/armor_used");
+        dualShotPickup = Resources.Load<AudioClip>("Audio/Pickups/dualshot_pickup");
+        healthPickupClip = Resources.Load<AudioClip>("Audio/Pickups/health_pickup");
+        takeDamageClip = Resources.Load<AudioClip>("Audio/Player/takedamage");
+        slowDownClip = Resources.Load<AudioClip>("Audio/Player/slowdown");
         _audio.clip = singleShotClip;
         _audio.volume = PlayerPrefs.GetFloat(DataController.WEAPONS_VOLUME);
         currentSpeed = maxSpeed;

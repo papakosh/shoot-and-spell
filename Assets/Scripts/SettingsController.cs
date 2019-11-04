@@ -66,7 +66,7 @@ public class SettingsController : MonoBehaviour
     }
     public void LoadMainMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene(DataController.MAIN_MENU_SCENE);
     }
 
     public void RefreshMusicVolume()
@@ -121,7 +121,7 @@ public class SettingsController : MonoBehaviour
         }
             musicIsPlaying = true;
             _audio.volume = musicVolSlider.value;
-            _audio.clip = Resources.Load<AudioClip>("Audio/background_music");
+            _audio.clip = Resources.Load<AudioClip>("Audio/Settings/background_music");
             _audio.Play();
             testStopMusicButton.GetComponentInChildren<Text>().text = "Stop";
     }
@@ -155,7 +155,7 @@ public class SettingsController : MonoBehaviour
         }
         weaponsIsPlaying = true;
         _audio.volume = weaponsVolSlider.value;
-        _audio.clip = Resources.Load<AudioClip>("Audio/weapon_player");
+        _audio.clip = Resources.Load<AudioClip>("Audio/Player/weapon_player");
         _audio.Play();
         testStopWeaponsButton.GetComponentInChildren<Text>().text = "Stop";
     }
@@ -189,7 +189,7 @@ public class SettingsController : MonoBehaviour
         }
         explosionsIsPlaying = true;
         _audio.volume = explosionsVolSlider.value;
-        _audio.clip = Resources.Load<AudioClip>("Audio/asteroid_explosion");
+        _audio.clip = Resources.Load<AudioClip>("Audio/Settings/asteroid_explosion");
         _audio.Play();
         testStopExplosionsButton.GetComponentInChildren<Text>().text = "Stop";
     }
@@ -223,7 +223,7 @@ public class SettingsController : MonoBehaviour
         }
         voicesIsPlaying = true;
         _audio.volume = voicesVolSlider.value;
-        _audio.clip = Resources.Load<AudioClip>("Audio/level 1/balloon");
+        _audio.clip = Resources.Load<AudioClip>("Audio/Words/Level 1/balloon");
         _audio.Play();
         testStopVoicesButton.GetComponentInChildren<Text>().text = "Stop";
     }

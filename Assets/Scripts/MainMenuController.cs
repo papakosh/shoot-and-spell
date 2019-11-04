@@ -100,9 +100,9 @@ public class MainMenuController : MonoBehaviour
 
     public void SelectEasyDifficulty()
     {
-        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
-        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
-        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general_selected");
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_EASY);
 
         currentDifficulty = dataController.currentDifficulty;
@@ -110,9 +110,9 @@ public class MainMenuController : MonoBehaviour
     }
     public void SelectNormalDifficulty()
     {
-        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
-        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
-        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general_selected");
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_NORMAL);
 
         currentDifficulty = dataController.currentDifficulty;
@@ -120,9 +120,9 @@ public class MainMenuController : MonoBehaviour
     }
     public void SelectHardDifficulty()
     {
-        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general_selected");
-        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
-        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/button_general");
+        hardButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general_selected");
+        easyButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
+        normalButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("Sprites/UI/Main Menu/button_general");
         dataController.UpdatePlayerDifficulty(DataController.DIFFICULTY_HARD);
 
         currentDifficulty = dataController.currentDifficulty;

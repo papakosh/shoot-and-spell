@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/**
+ * Description:
+ * 
+ * Details:
+ * 
+ */
 public class GameController : MonoBehaviour
 {
     public static GameController instance = null;
@@ -43,37 +48,6 @@ public class GameController : MonoBehaviour
     public GameObject joystickControlRight;
     public GameObject mainMenuButton;
 
-    public const int HEALTH_PICKUP = 0;
-    public const int DUALSHOT_PICKUP = 1;
-    public const int ARMOR_PICKUP = 2;
-    public const int TELEPORT_PICKUP = 3;
-    public const string HEALTH_PICKUP_PATH = "Sprites/Pickups/icon_health";
-    public const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/icon_dual_shot";
-    public const string ARMOR_PICKUP_PATH = "Sprites/Pickups/icon_armor";
-    public const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/icon_teleport";
-    public const string HEALTH_PICKUP_KEY = "SEEN_HEALTH";
-    public const string DUALSHOT_PICKUP_KEY = "SEEN_DUALSHOT";
-    public const string ARMOR_PICKUP_KEY = "SEEN_ARMOR";
-    public const string TELEPORT_PICKUP_KEY = "SEEN_TELEPORT";
-    public const string ACTIVE_STATUS = "ACTIVE";
-    public const string INACTIVE_STATUS = "INACTIVE";
-    public const string MAXIMUM_RANK_TEXT = "MAXED";
-    public const int DELAY = 3;
-
-    public const int LEVEL_ONE = 0;
-    public const int LEVEL_TWO = 1;
-    public const int LEVEL_THREE = 2;
-    public const int LEVEL_FOUR = 3;
-    public const int LEVEL_FIVE = 4;
-    public const int LEVEL_SIX = 5;
-    public const int LEVEL_SEVEN = 6;
-    public const int LEVEL_EIGHT = 7;
-    public const int LEVEL_NINE = 8;
-    public const int LEVEL_TEN = 9;
-
-    public const int ENEMY_HAZARD = 3;
-    public const int ASTEROID_OR_ENEMY=0;
-
     private DataController dataController;
     private Difficulty currentDifficulty;
     private AudioSource _audio;
@@ -85,17 +59,44 @@ public class GameController : MonoBehaviour
     private bool levelIncomplete;
     private GameObject[] debrisArray;
     private Color letterMatchedColor = new Color32(212, 175, 55, 255);
-    private string[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I",
-            "J", "K", "L", "M", "N", "O", "P", "Q", "R",
-            "S", "T", "U", "V", "W", "X", "Y", "Z" };
-    private int targetLetterIndex;
-    private int[] indicesForLettersFromSelectedWord;
+    private int targetLetterIndex; 
     private AudioClip selectedWordClip;
     private int selectedWordIndex;
     private string[] endOfRoundMsgs = { "x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP" };
     private string[] pickupHeaders = { "HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
     private string[] pickupMsgs = { "Add 1 point to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
     private string resumePlayingMessage = "Tap Screen to Resume";
+    
+    private const int LETTER_A_ASCII = 65;
+    private const int ENEMY_HAZARD = 3;
+    private const int ASTEROID_OR_ENEMY = 0;
+    private const string ACTIVE_STATUS = "ACTIVE";
+    private const string INACTIVE_STATUS = "INACTIVE";
+    private const string MAXIMUM_RANK_TEXT = "MAXED";
+    private const int DELAY = 3;
+    private const int LEVEL_ONE = 0;
+    private const int LEVEL_TWO = 1;
+    private const int LEVEL_THREE = 2;
+    private const int LEVEL_FOUR = 3;
+    private const int LEVEL_FIVE = 4;
+    private const int LEVEL_SIX = 5;
+    private const int LEVEL_SEVEN = 6;
+    private const int LEVEL_EIGHT = 7;
+    private const int LEVEL_NINE = 8;
+    private const int LEVEL_TEN = 9;
+    private const float playerStreakAdditive = 0.05f;
+    private const int HEALTH_PICKUP = 0;
+    private const int DUALSHOT_PICKUP = 1;
+    private const int ARMOR_PICKUP = 2;
+    private const int TELEPORT_PICKUP = 3;
+    private const string HEALTH_PICKUP_PATH = "Sprites/Pickups/health_icon_";
+    private const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/dual_shot_icon";
+    private const string ARMOR_PICKUP_PATH = "Sprites/Pickups/armor_icon";
+    private const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/teleport_icon";
+    private const string HEALTH_PICKUP_KEY = "SEEN_HEALTH";
+    private const string DUALSHOT_PICKUP_KEY = "SEEN_DUALSHOT";
+    private const string ARMOR_PICKUP_KEY = "SEEN_ARMOR";
+    private const string TELEPORT_PICKUP_KEY = "SEEN_TELEPORT";
 
     private int playerRank;
     private int playerXP;
@@ -108,7 +109,6 @@ public class GameController : MonoBehaviour
     private Color shipHitColor = Color.red;
     private Color shipAbsorbedDamageColor = Color.yellow;
     private float playerStreak = 0f;
-    private const float playerStreakAdditive = 0.05f;
 
     public void LoadMainMenu()
     {
@@ -130,7 +130,7 @@ public class GameController : MonoBehaviour
     }
     public void ProcessHit(string hitLetter)
     {
-        string targetLetter = "";
+        string targetLetter;
         if (IsLastLetter()) targetLetter = selectedWord.Substring(targetLetterIndex);
         else targetLetter = selectedWord.Substring(targetLetterIndex, 1);
 
@@ -485,10 +485,10 @@ public class GameController : MonoBehaviour
     {
         switch (pickupNumber)
         {
-            case 0: return !PlayerPrefs.HasKey(HEALTH_PICKUP_KEY);
-            case 1: return !PlayerPrefs.HasKey(DUALSHOT_PICKUP_KEY);
-            case 2: return !PlayerPrefs.HasKey(ARMOR_PICKUP_KEY);
-            case 3: return !PlayerPrefs.HasKey(TELEPORT_PICKUP_KEY);
+            case HEALTH_PICKUP: return !PlayerPrefs.HasKey(HEALTH_PICKUP_KEY);
+            case DUALSHOT_PICKUP: return !PlayerPrefs.HasKey(DUALSHOT_PICKUP_KEY);
+            case ARMOR_PICKUP: return !PlayerPrefs.HasKey(ARMOR_PICKUP_KEY);
+            case TELEPORT_PICKUP: return !PlayerPrefs.HasKey(TELEPORT_PICKUP_KEY);
         }
         return true;
     }
@@ -522,7 +522,7 @@ public class GameController : MonoBehaviour
             if (playerXP > nextRankXP)
             {
                 playerRank++;
-                playerXP = playerXP - nextRankXP;
+                playerXP -= nextRankXP;
                 IncreaseStats();
                 playerAchievedNextRank = true;
             }
@@ -541,7 +541,7 @@ public class GameController : MonoBehaviour
             playerUnlockedNextLevel = true;
         } else if (HasSpeltAllLevelWords())
         {
-            playerXP = playerXP + levelCompleteBonus;
+            playerXP += levelCompleteBonus;
             hasPlayerCompletedLevel = true;
             if (!HasPlayerReachedMaxRank())
             {
@@ -549,7 +549,7 @@ public class GameController : MonoBehaviour
                 if (playerXP > currentRankXP)
                 {
                     playerRank++;
-                    playerXP = playerXP - currentRankXP;
+                    playerXP -= currentRankXP;
                     IncreaseStats();
                     playerAchievedNextRank = true;
                 }
@@ -593,7 +593,7 @@ public class GameController : MonoBehaviour
     {
         double xpEarned = Math.Round(selectedWord.Length * (double)(levelXPModifier + playerStreak), MidpointRounding.AwayFromZero);
         xpPlayerEarned = (int)xpEarned;
-        playerXP = playerXP + xpPlayerEarned;
+        playerXP += xpPlayerEarned;
     }
     private IEnumerator EndOfRoundStats()
     {
@@ -717,75 +717,42 @@ public class GameController : MonoBehaviour
             }
         }
     }
-    private int[] CalculateTargetIndices()
+    private int ConvertCharacterToAscii(char letter)
     {
-        int[] targetIndices = new int[selectedWord.Length];
-        string letter = selectedWord.Substring(0, 1);
-        int letterIndex = 0;
-        while (letterIndex < selectedWord.Length)
-        {
-            for (int j = 0; j < letters.Length; j++)
-            {
-                if (letter.Equals(letters[j]))
-                {
-                    targetIndices[letterIndex] = j;
-                    letterIndex++;
-                    if (letterIndex < selectedWord.Length - 1) letter = selectedWord.Substring(letterIndex, 1);
-                    else letter = selectedWord.Substring(letterIndex);
-                }
-            }
-        }
-        return targetIndices;
+        return letter;
     }
+
     private IEnumerator DisplayWord(float delay)
     {
         if (!currentDifficulty.name.Equals(DataController.DIFFICULTY_HARD))
         {
-            indicesForLettersFromSelectedWord = CalculateTargetIndices();
-
-            for (int i = 0; i < selectedWordPanel.Length; i++)
+            char[] letters = selectedWord.ToCharArray();
+            for (int i = 0; i < selectedWord.Length; i++)
             {
-                if (i < indicesForLettersFromSelectedWord.Length)
-                {
-                    selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[indicesForLettersFromSelectedWord[i]].GetComponent<Image>().sprite;
-                    selectedWordPanel[i].SetActive(true);
-                }
-                else selectedWordPanel[i].SetActive(false);
+                int letterAscii = ConvertCharacterToAscii(letters[i]);
+                int letterIndex = letterAscii - LETTER_A_ASCII;
+
+                selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[letterIndex].GetComponent<Image>().sprite;
+                selectedWordPanel[i].SetActive(true);
             }
             if (currentDifficulty.name.Equals(DataController.DIFFICULTY_NORMAL))
             {
                 yield return new WaitForSeconds(delay);
-                indicesForLettersFromSelectedWord = CalculateTargetIndices();
-
                 for (int i = 0; i < selectedWordPanel.Length; i++)
                 {
-                    if (i < indicesForLettersFromSelectedWord.Length)
-                    {
-                        if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedColor)
-                        {
-                            selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[indicesForLettersFromSelectedWord[i]].GetComponent<Image>().sprite;
-                            selectedWordPanel[i].SetActive(false);
-                        }
-                    }
-                    else
-                    {
-                        if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedColor) selectedWordPanel[i].SetActive(false);
-                    }
+                    if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedColor) selectedWordPanel[i].SetActive(false); 
                 }
             }
         }
         else
         {
-            indicesForLettersFromSelectedWord = CalculateTargetIndices();
-
+            char[] letters = selectedWord.ToCharArray();
             for (int i = 0; i < selectedWordPanel.Length; i++)
             {
-                if (i < indicesForLettersFromSelectedWord.Length)
-                {
-                    selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[indicesForLettersFromSelectedWord[i]].GetComponent<Image>().sprite;
-                    selectedWordPanel[i].SetActive(false);
-                }
-                else selectedWordPanel[i].SetActive(false);
+                int letterAscii = ConvertCharacterToAscii(letters[i]);
+                int letterIndex = letterAscii - LETTER_A_ASCII;
+                selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[letterIndex].GetComponent<Image>().sprite;
+                selectedWordPanel[i].SetActive(false);
             }
         }
     }
@@ -853,13 +820,13 @@ public class GameController : MonoBehaviour
     {
         return playerShip != null && playerShip.activeSelf;
     }
-    private Sprite GetSkillStatusSprite(String status)
+    private Sprite GetSkillStatusSprite(string status)
     {
-        return "ACTIVE".Equals(status) ? Resources.Load<Sprite>("Sprites/panel_active") : Resources.Load<Sprite>("Sprites/panel_deactive");
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>("Sprites/UI/Game/panel_active") : Resources.Load<Sprite>("Sprites/UI/Game/panel");
     }
-    private Sprite GetMainMenuStatusSprite(String status)
+    private Sprite GetMainMenuStatusSprite(string status)
     {
-        return "ACTIVE".Equals(status) ? Resources.Load<Sprite>("Sprites/button_hangar_active") : Resources.Load<Sprite>("Sprites/button_hangar");
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>("Sprites/UI/Game/main_menu_active") : Resources.Load<Sprite>("Sprites/UI/Game/main_menu");
     }
     private void ShowCountdownMessage()
     {
@@ -1067,19 +1034,19 @@ public class GameController : MonoBehaviour
 
     private bool MoreThanOneLetterLeft()
     {
-        return targetLetterIndex + 1 <= (indicesForLettersFromSelectedWord.Length - 1);
+        return targetLetterIndex + 1 <= (selectedWord.Length - 1);
     }
     private bool MoreThanTwoLettersLeft()
     {
-        return targetLetterIndex + 2 <= (indicesForLettersFromSelectedWord.Length - 1);
+        return targetLetterIndex + 2 <= (selectedWord.Length - 1);
     }
     private bool MoreThanThreeLettersLeft()
     {
-        return targetLetterIndex + 3 <= (indicesForLettersFromSelectedWord.Length - 1);
+        return targetLetterIndex + 3 <= (selectedWord.Length - 1);
     }
     private bool MoreThanFourLettersLeft()
     {
-        return targetLetterIndex + 4 <= (indicesForLettersFromSelectedWord.Length - 1);
+        return targetLetterIndex + 4 <= (selectedWord.Length - 1);
     }
 
     private bool BetweenNumbers(int num, int num1, int num2)
@@ -1088,6 +1055,9 @@ public class GameController : MonoBehaviour
     }
     private GameObject PickALetterBlock(int index)
     {
-        return blocks[indicesForLettersFromSelectedWord[index]];
+        char[] letters = selectedWord.ToCharArray();
+        int letterAscii = ConvertCharacterToAscii(letters[index]);
+        int letterIndex = letterAscii - LETTER_A_ASCII;
+        return blocks[letterIndex];
     }
 }
