@@ -38,7 +38,7 @@ public class InfoController : MonoBehaviour
     {
         Application.OpenURL("https://opengameart.org/users/lukerustltd");
     }
-    public void VisitBuchLink()
+    public void VisitMicheleBuchBucelliLink()
     {
         Application.OpenURL("https://opengameart.org/users/buch");
     }
@@ -57,5 +57,9 @@ public class InfoController : MonoBehaviour
     public void VisitUnityTechnologiesLink()
     {
         Application.OpenURL("https://unity.com");
+    }
+    public void VisitGreatHeightsAudioLink()
+    {
+        Application.OpenURL("https://assetstore.unity.com/publishers/28429");
     }
 }
