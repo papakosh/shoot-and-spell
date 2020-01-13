@@ -26,7 +26,6 @@ public class GameController : MonoBehaviour
     public GameObject gameBackground;
     public GameObject[] letterImages;
     public GameObject[] selectedWordPanel;
-    public string selectedWord;
     public GameObject[] displayPickupMessage;
     public GameObject[] displayRoundMessages;
 
@@ -36,8 +35,8 @@ public class GameController : MonoBehaviour
     public Slider xpBar;
     public Slider hpBar;
     public Text rankText;
-    public GameObject xpAddedText;
-    public GameObject hpChangedText;
+    public GameObject xpEarnedText;
+    public GameObject hpChangeText;
     public float hitFlashWait = 0.125f;
     public float slowDownFlashWait = 0.25f;
     public int numberOfFlashes = 3;
@@ -98,6 +97,7 @@ public class GameController : MonoBehaviour
     private const string ARMOR_PICKUP_KEY = "SEEN_ARMOR";
     private const string TELEPORT_PICKUP_KEY = "SEEN_TELEPORT";
 
+    private string selectedWord;
     private int playerRank;
     private int playerXP;
     private int xpPlayerEarned;
@@ -349,8 +349,8 @@ public class GameController : MonoBehaviour
         {
             xpBar.maxValue = 1;
             xpBar.value = 1;
-            xpAddedText.GetComponent<Text>().text = MAXIMUM_RANK_TEXT;
-            xpAddedText.SetActive(true);
+            xpEarnedText.GetComponent<Text>().text = MAXIMUM_RANK_TEXT;
+            xpEarnedText.SetActive(true);
         }
         hpBar.maxValue = PlayerController.instance.maxHealth;
         hpBar.value = PlayerController.instance.currentHealth;
@@ -464,14 +464,14 @@ public class GameController : MonoBehaviour
     }
     private IEnumerator DisplayHPChangeText(int delay, float amt, bool isDamaged)
     {
-        ShowHPChangedText();
+        ShowHPChangeText();
 
-        if (isDamaged) hpChangedText.GetComponent<Text>().text = "-" + amt + " HP";
-        else hpChangedText.GetComponent<Text>().text = "+" + amt + " HP";
+        if (isDamaged) hpChangeText.GetComponent<Text>().text = "-" + amt + " HP";
+        else hpChangeText.GetComponent<Text>().text = "+" + amt + " HP";
 
-        hpChangedText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
+        hpChangeText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         yield return new WaitForSeconds(delay);
-        hpChangedText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
+        hpChangeText.GetComponent<Text>().CrossFadeAlpha(1, 0.0f, false);
 
         HideHPChangedText();
     }
@@ -939,17 +939,17 @@ public class GameController : MonoBehaviour
     }
     private void ShowXPEarnedMessage()
     {
-        xpAddedText.SetActive(true);
-        xpAddedText.GetComponent<Text>().text = "+" + xpPlayerEarned + " xp ";
-        xpAddedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
+        xpEarnedText.SetActive(true);
+        xpEarnedText.GetComponent<Text>().text = "+" + xpPlayerEarned + " xp ";
+        xpEarnedText.GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
-    private void ShowHPChangedText()
+    private void ShowHPChangeText()
     {
-        hpChangedText.SetActive(true);
+        hpChangeText.SetActive(true);
     }
     private void HideHPChangedText()
     {
-        hpChangedText.SetActive(false);
+        hpChangeText.SetActive(false);
     }
     private bool HasPlayerReachedMaxRank()
     {
