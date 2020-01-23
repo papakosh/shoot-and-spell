@@ -88,7 +88,7 @@ public class GameController : MonoBehaviour
     private const int DUALSHOT_PICKUP = 1;
     private const int ARMOR_PICKUP = 2;
     private const int TELEPORT_PICKUP = 3;
-    private const string HEALTH_PICKUP_PATH = "Sprites/Pickups/health_icon_";
+    private const string HEALTH_PICKUP_PATH = "Sprites/Pickups/health_icon";
     private const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/dual_shot_icon";
     private const string ARMOR_PICKUP_PATH = "Sprites/Pickups/armor_icon";
     private const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/teleport_icon";
@@ -172,10 +172,11 @@ public class GameController : MonoBehaviour
                     displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[pickupChosen];
                     displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[pickupChosen];
                     displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                    ShowPickupMessage();
+                    //ShowPickupMessage();
+                    StartCoroutine(ShowPickupMsg());
 
-                    Time.timeScale = 0f;
-                    isGamePaused = true;
+                   // Time.timeScale = 0f;
+                   // isGamePaused = true;
                 }
                 else
                     Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
@@ -534,7 +535,7 @@ public class GameController : MonoBehaviour
             currentDifficulty.playerXP = 0;
             currentDifficulty.playerRank = playerRank;
         }
-
+        
         if (HasUnlockedNextLevel())
         {
             currentDifficulty.levelsUnlocked[gameLevel + 1] = true;
@@ -566,6 +567,7 @@ public class GameController : MonoBehaviour
         {
             if (CanUnlockNormalAndHardDifficulty())
             {
+               
                 dataController.UnlockNormalAndHardDifficulty();
                 playerUnlockedNormalHardDifficulty = true;
             }
@@ -775,13 +777,24 @@ public class GameController : MonoBehaviour
         displayPickupMessage[2].SetActive(false);
         displayPickupMessage[3].SetActive(false);
     }
-    private void ShowPickupMessage()
+
+    private IEnumerator ShowPickupMsg()
+    {
+        yield return new WaitForSeconds(0.75f);
+        displayPickupMessage[0].SetActive(true);
+        displayPickupMessage[1].SetActive(true);
+        displayPickupMessage[2].SetActive(true);
+        displayPickupMessage[3].SetActive(true);
+        Time.timeScale = 0f;
+        isGamePaused = true;
+    }
+    /*private void ShowPickupMessage()
     {
         displayPickupMessage[0].SetActive(true);
         displayPickupMessage[1].SetActive(true);
         displayPickupMessage[2].SetActive(true);
         displayPickupMessage[3].SetActive(true);
-    }
+    }*/
     private void ShowRoundLostMessage()
     {
         displayRoundMessages[6].GetComponent<Text>().text = "Better luck next time! Tap to continue.";

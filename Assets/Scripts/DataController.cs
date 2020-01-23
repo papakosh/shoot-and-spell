@@ -85,8 +85,6 @@ public class DataController : MonoBehaviour
     }
     public void UpdatePlayerDifficulty(string difficultySelected)
     {
-        if (currentDifficulty.name.Equals(difficultySelected))
-            return;
         playerData.difficultySelected = difficultySelected;
         SavePlayerData();
         currentDifficulty = DetermineDifficulty();
@@ -143,6 +141,12 @@ public class DataController : MonoBehaviour
         else
         {
             playerData = new PlayerData();
+            playerData.easyDifficulty = new Difficulty();
+            playerData.easyDifficulty.name = DataController.DIFFICULTY_EASY;
+            playerData.normalDifficulty = new Difficulty();
+            playerData.normalDifficulty.name = DataController.DIFFICULTY_NORMAL;
+            playerData.hardDifficulty = new Difficulty();
+            playerData.hardDifficulty.name = DataController.DIFFICULTY_HARD;
             string dataAsJson = JsonUtility.ToJson(playerData);
             byte[] jsonBytes = Encoding.ASCII.GetBytes(dataAsJson);
             File.WriteAllBytes(filePath, jsonBytes);
