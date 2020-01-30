@@ -92,10 +92,21 @@ public class GameController : MonoBehaviour
     private const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/dual_shot_icon";
     private const string ARMOR_PICKUP_PATH = "Sprites/Pickups/armor_icon";
     private const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/teleport_icon";
-    private const string HEALTH_PICKUP_KEY = "SEEN_HEALTH";
-    private const string DUALSHOT_PICKUP_KEY = "SEEN_DUALSHOT";
-    private const string ARMOR_PICKUP_KEY = "SEEN_ARMOR";
-    private const string TELEPORT_PICKUP_KEY = "SEEN_TELEPORT";
+
+    private const string EASY_SEEN_HEALTH_PICKUP_KEY = "EASY_SEEN_HEALTH";
+    private const string EASY_SEEN_DUALSHOT_PICKUP_KEY = "EASY_SEEN_DUALSHOT";
+    private const string EASY_SEEN_ARMOR_PICKUP_KEY = "EASY_SEEN_ARMOR";
+    private const string EASY_SEEN_TELEPORT_PICKUP_KEY = "EASY_SEEN_TELEPORT";
+
+    private const string NORMAL_SEEN_HEALTH_PICKUP_KEY = "NORMAL_SEEN_HEALTH";
+    private const string NORMAL_SEEN_DUALSHOT_PICKUP_KEY = "NORMAL_SEEN_DUALSHOT";
+    private const string NORMAL_SEEN_ARMOR_PICKUP_KEY = "NORMAL_SEEN_ARMOR";
+    private const string NORMAL_SEEN_TELEPORT_PICKUP_KEY = "NORMAL_SEEN_TELEPORT";
+
+    private const string HARD_SEEN_HEALTH_PICKUP_KEY = "HARD_SEEN_HEALTH";
+    private const string HARD_SEEN_DUALSHOT_PICKUP_KEY = "HARD_SEEN_DUALSHOT";
+    private const string HARD_SEEN_ARMOR_PICKUP_KEY = "HARD_SEEN_ARMOR";
+    private const string HARD_SEEN_TELEPORT_PICKUP_KEY = "HARD_SEEN_TELEPORT";
 
     private string selectedWord;
     private int playerRank;
@@ -162,21 +173,32 @@ public class GameController : MonoBehaviour
                 if (IsFirstTimeForPickup(pickupChosen))
                 {
                     Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
-
-                    if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(HEALTH_PICKUP_KEY, "YES");
-                    else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(DUALSHOT_PICKUP_KEY, "YES");
-                    else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(ARMOR_PICKUP_KEY, "YES");
-                    else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(TELEPORT_PICKUP_KEY, "YES");
+                    if (IsEasyDifficulty())
+                    {
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(EASY_SEEN_HEALTH_PICKUP_KEY, "YES");
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_DUALSHOT_PICKUP_KEY, "YES");
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(EASY_SEEN_ARMOR_PICKUP_KEY, "YES");
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                    }else if (IsNormalDifficulty())
+                    {
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_HEALTH_PICKUP_KEY, "YES");
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_DUALSHOT_PICKUP_KEY, "YES");
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_ARMOR_PICKUP_KEY, "YES");
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                    }
+                    else if (IsHardDifficulty())
+                    {
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(HARD_SEEN_HEALTH_PICKUP_KEY, "YES");
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_DUALSHOT_PICKUP_KEY, "YES");
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(HARD_SEEN_ARMOR_PICKUP_KEY, "YES");
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                    }
 
                     displayPickupMessage[0].GetComponent<Image>().sprite = GetPickupSprite(pickupChosen);
                     displayPickupMessage[1].GetComponent<Text>().text = pickupHeaders[pickupChosen];
                     displayPickupMessage[2].GetComponent<Text>().text = pickupMsgs[pickupChosen];
                     displayPickupMessage[3].GetComponent<Text>().text = resumePlayingMessage;
-                    //ShowPickupMessage();
                     StartCoroutine(ShowPickupMsg());
-
-                   // Time.timeScale = 0f;
-                   // isGamePaused = true;
                 }
                 else
                     Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
@@ -486,10 +508,26 @@ public class GameController : MonoBehaviour
     {
         switch (pickupNumber)
         {
-            case HEALTH_PICKUP: return !PlayerPrefs.HasKey(HEALTH_PICKUP_KEY);
-            case DUALSHOT_PICKUP: return !PlayerPrefs.HasKey(DUALSHOT_PICKUP_KEY);
-            case ARMOR_PICKUP: return !PlayerPrefs.HasKey(ARMOR_PICKUP_KEY);
-            case TELEPORT_PICKUP: return !PlayerPrefs.HasKey(TELEPORT_PICKUP_KEY);
+            case HEALTH_PICKUP:
+                if (IsEasyDifficulty())return !PlayerPrefs.HasKey(EASY_SEEN_HEALTH_PICKUP_KEY);
+                else if (IsNormalDifficulty()) return !PlayerPrefs.HasKey(NORMAL_SEEN_HEALTH_PICKUP_KEY);
+                else if (IsHardDifficulty()) return !PlayerPrefs.HasKey(HARD_SEEN_HEALTH_PICKUP_KEY);
+                break;
+            case DUALSHOT_PICKUP:
+                if (IsEasyDifficulty()) return !PlayerPrefs.HasKey(EASY_SEEN_DUALSHOT_PICKUP_KEY);
+                else if (IsNormalDifficulty()) return !PlayerPrefs.HasKey(NORMAL_SEEN_DUALSHOT_PICKUP_KEY);
+                else if (IsHardDifficulty()) return !PlayerPrefs.HasKey(HARD_SEEN_DUALSHOT_PICKUP_KEY);
+                break;
+            case ARMOR_PICKUP:
+                if (IsEasyDifficulty()) return !PlayerPrefs.HasKey(EASY_SEEN_ARMOR_PICKUP_KEY);
+                else if (IsNormalDifficulty()) return !PlayerPrefs.HasKey(NORMAL_SEEN_ARMOR_PICKUP_KEY);
+                else if (IsHardDifficulty()) return !PlayerPrefs.HasKey(HARD_SEEN_ARMOR_PICKUP_KEY);
+                break;
+            case TELEPORT_PICKUP:
+                if (IsEasyDifficulty()) return !PlayerPrefs.HasKey(EASY_SEEN_TELEPORT_PICKUP_KEY);
+                else if (IsNormalDifficulty()) return !PlayerPrefs.HasKey(NORMAL_SEEN_TELEPORT_PICKUP_KEY);
+                else if (IsHardDifficulty()) return !PlayerPrefs.HasKey(HARD_SEEN_TELEPORT_PICKUP_KEY);
+                break;
         }
         return true;
     }
@@ -726,7 +764,7 @@ public class GameController : MonoBehaviour
 
     private IEnumerator DisplayWord(float delay)
     {
-        if (!currentDifficulty.name.Equals(DataController.DIFFICULTY_HARD))
+        if (!IsHardDifficulty())
         {
             char[] letters = selectedWord.ToCharArray();
             for (int i = 0; i < selectedWord.Length; i++)
@@ -737,7 +775,7 @@ public class GameController : MonoBehaviour
                 selectedWordPanel[i].GetComponent<Image>().sprite = letterImages[letterIndex].GetComponent<Image>().sprite;
                 selectedWordPanel[i].SetActive(true);
             }
-            if (currentDifficulty.name.Equals(DataController.DIFFICULTY_NORMAL))
+            if (IsNormalDifficulty())
             {
                 yield return new WaitForSeconds(delay);
                 for (int i = 0; i < selectedWordPanel.Length; i++)
@@ -749,7 +787,7 @@ public class GameController : MonoBehaviour
         else
         {
             char[] letters = selectedWord.ToCharArray();
-            for (int i = 0; i < selectedWordPanel.Length; i++)
+            for (int i = 0; i < selectedWord.Length; i++)
             {
                 int letterAscii = ConvertCharacterToAscii(letters[i]);
                 int letterIndex = letterAscii - LETTER_A_ASCII;
@@ -788,13 +826,7 @@ public class GameController : MonoBehaviour
         Time.timeScale = 0f;
         isGamePaused = true;
     }
-    /*private void ShowPickupMessage()
-    {
-        displayPickupMessage[0].SetActive(true);
-        displayPickupMessage[1].SetActive(true);
-        displayPickupMessage[2].SetActive(true);
-        displayPickupMessage[3].SetActive(true);
-    }*/
+
     private void ShowRoundLostMessage()
     {
         displayRoundMessages[6].GetComponent<Text>().text = "Better luck next time! Tap to continue.";
@@ -991,6 +1023,14 @@ public class GameController : MonoBehaviour
     private bool IsEasyDifficulty()
     {
         return DataController.DIFFICULTY_EASY.Equals(currentDifficulty.name);
+    }
+    private bool IsNormalDifficulty()
+    {
+        return DataController.DIFFICULTY_NORMAL.Equals(currentDifficulty.name);
+    }
+    private bool IsHardDifficulty()
+    {
+        return DataController.DIFFICULTY_HARD.Equals(currentDifficulty.name);
     }
     private bool NormalDifficultyIsLocked()
     {
