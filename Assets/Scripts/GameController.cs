@@ -5,10 +5,29 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /**
- * Description:
+ * Description: Manages the user experience as well as most of the gameplay, including endless runner of asteroids, letters, and enemy ships; scoring XP for words 
+ * spelled; earning player rank; spawning pickups; and finally, game difficulty.
  * 
- * Details:
- * 
+ * Details - 
+ * LoadMainMenu - Delete temporary data, unpause the game, and finally load the main menu.
+ * PlayWord - Play the current word
+ * ProcessHit - Evaluate the letter that was hit for the next letter in the current word. For non-matches, slow down the player's ship. 
+ * For matches, if last letter, end round; else, increment to next letter.
+ * SpawnRandomPickup - Pick a random number between 1 and 6. When the number 3 is picked, choose a random pickup depending on the player's rank and spawn. 
+ * The first time a pickup appears,the game pauses and a usage tip displays to the user.
+ * ResumeGame - Hide pickup messages, show the player ship and unpause the game
+ * LoseRound - Show a concillatory message, delete temporary data, and mark round as over.
+ * PlayAnotherRound - Reload the game on the current level
+ * RefreshHealthBar - Show message of +HP when adding health to the player or -HP when subtracting health from the player, and then update hp bar to reflect 
+ * the new value
+ * PlayerShipHit - The ship's color flashes for several seconds, alternating between red and white, to indicate damage taken after hit
+ * ArmorActive - The ship's color flashes for several seconds, alternating between yellow and white, to indicate no damage taken after hit
+ * UpdateTeleportSatusIcon - Change status icon on UI to reflect whether player has teleport skill or not
+ * UpdateArmorStatusIcon - Change status icon on UI to reflect whether player has armor skill or not
+ * UpdateDualShotStatusIcon - Change status icon on UI to reflect whether player has dual shot skill or not
+ * Awake - Instantiate instance of gamecontroller class, locate the data controller object, set the current difficulty, and initialize audio source object
+ * Start - Setup the game level (initial level values, background image, debris wait times, word to be spelled), Setup the player data (?), Setup UI (?), 
+ * Coutdown from 5 seconds, and finally spawn waves of debris (asteroids, enemy ships, and letter blocks)
  */
 public class GameController : MonoBehaviour
 {
