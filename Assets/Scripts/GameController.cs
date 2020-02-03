@@ -5,29 +5,30 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /**
- * Description: Manages the user experience as well as most of the gameplay, including endless runner of asteroids, letters, and enemy ships; scoring XP for words 
- * spelled; earning player rank; spawning pickups; and finally, game difficulty.
+ * Description: Manages the most of the gameplay, including an endless run of asteroids, letters, and enemy ships; scoring points for words 
+ * spelled; the player earning rank; and spawning pickups, as well the player experience (using skills, taking damage, difficulty settings, etc).
  * 
  * Details - 
  * LoadMainMenu - Delete temporary data, unpause the game, and finally load the main menu.
- * PlayWord - Play the current word
- * ProcessHit - Evaluate the letter that was hit for the next letter in the current word. For non-matches, slow down the player's ship. 
- * For matches, if last letter, end round; else, increment to next letter.
- * SpawnRandomPickup - Pick a random number between 1 and 6. When the number 3 is picked, choose a random pickup depending on the player's rank and spawn. 
- * The first time a pickup appears,the game pauses and a usage tip displays to the user.
+ * PlayWord - Play the audio for the current word 
+ * ProcessHit - Evaluate the letter that was destroyed and match it against the next letter in the current word. For non-matches, slow down the player's ship. 
+ * For matches, if it is the last letter, end the round; else, increment to next letter.
+ * SpawnRandomPickup - Pick a random number between 1 and 6. If the number 3 is picked, spawn a random pickup depending on the player's rank. The first time 
+ * a pickup appears, the game pauses and a usage tip displays to the user.
  * ResumeGame - Hide pickup messages, show the player ship and unpause the game
- * LoseRound - Show a concillatory message, delete temporary data, and mark round as over.
+ * LoseRound - Show a concillatory message, delete temporary data, and mark the round as over.
  * PlayAnotherRound - Reload the game on the current level
- * RefreshHealthBar - Show message of +HP when adding health to the player or -HP when subtracting health from the player, and then update hp bar to reflect 
+ * RefreshHealthBar - Show a message of +HP when adding health to the player or -HP when subtracting health from the player, and then update hp bar to reflect 
  * the new value
- * PlayerShipHit - The ship's color flashes for several seconds, alternating between red and white, to indicate damage taken after hit
- * ArmorActive - The ship's color flashes for several seconds, alternating between yellow and white, to indicate no damage taken after hit
- * UpdateTeleportSatusIcon - Change status icon on UI to reflect whether player has teleport skill or not
+ * PlayerShipHit - The ship flashes for several seconds, alternating color between red and white, to indicate damage taken after being hit
+ * ArmorActive - The ship flashes for several seconds, alternating color between yellow and white, to indicate no damage taken after being hit
+ * UpdateTeleportStatusIcon - Change status icon on UI to reflect whether player has teleport skill or not
  * UpdateArmorStatusIcon - Change status icon on UI to reflect whether player has armor skill or not
  * UpdateDualShotStatusIcon - Change status icon on UI to reflect whether player has dual shot skill or not
  * Awake - Instantiate instance of gamecontroller class, locate the data controller object, set the current difficulty, and initialize audio source object
- * Start - Setup the game level (initial level values, background image, debris wait times, word to be spelled), Setup the player data (?), Setup UI (?), 
- * Coutdown from 5 seconds, and finally spawn waves of debris (asteroids, enemy ships, and letter blocks)
+ * Start - Setup the game level (initial level values, background image, debris wait times, word to be spelled); Setup the player data (retrieve player stats
+ * and customize player UI options); Setup UI (prepare UI for display); Coutdown from 5 seconds; and finally, spawn waves of debris (asteroids, enemy ships, 
+ * and letter blocks) when the counter reach zero to begin play.
  */
 public class GameController : MonoBehaviour
 {
@@ -76,7 +77,7 @@ public class GameController : MonoBehaviour
     private int levelCompleteBonus;
     private bool levelIncomplete;
     private GameObject[] debrisArray;
-    private Color letterMatchedColor = new Color32(212, 175, 55, 255);
+    private Color letterMatchedGoldColor = new Color32(212, 175, 55, 255);
     private int targetLetterIndex; 
     private AudioClip selectedWordClip;
     private int selectedWordIndex;
@@ -167,7 +168,7 @@ public class GameController : MonoBehaviour
         if (LettersMatch(targetLetter, hitLetter))
         {
             selectedWordPanel[targetLetterIndex].SetActive(true);
-            selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedColor;
+            selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedGoldColor;
 
             if (IsLastLetter()) RoundWon();
             else targetLetterIndex++;
@@ -485,23 +486,23 @@ public class GameController : MonoBehaviour
         switch (rank)
         {
             case DataController.RECRUIT_RANK:
-                return "Space Recruit";
+                return DataController.RECRUIT_RANK_TEXT;
             case DataController.CADET_RANK:
-                return "Space Cadet";
+                return DataController.CADET_RANK_TEXT;
             case DataController.PILOT_RANK:
-                return "Space Pilot";
+                return DataController.PILOT_RANK_TEXT;
             case DataController.ACE_RANK:
-                return "Space Ace";
+                return DataController.ACE_RANK_TEXT;
             case DataController.CHIEF_RANK:
-                return "Space Chief";
+                return DataController.CHIEF_RANK_TEXT;
             case DataController.CAPTAIN_RANK:
-                return "Space Captain";
+                return DataController.CAPTAIN_RANK_TEXT;
             case DataController.COMMANDER_RANK:
-                return "Space Commander";
+                return DataController.COMMANDER_RANK_TEXT;
             case DataController.MASTER_RANK:
-                return "Space Master";
+                return DataController.MASTER_RANK_TEXT;
             default:
-                return "Undefined";
+                return DataController.RANK_UNDEFINED_TEXT;
         }
     }
     private IEnumerator DisplayHPChangeText(int delay, float amt, bool isDamaged)
@@ -799,7 +800,7 @@ public class GameController : MonoBehaviour
                 yield return new WaitForSeconds(delay);
                 for (int i = 0; i < selectedWordPanel.Length; i++)
                 {
-                    if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedColor) selectedWordPanel[i].SetActive(false); 
+                    if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedGoldColor) selectedWordPanel[i].SetActive(false); 
                 }
             }
         }
@@ -848,12 +849,12 @@ public class GameController : MonoBehaviour
 
     private void ShowRoundLostMessage()
     {
-        displayRoundMessages[6].GetComponent<Text>().text = "Better luck next time! Tap to continue.";
+        displayRoundMessages[6].GetComponent<Text>().text = DataController.MESSAGES_CONCILLATORY;
         displayRoundMessages[6].SetActive(true);
     }
     private void ShowRoundWonMessage()
     {
-        displayRoundMessages[6].GetComponent<Text>().text = "Good job! Tap to continue.";
+        displayRoundMessages[6].GetComponent<Text>().text = DataController.MESSAGES_CONGRATULATORY;
         displayRoundMessages[6].SetActive(true);
     }
     private bool IsLastLetter()
@@ -886,11 +887,11 @@ public class GameController : MonoBehaviour
     }
     private Sprite GetSkillStatusSprite(string status)
     {
-        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>("Sprites/UI/Game/panel_active") : Resources.Load<Sprite>("Sprites/UI/Game/panel");
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_PANEL_ACTIVE) : Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_PANEL_INACTIVE);
     }
     private Sprite GetMainMenuStatusSprite(string status)
     {
-        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>("Sprites/UI/Game/main_menu_active") : Resources.Load<Sprite>("Sprites/UI/Game/main_menu");
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_MAINMENU_ACTIVE) : Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_MAINMENU_INACTIVE);
     }
     private void ShowCountdownMessage()
     {

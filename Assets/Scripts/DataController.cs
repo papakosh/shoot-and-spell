@@ -41,6 +41,16 @@ public class DataController : MonoBehaviour
     public const int COMMANDER_RANK = 6;
     public const int MASTER_RANK = 7;
 
+    public const string RECRUIT_RANK_TEXT = "Recruit";
+    public const string CADET_RANK_TEXT = "Cadet";
+    public const string PILOT_RANK_TEXT = "Pilot";
+    public const string ACE_RANK_TEXT = "Ace Pilot";
+    public const string CHIEF_RANK_TEXT = "Chief";
+    public const string CAPTAIN_RANK_TEXT = "Captain";
+    public const string COMMANDER_RANK_TEXT = "Commander";
+    public const string MASTER_RANK_TEXT = "Master";
+    public const string RANK_UNDEFINED_TEXT = "UNDEFINED";
+
     public const string DIFFICULTY_EASY = "EASY";
     public const string DIFFICULTY_NORMAL = "NORMAL";
     public const string DIFFICULTY_HARD = "HARD";
@@ -61,6 +71,14 @@ public class DataController : MonoBehaviour
     public const string DUALSHOT_KEY = "HAVE_DUALSHOT";
     public const string ARMOR_KEY = "HAVE_ARMOR";
     public const string TELEPORT_KEY = "HAVE_TELEPORT";
+
+    public const string RESOURCES_UI_GAME_PANEL_ACTIVE = "Sprites/UI/Game/panel_active";
+    public const string RESOURCES_UI_GAME_PANEL_INACTIVE = "Sprites/UI/Game/panel";
+    public const string RESOURCES_UI_GAME_MAINMENU_ACTIVE = "Sprites/UI/Game/main_menu_active";
+    public const string RESOURCES_UI_GAME_MAINMENU_INACTIVE = "Sprites/UI/Game/main_menu";
+
+    public const string MESSAGES_CONCILLATORY = "Better luck next time! Tap to continue.";
+    public const string MESSAGES_CONGRATULATORY = "Good job! Tap to continue.";
 
     private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
