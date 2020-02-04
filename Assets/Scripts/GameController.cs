@@ -77,14 +77,24 @@ public class GameController : MonoBehaviour
     private int levelCompleteBonus;
     private bool levelIncomplete;
     private GameObject[] debrisArray;
-    private Color letterMatchedGoldColor = new Color32(212, 175, 55, 255);
+    private Color letterMatchedColorGold = new Color32(212, 175, 55, 255);
     private int targetLetterIndex; 
     private AudioClip selectedWordClip;
     private int selectedWordIndex;
-    private string[] endOfRoundMsgs = { "x#", "LEVEL # UNLOCKED", "# RANK ACHIEVED", "NORMAL & HARD UNLOCKED", "LEVEL COMPLETED +# XP" };
-    private string[] pickupHeaders = { "HEALTH", "DUAL SHOT", "ARMOR", "TELEPORT" };
-    private string[] pickupMsgs = { "Add 1 point to HP", "Fire Two Bolts", "Absorb Any Damage", "Tap Anywhere And Move" };
-    private string resumePlayingMessage = "Tap Screen to Resume";
+    private string[] endOfRoundMsgs = { DataController.MESSAGES_END_OF_ROUND_STREAK_PLACEHOLDER, 
+        DataController.MESSAGES_END_OF_ROUND_LEVEL_UNLOCKED_PLACEHOLDER,
+        DataController.MESSAGES_END_OF_ROUND_RANK_ACHIEVED_PLACEHOLDER, 
+        DataController.MESSAGES_END_OF_ROUND_NORMAL_HARD_UNLOCKED, 
+        DataController.MESSAGES_END_OF_ROUND_LEVEL_COMPLETED_PLACEHOLDER};
+    private string[] pickupHeaders = { DataController.MESSAGES_PICKUPS_HEALTH_HEADER, 
+        DataController.MESSAGES_PICKUPS_DUALSHOT_HEADER,
+        DataController.MESSAGES_PICKUPS_ARMOR_HEADER,
+        DataController.MESSAGES_PICKUPS_TELEPORT_HEADER};
+    private string[] pickupMsgs = { DataController.MESSAGES_PICKUPS_HEALTH_INFO, 
+        DataController.MESSAGES_PICKUPS_DUALSHOT_INFO,
+        DataController.MESSAGES_PICKUPS_ARMOR_INFO,
+        DataController.MESSAGES_PICKUPS_TELEPORT_INFO};
+    private string resumePlayingMessage = DataController.MESSAGES_RESUME_GAME;
     
     private const int LETTER_A_ASCII = 65;
     private const int ENEMY_HAZARD = 3;
@@ -108,10 +118,15 @@ public class GameController : MonoBehaviour
     private const int DUALSHOT_PICKUP = 1;
     private const int ARMOR_PICKUP = 2;
     private const int TELEPORT_PICKUP = 3;
-    private const string HEALTH_PICKUP_PATH = "Sprites/Pickups/health_icon";
-    private const string DUALSHOT_PICKUP_PATH = "Sprites/Pickups/dual_shot_icon";
-    private const string ARMOR_PICKUP_PATH = "Sprites/Pickups/armor_icon";
-    private const string TELEPORT_PICKUP_PATH = "Sprites/Pickups/teleport_icon";
+    
+    private const string RESOURCES_UI_HEALTH_ICON = "Sprites/Pickups/health_icon";
+    private const string RESOURCES_UI_DUALSHOT_ICON = "Sprites/Pickups/dual_shot_icon";
+    private const string RESOURCES_UI_ARMOR_ICON = "Sprites/Pickups/armor_icon";
+    private const string RESOURCES_UI_TELEPORT_ICON = "Sprites/Pickups/teleport_icon";
+    private const string RESOURCES_UI_GAME_PANEL_ACTIVE = "Sprites/UI/Game/panel_active";
+    private const string RESOURCES_UI_GAME_PANEL_INACTIVE = "Sprites/UI/Game/panel";
+    private const string RESOURCES_UI_GAME_MAINMENU_ACTIVE = "Sprites/UI/Game/main_menu_active";
+    private const string RESOURCES_UI_GAME_MAINMENU_INACTIVE = "Sprites/UI/Game/main_menu";
 
     private const string EASY_SEEN_HEALTH_PICKUP_KEY = "EASY_SEEN_HEALTH";
     private const string EASY_SEEN_DUALSHOT_PICKUP_KEY = "EASY_SEEN_DUALSHOT";
@@ -128,6 +143,14 @@ public class GameController : MonoBehaviour
     private const string HARD_SEEN_ARMOR_PICKUP_KEY = "HARD_SEEN_ARMOR";
     private const string HARD_SEEN_TELEPORT_PICKUP_KEY = "HARD_SEEN_TELEPORT";
 
+    private const string MINUS = "-";
+    private const string PLUS = "+";
+    private const string PLACEHOLDER = "#";
+    private const string EMPTY_STRING = "";
+    private const string KEYVALUE_FILLED = "YES";
+
+    private const string HIT_POINTS = " HP";
+
     private string selectedWord;
     private int playerRank;
     private int playerXP;
@@ -136,9 +159,10 @@ public class GameController : MonoBehaviour
     private bool playerUnlockedNormalHardDifficulty = false;
     private bool playerAchievedNextRank = false;
     private bool hasPlayerCompletedLevel = false;
-    private Color shipNormalColor = Color.white;
-    private Color shipHitColor = Color.red;
-    private Color shipAbsorbedDamageColor = Color.yellow;
+    private Color shipNormalColorWhite = Color.white;
+    private Color shipHitColorRed = Color.red;
+    private Color shipHitAbsorbedColorYellow = Color.yellow;
+
     private float playerStreak = 0f;
 
     public void LoadMainMenu()
@@ -168,7 +192,7 @@ public class GameController : MonoBehaviour
         if (LettersMatch(targetLetter, hitLetter))
         {
             selectedWordPanel[targetLetterIndex].SetActive(true);
-            selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedGoldColor;
+            selectedWordPanel[targetLetterIndex].GetComponent<Image>().color = letterMatchedColorGold;
 
             if (IsLastLetter()) RoundWon();
             else targetLetterIndex++;
@@ -195,23 +219,23 @@ public class GameController : MonoBehaviour
                     Instantiate(pickups[pickupChosen], pickupTransform.position, rotateQuaternion);
                     if (IsEasyDifficulty())
                     {
-                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(EASY_SEEN_HEALTH_PICKUP_KEY, "YES");
-                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_DUALSHOT_PICKUP_KEY, "YES");
-                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(EASY_SEEN_ARMOR_PICKUP_KEY, "YES");
-                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(EASY_SEEN_HEALTH_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_DUALSHOT_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(EASY_SEEN_ARMOR_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(EASY_SEEN_TELEPORT_PICKUP_KEY, KEYVALUE_FILLED);
                     }else if (IsNormalDifficulty())
                     {
-                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_HEALTH_PICKUP_KEY, "YES");
-                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_DUALSHOT_PICKUP_KEY, "YES");
-                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_ARMOR_PICKUP_KEY, "YES");
-                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_HEALTH_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_DUALSHOT_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_ARMOR_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(NORMAL_SEEN_TELEPORT_PICKUP_KEY, KEYVALUE_FILLED);
                     }
                     else if (IsHardDifficulty())
                     {
-                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(HARD_SEEN_HEALTH_PICKUP_KEY, "YES");
-                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_DUALSHOT_PICKUP_KEY, "YES");
-                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(HARD_SEEN_ARMOR_PICKUP_KEY, "YES");
-                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_TELEPORT_PICKUP_KEY, "YES");
+                        if (pickupChosen == HEALTH_PICKUP) PlayerPrefs.SetString(HARD_SEEN_HEALTH_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == DUALSHOT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_DUALSHOT_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == ARMOR_PICKUP) PlayerPrefs.SetString(HARD_SEEN_ARMOR_PICKUP_KEY, KEYVALUE_FILLED);
+                        else if (pickupChosen == TELEPORT_PICKUP) PlayerPrefs.SetString(HARD_SEEN_TELEPORT_PICKUP_KEY, KEYVALUE_FILLED);
                     }
 
                     displayPickupMessage[0].GetComponent<Image>().sprite = GetPickupSprite(pickupChosen);
@@ -266,12 +290,12 @@ public class GameController : MonoBehaviour
         {
             if (IsPlayerShipActive())
             {
-                playerShip.GetComponent<Renderer>().material.color = shipHitColor;
+                playerShip.GetComponent<Renderer>().material.color = shipHitColorRed;
                 yield return new WaitForSeconds(hitFlashWait);
             }
             if (IsPlayerShipActive())
             {
-                playerShip.GetComponent<Renderer>().material.color = shipNormalColor;
+                playerShip.GetComponent<Renderer>().material.color = shipNormalColorWhite;
                 yield return new WaitForSeconds(hitFlashWait);
             }
         }
@@ -280,9 +304,9 @@ public class GameController : MonoBehaviour
     {
         for (int i = 1; i <= numberOfFlashes; i++)
         {
-            playerShip.GetComponent<Renderer>().material.color = shipAbsorbedDamageColor;
+            playerShip.GetComponent<Renderer>().material.color = shipHitAbsorbedColorYellow;
             yield return new WaitForSeconds(hitFlashWait);
-            playerShip.GetComponent<Renderer>().material.color = shipNormalColor;
+            playerShip.GetComponent<Renderer>().material.color = shipNormalColorWhite;
             yield return new WaitForSeconds(hitFlashWait);
         }
     }
@@ -404,7 +428,7 @@ public class GameController : MonoBehaviour
         while (counter >= 0)
         {
             yield return new WaitForSeconds(1);
-            displayRoundMessages[5].GetComponent<Text>().text = counter + "";
+            displayRoundMessages[5].GetComponent<Text>().text = counter + EMPTY_STRING;
             counter--;
         }
         HideCountdownMessage();
@@ -509,8 +533,8 @@ public class GameController : MonoBehaviour
     {
         ShowHPChangeText();
 
-        if (isDamaged) hpChangeText.GetComponent<Text>().text = "-" + amt + " HP";
-        else hpChangeText.GetComponent<Text>().text = "+" + amt + " HP";
+        if (isDamaged) hpChangeText.GetComponent<Text>().text = MINUS + amt + HIT_POINTS;
+        else hpChangeText.GetComponent<Text>().text = PLUS + amt + HIT_POINTS;
 
         hpChangeText.GetComponent<Text>().CrossFadeAlpha(0, 3.0f, false);
         yield return new WaitForSeconds(delay);
@@ -636,7 +660,7 @@ public class GameController : MonoBehaviour
     private string RandomWord()
     {
         WordData[] words = dataController.gameData.allLevelData[gameLevel].words;
-        string wordChosen = "";
+        string wordChosen = EMPTY_STRING;
         bool foundWord = false;
         int counter = 0;
         while (counter < 10 && !foundWord)
@@ -800,7 +824,7 @@ public class GameController : MonoBehaviour
                 yield return new WaitForSeconds(delay);
                 for (int i = 0; i < selectedWordPanel.Length; i++)
                 {
-                    if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedGoldColor) selectedWordPanel[i].SetActive(false); 
+                    if (selectedWordPanel[i].GetComponent<Image>().color != letterMatchedColorGold) selectedWordPanel[i].SetActive(false); 
                 }
             }
         }
@@ -870,13 +894,13 @@ public class GameController : MonoBehaviour
         switch (pickupChosen)
         {
             case HEALTH_PICKUP:
-                return Resources.Load<Sprite>(HEALTH_PICKUP_PATH);
+                return Resources.Load<Sprite>(RESOURCES_UI_HEALTH_ICON);
             case DUALSHOT_PICKUP:
-                return Resources.Load<Sprite>(DUALSHOT_PICKUP_PATH);
+                return Resources.Load<Sprite>(RESOURCES_UI_DUALSHOT_ICON);
             case ARMOR_PICKUP:
-                return Resources.Load<Sprite>(ARMOR_PICKUP_PATH);
+                return Resources.Load<Sprite>(RESOURCES_UI_ARMOR_ICON);
             case TELEPORT_PICKUP:
-                return Resources.Load<Sprite>(TELEPORT_PICKUP_PATH);
+                return Resources.Load<Sprite>(RESOURCES_UI_TELEPORT_ICON);
             default: return null;
         }
     }
@@ -887,11 +911,11 @@ public class GameController : MonoBehaviour
     }
     private Sprite GetSkillStatusSprite(string status)
     {
-        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_PANEL_ACTIVE) : Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_PANEL_INACTIVE);
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(RESOURCES_UI_GAME_PANEL_ACTIVE) : Resources.Load<Sprite>(RESOURCES_UI_GAME_PANEL_INACTIVE);
     }
     private Sprite GetMainMenuStatusSprite(string status)
     {
-        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_MAINMENU_ACTIVE) : Resources.Load<Sprite>(DataController.RESOURCES_UI_GAME_MAINMENU_INACTIVE);
+        return ACTIVE_STATUS.Equals(status) ? Resources.Load<Sprite>(RESOURCES_UI_GAME_MAINMENU_ACTIVE) : Resources.Load<Sprite>(RESOURCES_UI_GAME_MAINMENU_INACTIVE);
     }
     private void ShowCountdownMessage()
     {
@@ -953,27 +977,27 @@ public class GameController : MonoBehaviour
         displayRoundMessages[0].GetComponent<Image>().CrossFadeAlpha(0, 9.0f, true);
 
         float playerStreakCount = playerStreak / 0.05f;
-        displayRoundMessages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace("#", "" + ((int)playerStreakCount + 1));
+        displayRoundMessages[1].GetComponent<Text>().text = endOfRoundMsgs[0].Replace(PLACEHOLDER, EMPTY_STRING + ((int)playerStreakCount + 1));
         displayRoundMessages[1].SetActive(true);
         displayRoundMessages[1].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
     private void ShowRankAchievedMessage()
     {
         displayRoundMessages[2].SetActive(true);
-        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace("#", "" + GetRankText(playerRank).ToUpper());
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace(PLACEHOLDER, EMPTY_STRING + GetRankText(playerRank).ToUpper());
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
     private void ShowUnlockedLevelMessage()
     {
         displayRoundMessages[3].SetActive(true);
-        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + (gameLevel + 2));
         displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
 
     private void ShowUnlockedLevelMessage2()
     {
         displayRoundMessages[2].SetActive(true);
-        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace("#", "" + (gameLevel + 2));
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + (gameLevel + 2));
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
 
@@ -993,13 +1017,13 @@ public class GameController : MonoBehaviour
     private void ShowLevelCompleteMessage()
     {
         displayRoundMessages[3].SetActive(true);
-        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[4].Replace(PLACEHOLDER, EMPTY_STRING + levelCompleteBonus);
         displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
     private void ShowLevelCompleteMessage2()
     {
         displayRoundMessages[2].SetActive(true);
-        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[4].Replace("#", "" + levelCompleteBonus);
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[4].Replace(PLACEHOLDER, EMPTY_STRING + levelCompleteBonus);
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
     private void ShowXPEarnedMessage()

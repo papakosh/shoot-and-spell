@@ -72,13 +72,26 @@ public class DataController : MonoBehaviour
     public const string ARMOR_KEY = "HAVE_ARMOR";
     public const string TELEPORT_KEY = "HAVE_TELEPORT";
 
-    public const string RESOURCES_UI_GAME_PANEL_ACTIVE = "Sprites/UI/Game/panel_active";
-    public const string RESOURCES_UI_GAME_PANEL_INACTIVE = "Sprites/UI/Game/panel";
-    public const string RESOURCES_UI_GAME_MAINMENU_ACTIVE = "Sprites/UI/Game/main_menu_active";
-    public const string RESOURCES_UI_GAME_MAINMENU_INACTIVE = "Sprites/UI/Game/main_menu";
-
     public const string MESSAGES_CONCILLATORY = "Better luck next time! Tap to continue.";
     public const string MESSAGES_CONGRATULATORY = "Good job! Tap to continue.";
+    public const string MESSAGES_END_OF_ROUND_STREAK_PLACEHOLDER = "x#";
+    public const string MESSAGES_END_OF_ROUND_LEVEL_UNLOCKED_PLACEHOLDER = "LEVEL # UNLOCKED";
+    public const string MESSAGES_END_OF_ROUND_RANK_ACHIEVED_PLACEHOLDER = "# RANK ACHIEVED";
+    public const string MESSAGES_END_OF_ROUND_NORMAL_HARD_UNLOCKED = "NORMAL & HARD UNLOCKED";
+    public const string MESSAGES_END_OF_ROUND_LEVEL_COMPLETED_PLACEHOLDER= "LEVEL COMPLETED +# XP";
+    public const string MESSAGES_PICKUPS_HEALTH_HEADER = "HEALTH";
+    public const string MESSAGES_PICKUPS_DUALSHOT_HEADER = "DUAL SHOT";
+    public const string MESSAGES_PICKUPS_ARMOR_HEADER = "ARMOR";
+    public const string MESSAGES_PICKUPS_TELEPORT_HEADER = "TELEPORT";
+
+    public const string MESSAGES_PICKUPS_HEALTH_INFO = "Add 1 point to HP";
+    public const string MESSAGES_PICKUPS_DUALSHOT_INFO = "Fire Two Bolts";
+    public const string MESSAGES_PICKUPS_ARMOR_INFO = "Absorb Any Damage";
+    public const string MESSAGES_PICKUPS_TELEPORT_INFO = "Tap Anywhere And Move";
+    public const string MESSAGES_RESUME_GAME = "Tap Screen to Resume";
+
+
+
 
     private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
