@@ -28,6 +28,17 @@ public class DestroyByContact : MonoBehaviour
     public GameObject explosion;
     public float damage;
 
+    private const string OBJECT_TAG_GAME_BOUNDARY = "Game Boundary";
+    private const string OBJECT_TAG_PLAYER = "Player";
+    private const string OBJECT_TAG_ENEMY = "Enemy";
+    private const string OBJECT_TAG_ENEMY_BOLT = "Enemy Bolt";
+    private const string OBJECT_TAG_HAZARD = "Hazard";
+    private const string OBJECT_TAG_PLAYER_BOLT = "Bolt";
+    private const string OBJECT_TAG_HEALTH_PICKUP = "Health";
+    private const string OBJECT_TAG_DUALSHOT_PICKUP = "Dual Shot";
+    private const string OBJECT_TAG_ARMOR_PICKUP = "Armor";
+    private const string OBJECT_TAG_TELEPORT_PICKUP = "Teleport";
+
     void OnTriggerEnter(Collider other)
     {
         if (CollisionIsWithTheGameBoundary(other.gameObject.tag))
@@ -40,9 +51,11 @@ public class DestroyByContact : MonoBehaviour
                 CollisionIsWithAnEnemyBolt(other.gameObject.tag))
                 return;
             string letter = gameObject.tag;
+
             Destroy(gameObject);
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
             Instantiate(explosion, transform.position, transform.rotation);
+            
             if (CollisionIsWithABolt(other.gameObject.tag)) Destroy(other.gameObject);
             else if (CollisionIsWithThePlayer(other.gameObject.tag)){
                 if (PlayerController.instance.canAbsorbDamage) PlayerController.instance.AbsorbDamage();
@@ -59,7 +72,8 @@ public class DestroyByContact : MonoBehaviour
                     }
                 }   
             }
-            GameController.instance.ProcessHit(letter);
+            
+            GameController.instance.ProcessLetterHit(letter);
         }
         else if (CollisionIsWithAHealthPickup(gameObject.tag) || CollisionIsWithADualShotPickup(gameObject.tag) || 
             CollisionIsWithAnArmorPickup(gameObject.tag) || CollisionIsWithATeleportPickup(gameObject.tag)){
@@ -83,6 +97,7 @@ public class DestroyByContact : MonoBehaviour
                 CollisionIsWithALetter(other.gameObject.tag) || CollisionIsWithAnyPickup(other) ||
                 CollisionIsWithAnEnemyBolt(other.gameObject.tag))
                 return;
+
             Transform pickupTransform = transform;
             Destroy(gameObject);
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -116,6 +131,7 @@ public class DestroyByContact : MonoBehaviour
                 CollisionIsWithALetter(other.gameObject.tag) || CollisionIsWithAnyPickup(other) ||
                 CollisionIsWithAnEnemyBolt(other.gameObject.tag))
                 return;
+
             Transform pickupTransform = transform;
             Destroy(gameObject);
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
@@ -149,6 +165,7 @@ public class DestroyByContact : MonoBehaviour
                 CollisionIsWithALetter(other.gameObject.tag) || CollisionIsWithAnyPickup(other) ||
                 CollisionIsWithAnEnemyBolt(other.gameObject.tag))
                 return;
+
             Destroy(gameObject);
 
             if (CollisionIsWithABolt(other.gameObject.tag)) Destroy(other.gameObject);
@@ -179,33 +196,33 @@ public class DestroyByContact : MonoBehaviour
 
     private bool CollisionIsWithTheGameBoundary (string tag)
     {
-        return tag.Equals("Game Boundary");
+        return tag.Equals(OBJECT_TAG_GAME_BOUNDARY);
     }
 
     private bool CollisionIsWithABolt(string tag)
     {
-        return tag.Equals("Bolt");
+        return tag.Equals(OBJECT_TAG_PLAYER_BOLT);
     }
     private bool CollisionIsWithThePlayer(string tag)
     {
-        return tag.Equals("Player");
+        return tag.Equals(OBJECT_TAG_PLAYER);
     }
 
     private bool CollisionIsWithAHealthPickup(string tag)
     {
-        return tag.Equals("Health");
+        return tag.Equals(OBJECT_TAG_HEALTH_PICKUP);
     }
     private bool CollisionIsWithADualShotPickup(string tag)
     {
-        return tag.Equals("Dual Shot");
+        return tag.Equals(OBJECT_TAG_DUALSHOT_PICKUP);
     }
     private bool CollisionIsWithAnArmorPickup(string tag)
     {
-        return tag.Equals("Armor");
+        return tag.Equals(OBJECT_TAG_ARMOR_PICKUP);
     }
     private bool CollisionIsWithATeleportPickup(string tag)
     {
-        return tag.Equals("Teleport");
+        return tag.Equals(OBJECT_TAG_TELEPORT_PICKUP);
     }
     private bool CollisionIsWithAnyPickup(Collider other)
     {
@@ -214,14 +231,14 @@ public class DestroyByContact : MonoBehaviour
     }
     private bool CollisionIsWithAnEnemy(string tag)
     {
-        return tag.Equals("Enemy");
+        return tag.Equals(OBJECT_TAG_ENEMY);
     }
     private bool CollisionIsWithAnEnemyBolt(string tag)
     {
-        return tag.Equals("Enemy Bolt");
+        return tag.Equals(OBJECT_TAG_ENEMY_BOLT);
     }
     private bool CollisionIsWithAHazard(string tag)
     {
-        return tag.Equals("Hazard");
+        return tag.Equals(OBJECT_TAG_HAZARD);
     }
 }

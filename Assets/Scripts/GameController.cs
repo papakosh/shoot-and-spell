@@ -5,13 +5,13 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /**
- * Description: Manages the most of the gameplay, including an endless run of asteroids, letters, and enemy ships; scoring points for words 
- * spelled; the player earning rank; and spawning pickups, as well the player experience (using skills, taking damage, difficulty settings, etc).
+ * Description: Manages most of the gameplay, including an endless run of asteroids, letters, and enemy ships; scoring the words 
+ * spelled; rewarding the player with rank; and spawning pickups, as well the player experience, like using skills, taking damage, difficulty settings, etc.
  * 
  * Details - 
  * LoadMainMenu - Delete temporary data, unpause the game, and finally load the main menu.
  * PlayWord - Play the audio for the current word 
- * ProcessHit - Evaluate the letter that was destroyed and match it against the next letter in the current word. For non-matches, slow down the player's ship. 
+ * ProcessLetterHit - Evaluate the letter that was destroyed and match it against the next letter in the current word. For non-matches, slow down the player's ship. 
  * For matches, if it is the last letter, end the round; else, increment to next letter.
  * SpawnRandomPickup - Pick a random number between 1 and 6. If the number 3 is picked, spawn a random pickup depending on the player's rank. The first time 
  * a pickup appears, the game pauses and a usage tip displays to the user.
@@ -57,8 +57,8 @@ public class GameController : MonoBehaviour
     public Text rankText;
     public GameObject xpEarnedText;
     public GameObject hpChangeText;
-    public float hitFlashWait = 0.125f;
-    public float slowDownFlashWait = 0.25f;
+    public float playerHitFlashWait = 0.125f;
+    public float playerSlowDownFlashWait = 0.25f;
     public int numberOfFlashes = 3;
     public GameObject dualShotStatusIcon;
     public GameObject armorStatusIcon;
@@ -71,7 +71,8 @@ public class GameController : MonoBehaviour
     private Difficulty currentDifficulty;
     private AudioSource _audio;
 
-    private int gameLevel;
+    private int currentGameLevelIndex;
+    private int nextGameLevelIndex;
     private bool roundOver;
     private int levelXPModifier = 1;
     private int levelCompleteBonus;
@@ -183,7 +184,7 @@ public class GameController : MonoBehaviour
         _audio.volume = PlayerPrefs.GetFloat(DataController.VOICES_VOLUME);
         _audio.Play();
     }
-    public void ProcessHit(string hitLetter)
+    public void ProcessLetterHit(string hitLetter)
     {
         string targetLetter;
         if (IsLastLetter()) targetLetter = selectedWord.Substring(targetLetterIndex);
@@ -291,12 +292,12 @@ public class GameController : MonoBehaviour
             if (IsPlayerShipActive())
             {
                 playerShip.GetComponent<Renderer>().material.color = shipHitColorRed;
-                yield return new WaitForSeconds(hitFlashWait);
+                yield return new WaitForSeconds(playerHitFlashWait);
             }
             if (IsPlayerShipActive())
             {
                 playerShip.GetComponent<Renderer>().material.color = shipNormalColorWhite;
-                yield return new WaitForSeconds(hitFlashWait);
+                yield return new WaitForSeconds(playerHitFlashWait);
             }
         }
     }
@@ -305,9 +306,9 @@ public class GameController : MonoBehaviour
         for (int i = 1; i <= numberOfFlashes; i++)
         {
             playerShip.GetComponent<Renderer>().material.color = shipHitAbsorbedColorYellow;
-            yield return new WaitForSeconds(hitFlashWait);
+            yield return new WaitForSeconds(playerHitFlashWait);
             playerShip.GetComponent<Renderer>().material.color = shipNormalColorWhite;
-            yield return new WaitForSeconds(hitFlashWait);
+            yield return new WaitForSeconds(playerHitFlashWait);
         }
     }
     public void UpdateTeleportStatusIcon(string newStatus)
@@ -346,10 +347,11 @@ public class GameController : MonoBehaviour
     }
     private void SetupGameLevel()
     {
-        gameLevel = PlayerPrefs.GetInt(DataController.GAME_LEVEL_KEY);
+        currentGameLevelIndex = PlayerPrefs.GetInt(DataController.GAME_LEVEL_KEY);
+        nextGameLevelIndex = currentGameLevelIndex + 1;
         roundOver = false;
-        levelXPModifier = gameLevel + 1;
-        levelCompleteBonus = dataController.gameData.allLevelData[gameLevel].completionBonus;
+        levelXPModifier = currentGameLevelIndex + 1;
+        levelCompleteBonus = dataController.gameData.allLevelData[currentGameLevelIndex].completionBonus;
 
         if (!AllWordsSpelt()) levelIncomplete = true;
 
@@ -494,13 +496,13 @@ public class GameController : MonoBehaviour
             if (IsPlayerShipActive())
             {
                 playerShip.transform.GetChild(0).gameObject.SetActive(false);
-                yield return new WaitForSeconds(slowDownFlashWait);
+                yield return new WaitForSeconds(playerSlowDownFlashWait);
             }
 
             if (IsPlayerShipActive())
             {
                 playerShip.transform.GetChild(0).gameObject.SetActive(true);
-                yield return new WaitForSeconds(slowDownFlashWait);
+                yield return new WaitForSeconds(playerSlowDownFlashWait);
             }
         }
         PlayerController.instance.NormalizeSpeed();
@@ -598,7 +600,7 @@ public class GameController : MonoBehaviour
     }
     private void CheckProgression()
     {
-        currentDifficulty.AddToListOfLevelCompletedWords(gameLevel, selectedWord);
+        currentDifficulty.AddToListOfLevelCompletedWords(currentGameLevelIndex, selectedWord);
         if (!HasPlayerReachedMaxRank())
         {
             int nextRankXP = (int)CalculateXPForNextRank(playerRank);
@@ -620,7 +622,7 @@ public class GameController : MonoBehaviour
         
         if (HasUnlockedNextLevel())
         {
-            currentDifficulty.levelsUnlocked[gameLevel + 1] = true;
+            currentDifficulty.levelsUnlocked[nextGameLevelIndex] = true;
             playerUnlockedNextLevel = true;
         } else if (HasSpeltAllLevelWords())
         {
@@ -659,7 +661,7 @@ public class GameController : MonoBehaviour
     }
     private string RandomWord()
     {
-        WordData[] words = dataController.gameData.allLevelData[gameLevel].words;
+        WordData[] words = dataController.gameData.allLevelData[currentGameLevelIndex].words;
         string wordChosen = EMPTY_STRING;
         bool foundWord = false;
         int counter = 0;
@@ -693,14 +695,14 @@ public class GameController : MonoBehaviour
         } else if (playerAchievedNextRank && (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel))
         {
             ShowRankAchievedMessage();
-            if (playerUnlockedNextLevel) ShowUnlockedLevelMessage();
+            if (playerUnlockedNextLevel) ShowUnlockedNextLevelMessage();
             else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage();
             else if (hasPlayerCompletedLevel)ShowLevelCompleteMessage();
             yield return new WaitForSeconds(0.5f);
         }
         else if (playerUnlockedNextLevel || playerUnlockedNormalHardDifficulty || hasPlayerCompletedLevel)
         {
-            if (playerUnlockedNextLevel) ShowUnlockedLevelMessage2();
+            if (playerUnlockedNextLevel) ShowUnlockedNextLevelMessage2();
             else if (playerUnlockedNormalHardDifficulty) ShowUnlockedDifficultyMessage2();
             else if (hasPlayerCompletedLevel) ShowLevelCompleteMessage2();
             yield return new WaitForSeconds(0.5f);
@@ -925,13 +927,13 @@ public class GameController : MonoBehaviour
     {
         displayRoundMessages[5].SetActive(false);
     }
-    private Texture GetBackGroundTexture(int gameLevel)
+    private Texture GetBackGroundTexture(int index)
     {
-        return Resources.Load<Texture>(dataController.gameData.allLevelData[gameLevel].backgroundPath);
+        return Resources.Load<Texture>(dataController.gameData.allLevelData[index].backgroundPath);
     }
     private void CustomizeLevelBackground()
     {
-        Texture nebulaBackground = GetBackGroundTexture(gameLevel);
+        Texture nebulaBackground = GetBackGroundTexture(currentGameLevelIndex);
         gameBackground.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
         GameObject backgroundChild = gameBackground.transform.GetChild(0).gameObject;
         backgroundChild.GetComponent<Renderer>().material.mainTexture = nebulaBackground;
@@ -940,18 +942,18 @@ public class GameController : MonoBehaviour
     {
         targetLetterIndex = 0;
         selectedWord = RandomWord();
-        selectedWordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[gameLevel].words[selectedWordIndex].audioPath);
+        selectedWordClip = Resources.Load<AudioClip>(dataController.gameData.allLevelData[currentGameLevelIndex].words[selectedWordIndex].audioPath);
         _audio.clip = selectedWordClip;
     }
 
     private bool AllWordsSpelt()
     {
-        return currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count == dataController.gameData.allLevelData[gameLevel].words.Length;
+        return currentDifficulty.ListOfLevelCompletedWords(currentGameLevelIndex).Count == dataController.gameData.allLevelData[currentGameLevelIndex].words.Length;
     }
     private void CustomizeLevelDebrisWaitTimes()
     {
-        debrisSpawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * (gameLevel + 1));
-        switch (gameLevel)
+        debrisSpawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * (currentGameLevelIndex + 1));
+        switch (currentGameLevelIndex)
         {
             case 0:
             case 1:
@@ -987,17 +989,19 @@ public class GameController : MonoBehaviour
         displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[2].Replace(PLACEHOLDER, EMPTY_STRING + GetRankText(playerRank).ToUpper());
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
-    private void ShowUnlockedLevelMessage()
+    private void ShowUnlockedNextLevelMessage()
     {
+        string nextGameLevelNumber = (nextGameLevelIndex + 1).ToString();
         displayRoundMessages[3].SetActive(true);
-        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + (gameLevel + 2));
+        displayRoundMessages[3].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + nextGameLevelNumber);
         displayRoundMessages[3].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
 
-    private void ShowUnlockedLevelMessage2()
+    private void ShowUnlockedNextLevelMessage2()
     {
+        string nextGameLevelNumber = (nextGameLevelIndex + 1).ToString();
         displayRoundMessages[2].SetActive(true);
-        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + (gameLevel + 2));
+        displayRoundMessages[2].GetComponent<Text>().text = endOfRoundMsgs[1].Replace(PLACEHOLDER, EMPTY_STRING + nextGameLevelNumber);
         displayRoundMessages[2].GetComponent<Text>().CrossFadeAlpha(0, 9.0f, true);
     }
 
@@ -1046,23 +1050,23 @@ public class GameController : MonoBehaviour
     }
     private bool HasUnlockedNextLevel()
     {
-        return gameLevel < 9 && NextLevelIsLocked() && SpeltAtleast51PercentOfLevelWords();
+        return currentGameLevelIndex < 9 && NextLevelIsLocked() && SpeltAtleast51PercentOfLevelWords();
     }
     private bool NextLevelIsLocked()
     {
-        return !currentDifficulty.levelsUnlocked[gameLevel + 1];
+        return !currentDifficulty.levelsUnlocked[currentGameLevelIndex + 1];
     }
     private bool SpeltAtleast51PercentOfLevelWords()
     {
-        return currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count >= ((dataController.gameData.allLevelData[gameLevel].words.Length / 2) + 1);
+        return currentDifficulty.ListOfLevelCompletedWords(currentGameLevelIndex).Count >= ((dataController.gameData.allLevelData[currentGameLevelIndex].words.Length / 2) + 1);
     }
     private bool HasSpeltAllLevelWords()
     {
-        return levelIncomplete && currentDifficulty.ListOfLevelCompletedWords(gameLevel).Count == dataController.gameData.allLevelData[gameLevel].words.Length;
+        return levelIncomplete && currentDifficulty.ListOfLevelCompletedWords(currentGameLevelIndex).Count == dataController.gameData.allLevelData[currentGameLevelIndex].words.Length;
     }
     private bool CanUnlockNormalAndHardDifficulty()
     {
-        return gameLevel == 9 && SpeltAtleast51PercentOfLevelWords() && IsEasyDifficulty() && NormalDifficultyIsLocked();
+        return currentGameLevelIndex == 9 && SpeltAtleast51PercentOfLevelWords() && IsEasyDifficulty() && NormalDifficultyIsLocked();
     }
     private bool IsEasyDifficulty()
     {
@@ -1082,11 +1086,11 @@ public class GameController : MonoBehaviour
     }
     private bool ListDoesNotContainWord(string word)
     {
-        return !currentDifficulty.ListOfLevelCompletedWords(gameLevel).Contains(word);
+        return !currentDifficulty.ListOfLevelCompletedWords(currentGameLevelIndex).Contains(word);
     }
     private int DetermineNumberOfEnemyShipsAllowed()
     {
-        switch (gameLevel)
+        switch (currentGameLevelIndex)
         {
             case LEVEL_ONE:
             case LEVEL_TWO:
@@ -1108,7 +1112,7 @@ public class GameController : MonoBehaviour
     }
     private int DetermineNumberOfHazards()
     {
-        switch (gameLevel)
+        switch (currentGameLevelIndex)
         {
             case LEVEL_ONE:
             case LEVEL_TWO:

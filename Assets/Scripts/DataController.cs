@@ -90,9 +90,6 @@ public class DataController : MonoBehaviour
     public const string MESSAGES_PICKUPS_TELEPORT_INFO = "Tap Anywhere And Move";
     public const string MESSAGES_RESUME_GAME = "Tap Screen to Resume";
 
-
-
-
     private string gameDataFilename = "game.json";
     private string playerDataFilename = "player.json";
 
