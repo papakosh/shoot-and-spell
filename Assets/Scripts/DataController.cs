@@ -41,6 +41,17 @@ public class DataController : MonoBehaviour
     public const int COMMANDER_RANK = 6;
     public const int MASTER_RANK = 7;
 
+    public const int LEVEL_ONE = 0;
+    public const int LEVEL_TWO = 1;
+    public const int LEVEL_THREE = 2;
+    public const int LEVEL_FOUR = 3;
+    public const int LEVEL_FIVE = 4;
+    public const int LEVEL_SIX = 5;
+    public const int LEVEL_SEVEN = 6;
+    public const int LEVEL_EIGHT = 7;
+    public const int LEVEL_NINE = 8;
+    public const int LEVEL_TEN = 9;
+
     public const string RECRUIT_RANK_TEXT = "Recruit";
     public const string CADET_RANK_TEXT = "Cadet";
     public const string PILOT_RANK_TEXT = "Pilot";

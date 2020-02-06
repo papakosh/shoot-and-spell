@@ -1,8 +1,17 @@
 ﻿/**
- * Description: Regulates how the game works. This includes an experience points modifier 
- * to factor in word difficulty, wait times for spawning hazards, and managing level data.
+ * Description: Regulates how the game works.
  * 
- * Details: Object marked System.Serializable so it can be written to a file using serialization.
+ * Details:
+ * Class-
+ * Object marked System.Serializable so it can be written to a file using serialization.
+ * 
+ * Attributes-
+ * All level data - storage of the game levels
+ * XP modifier - experience points modifier to factor in word difficulty
+ * Base xp - Basic XP number used in calculations
+ * Wave wait - Number of seconds between waves
+ * Spawn wait - Number of seconds between pieces of debris
+ * Spawn wait decrement - Number of seconds to decrease wait time between pieces of debris
  */
 [System.Serializable]
 public class GameData

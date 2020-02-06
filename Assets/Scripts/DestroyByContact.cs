@@ -39,6 +39,9 @@ public class DestroyByContact : MonoBehaviour
     private const string OBJECT_TAG_ARMOR_PICKUP = "Armor";
     private const string OBJECT_TAG_TELEPORT_PICKUP = "Teleport";
 
+    private const int LETTER_A_ASCII = 65;
+    private const int LETTER_Z_ASCII = 90;
+
     void OnTriggerEnter(Collider other)
     {
         if (CollisionIsWithTheGameBoundary(other.gameObject.tag))
@@ -191,7 +194,12 @@ public class DestroyByContact : MonoBehaviour
     private bool CollisionIsWithALetter(string tag)
     {
         Char[] vals = tag.ToCharArray();
-        return vals.Length == 1 && ((int)vals[0] >= 65 && (int)vals[0] <= 90);
+        return vals.Length == 1 && CharacterBetweenLettersAandZ ((int)vals[0]);
+    }
+
+    private bool CharacterBetweenLettersAandZ(int value)
+    {
+       return value >= LETTER_A_ASCII && value <= LETTER_Z_ASCII;
     }
 
     private bool CollisionIsWithTheGameBoundary (string tag)

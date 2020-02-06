@@ -3,11 +3,19 @@
  * Description: Creates a parallax effect to mimic a ship flying through space 
  * by having the background always moving
  * 
- * Details: The parallax effect is achieved by calculating the background's
+ * Details: 
+ * Attributes-
+ * Scroll speed - How fast to scroll and in which direction
+ * Background height on Z - How tall the background is on the z-axis
+ * 
+ * Methods-
+ * Start - Initialize origin, audio source, and background music volume.
+ * Update - The parallax effect is achieved by calculating the background's
  * next position and then moving its transform there. The next positions is 
  * calculated by using the Mathf.Repeat function where t is negative 
  * (to scroll downward) and a length is added to t until the result is between 
  * zero and length
+ * 
  */
 public class BackgroundScroller : MonoBehaviour
 {

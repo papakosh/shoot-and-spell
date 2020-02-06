@@ -2,10 +2,23 @@
 using UnityEngine.SceneManagement;
 
 /**
- * Description: Manages url linking for on-screen text
- * Details: 
+ * Description: Manages url linking for on-screen text under the credits section.
+ * 
+ * Details:
+ * Methods-
  * LoadMainMenu: Returns to main menu
- * Visit (Destination): Opens specified url
+ * VisitDinvStudioLink: Opens specified url
+ * VisitViktorLink: Opens specified url
+ * VisitSindwillerLink: Opens specified url
+ * VisitCraftPixLink: Opens specified url
+ * VisitAlucardLink: Opens specified url
+ * VisitLukeRustltdLink: Opens specified url
+ * VisitMicheleBuchBucelliLink: Opens specified url
+ * VisitJesusLastraLink: Opens specified url
+ * VisitThorChristopherArislandLink: Opens specified url
+ * VisitDanSchullerLink: Opens specified url
+ * VisitUnityTechnologiesLink: Opens specified url
+ * VisitGreatHeightsAudioLink: Opens specified url
  */
 public class InfoController : MonoBehaviour
 {

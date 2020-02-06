@@ -955,20 +955,20 @@ public class GameController : MonoBehaviour
         debrisSpawnWait = dataController.gameData.spawnWait - (dataController.gameData.spawnWaitDecrement * (currentGameLevelIndex + 1));
         switch (currentGameLevelIndex)
         {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
+            case DataController.LEVEL_ONE:
+            case DataController.LEVEL_TWO:
+            case DataController.LEVEL_THREE:
+            case DataController.LEVEL_FOUR:
+            case DataController.LEVEL_FIVE:
+            case DataController.LEVEL_SIX:
+            case DataController.LEVEL_SEVEN:
                 debrisWaveWait = dataController.gameData.waveWait - 0;
                 break;
-            case 7:
-            case 8:
+            case DataController.LEVEL_EIGHT:
+            case DataController.LEVEL_NINE:
                 debrisWaveWait = dataController.gameData.waveWait - 1;
                 break;
-            case 9:
+            case DataController.LEVEL_TEN:
                 debrisWaveWait = dataController.gameData.waveWait - 2;
                 break;
         }
@@ -1050,7 +1050,7 @@ public class GameController : MonoBehaviour
     }
     private bool HasUnlockedNextLevel()
     {
-        return currentGameLevelIndex < 9 && NextLevelIsLocked() && SpeltAtleast51PercentOfLevelWords();
+        return currentGameLevelIndex < DataController.LEVEL_TEN && NextLevelIsLocked() && SpeltAtleast51PercentOfLevelWords();
     }
     private bool NextLevelIsLocked()
     {
@@ -1066,7 +1066,7 @@ public class GameController : MonoBehaviour
     }
     private bool CanUnlockNormalAndHardDifficulty()
     {
-        return currentGameLevelIndex == 9 && SpeltAtleast51PercentOfLevelWords() && IsEasyDifficulty() && NormalDifficultyIsLocked();
+        return currentGameLevelIndex == DataController.LEVEL_TEN && SpeltAtleast51PercentOfLevelWords() && IsEasyDifficulty() && NormalDifficultyIsLocked();
     }
     private bool IsEasyDifficulty()
     {

@@ -2,9 +2,11 @@
 
 /**
  * Description: Stores a player’s progress in a difficulty, including experience points, rank,
- * levels unlocked, and a list of words completed for each level.
+ * levels unlocked, and a list of words completed for each level. Object IS marked System.Serializable 
+ * so it can be written to a file using serialization.
  * 
- * Details: Object marked System.Serializable so it can be written to a file using serialization.
+ * Details:
+ * ListOfLevelCompletedWords: Returns a list of words completed for a given level index
  */
 [System.Serializable]
 public class Difficulty
@@ -23,29 +25,30 @@ public class Difficulty
     public List<string> level9CompletedWords;
     public List<string> level10CompletedWords;
     public bool[] levelsUnlocked = { true, false, false, false, false, false, false, false, false, false };
+
     public List<string> ListOfLevelCompletedWords(int levelIndex)
     {
         switch (levelIndex)
         {
-            case 0:
+            case DataController.LEVEL_ONE:
                 return level1CompletedWords;
-            case 1:
+            case DataController.LEVEL_TWO:
                 return level2CompletedWords;
-            case 2:
+            case DataController.LEVEL_THREE:
                 return level3CompletedWords;
-            case 3:
+            case DataController.LEVEL_FOUR:
                 return level4CompletedWords;
-            case 4:
+            case DataController.LEVEL_FIVE:
                 return level5CompletedWords;
-            case 5:
+            case DataController.LEVEL_SIX:
                 return level6CompletedWords;
-            case 6:
+            case DataController.LEVEL_SEVEN:
                 return level7CompletedWords;
-            case 7:
+            case DataController.LEVEL_EIGHT:
                 return level8CompletedWords;
-            case 8:
+            case DataController.LEVEL_NINE:
                 return level9CompletedWords;
-            case 9:
+            case DataController.LEVEL_TEN:
                 return level10CompletedWords;
             default:
                 return null;

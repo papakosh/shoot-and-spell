@@ -1,9 +1,15 @@
 ﻿/**
- * Description: Regulates how levels work and display to a player. This includes the name 
- * of the level, the words, the space background, and the bonus experience points awarded 
- * for completing a level.
+ * Description: Regulates how the levels work and display to a player. 
  * 
- * Details: Object marked System.Serializable so it can be written to a file using serialization.
+ * Details:
+ * Class-
+ * The object is marked System.Serializable so it can be written to a file using serialization.
+ * 
+ * Attributes-
+ * Name - name of the level
+ * Words - words to be spelled
+ * Background path - path to space background
+ * Completion bonus - bonus xp rewarded for completing the level
  */
 [System.Serializable]
 public class LevelData
