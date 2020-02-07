@@ -4,21 +4,32 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System.Text;
 /**
- * Description: Regulates the game's access to game and player data, including
- * loading both from the file system and saving player data back to it.
+ * Description: Regulates the game's access to game and player data.
  * 
  * Details:
+ * Attributes-
+ * Game data - Read-only data, including rules and words
+ * Player data - Read-write data storing the player's progress
+ * Current difficulty - Player's data for a specific difficulty
+ * Game data filename - Json file for game data
+ * Player data filename - Json file for player data
+ * Music vol default - Default float value for music volume
+ * Weapons vol default - Default float value for weapons volume
+ * Explosions vol default - Default float value for explosions volume
+ * Voices vol default - Default float value for voices volume
+ * 
+ * Methods-
  * SavePlayerData: Write player data to json file
  * UnlockNormalAndHardDifficulty: Unlock normal and hard difficulty and save changes
  * UpdatePlayerDifficulty: Update player difficulty to new, if changed from current, and save changes
- * Start: Indicate data controller not to be destroyed, then load game and player data, initialize 
- * current difficulty and game settings, before finally loading main menu.
  * DetermineDifficulty: Return difficulty object from player data based on difficulty selected
- * LoadGameSettings: Set volume and control settings to default, if not set
+ * LoadGameSettings: Set volume and joystick control settings to default, if not set
  * LoadMainMenu: Call load scene on main menu
  * LoadPlayerData: Read player data from json file
  * LoadGameData: Read game data from json file
- * IsAndroidJar: Check file path is jar file or not
+ * IsAndroidJar: Check file path to see if it is jar file or not
+ * Start: Indicate data controller not to be destroyed, then load game and player data, initialize 
+ * current difficulty and game settings, before finally loading main menu.
  */
 public class DataController : MonoBehaviour
 {

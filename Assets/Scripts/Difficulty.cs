@@ -1,12 +1,28 @@
 ﻿using System.Collections.Generic;
 
 /**
- * Description: Stores a player’s progress in a difficulty, including experience points, rank,
- * levels unlocked, and a list of words completed for each level. Object IS marked System.Serializable 
- * so it can be written to a file using serialization.
+ * Description: Stores a player’s progress in a difficulty. 
  * 
  * Details:
- * ListOfLevelCompletedWords: Returns a list of words completed for a given level index
+ * Attributes-
+ * Name - Name of the difficulty (easy, normal or hard)
+ * Player rank - Player's rank under the difficulty
+ * Player xp - Player's experience points under the difficulty
+ * Level 1 complete words - List of words completed by the player for level 1 under the difficulty
+ * Level 2 complete words - List of words completed by the player for level 2 under the difficulty
+ * Level 3 complete words - List of words completed by the player for level 3 under the difficulty
+ * Level 4 complete words - List of words completed by the player for level 4 under the difficulty
+ * Level 5 complete words - List of words completed by the player for level 5 under the difficulty
+ * Level 6 complete words - List of words completed by the player for level 6 under the difficulty
+ * Level 7 complete words - List of words completed by the player for level 7 under the difficulty
+ * Level 8 complete words - List of words completed by the player for level 8 under the difficulty
+ * Level 9 complete words - List of words completed by the player for level 9 under the difficulty
+ * Level 10 complete words - List of words completed by the player for level 10 under the difficulty
+ * Levels Unlocked - true/false for levels unlocked by the player. By default, level 1 is unlocked.
+ * 
+ * Methods-
+ * ListOfLevelCompletedWords: Returns a list of words completed by the player given a level index
+ * AddToListOfLevelCompletedWords: Adds a word to the list of completed words for a level if not there
  */
 [System.Serializable]
 public class Difficulty

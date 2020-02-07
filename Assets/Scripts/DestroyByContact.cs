@@ -2,15 +2,22 @@
 using UnityEngine;
 
 /**
- * Description: Process collisions between the attached game object, including letters, pickups 
- * (health, dual shot, armor, teleport), hazards, and enemies, and a collider, including any
- * of the previous plus the game boundary, bolts, and the player.
+ * Description: Process collisions between game objects (letters, pickups, hazards, 
+ * enemy ships, game boundary, enemy bolts, player bolts, and the player)
  * 
  * Details:
- * OnTriggerEnter:
- * CollisionIsWithALetter: Return true if tag's ascii value is between 65 and 90 (A to Z)
- * CollisionIsWithTheBoundary: Return true if tag is equal to Game Boundary
- * CollisionIsWithABolt: Return true if tag is equal to Bolt
+ * Attributes-
+ * Player explosion - the explosion to play when the player is destroyed
+ * Explosion - the explosion to play when the attached game object is destroyed
+ * Damage - the damage done to or healed by the player when they are hit (positive for health pickup, 
+ * negative for hazards, enemy ships, enemy bolts, and letters)
+ * 
+ * Methods-
+ * OnTriggerEnter: Process collision between attached game object and intruding game object
+ * CollisionIsWithALetter: Return true if letter is between A and Z
+ * CharacterBetweenLettersAandZ: Return true if tag's ascii value is between 65 and 90 (A and Z)
+ * CollisionIsWithTheGameBoundary: Return true if tag is equal to Game Boundary
+ * CollisionIsWithAPlayerBolt: Return true if tag is equal to Bolt
  * CollisionIsWithThePlayer: Return true if tag is equal to Player
  * CollisionIsWithAHealthPickup: Return true if tag is equal to Health
  * CollisionIsWithADualShotPickup: Return true if tag is equal to Dual Shot
@@ -59,7 +66,7 @@ public class DestroyByContact : MonoBehaviour
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
             Instantiate(explosion, transform.position, transform.rotation);
             
-            if (CollisionIsWithABolt(other.gameObject.tag)) Destroy(other.gameObject);
+            if (CollisionIsWithAPlayerBolt(other.gameObject.tag)) Destroy(other.gameObject);
             else if (CollisionIsWithThePlayer(other.gameObject.tag)){
                 if (PlayerController.instance.canAbsorbDamage) PlayerController.instance.AbsorbDamage();
                 else
@@ -80,7 +87,7 @@ public class DestroyByContact : MonoBehaviour
         }
         else if (CollisionIsWithAHealthPickup(gameObject.tag) || CollisionIsWithADualShotPickup(gameObject.tag) || 
             CollisionIsWithAnArmorPickup(gameObject.tag) || CollisionIsWithATeleportPickup(gameObject.tag)){
-            if (CollisionIsWithABolt(other.gameObject.tag) || CollisionIsWithAnEnemy(other.gameObject.tag) || 
+            if (CollisionIsWithAPlayerBolt(other.gameObject.tag) || CollisionIsWithAnEnemy(other.gameObject.tag) || 
                 CollisionIsWithAHazard(other.gameObject.tag) || CollisionIsWithALetter(other.gameObject.tag) ||
                 CollisionIsWithAnyPickup(other) || CollisionIsWithAnEnemyBolt(other.gameObject.tag))
                 return;
@@ -106,7 +113,7 @@ public class DestroyByContact : MonoBehaviour
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
             Instantiate(explosion, transform.position, transform.rotation);
 
-            if (CollisionIsWithABolt(other.gameObject.tag))
+            if (CollisionIsWithAPlayerBolt(other.gameObject.tag))
             {
                 Destroy(other.gameObject);
                 GameController.instance.SpawnRandomPickup(pickupTransform);
@@ -140,7 +147,7 @@ public class DestroyByContact : MonoBehaviour
             explosion.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat(DataController.EXPLOSIONS_VOLUME);
             Instantiate(explosion, transform.position, transform.rotation);
         
-            if (CollisionIsWithABolt(other.gameObject.tag))
+            if (CollisionIsWithAPlayerBolt(other.gameObject.tag))
             {
                 Destroy(other.gameObject);
                 GameController.instance.SpawnRandomPickup(pickupTransform);
@@ -171,7 +178,7 @@ public class DestroyByContact : MonoBehaviour
 
             Destroy(gameObject);
 
-            if (CollisionIsWithABolt(other.gameObject.tag)) Destroy(other.gameObject);
+            if (CollisionIsWithAPlayerBolt(other.gameObject.tag)) Destroy(other.gameObject);
             else if (CollisionIsWithThePlayer(other.gameObject.tag))
             {
                 if (PlayerController.instance.canAbsorbDamage) PlayerController.instance.AbsorbDamage();
@@ -207,7 +214,7 @@ public class DestroyByContact : MonoBehaviour
         return tag.Equals(OBJECT_TAG_GAME_BOUNDARY);
     }
 
-    private bool CollisionIsWithABolt(string tag)
+    private bool CollisionIsWithAPlayerBolt(string tag)
     {
         return tag.Equals(OBJECT_TAG_PLAYER_BOLT);
     }
