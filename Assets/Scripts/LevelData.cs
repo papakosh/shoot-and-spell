@@ -7,7 +7,7 @@
  * 
  * Attributes-
  * Name - name of the level
- * Words - words to be spelled
+ * Words - an array of words to be spelled
  * Background path - path to space background
  * Completion bonus - bonus xp rewarded for completing the level
  */

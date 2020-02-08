@@ -2,10 +2,27 @@
 using UnityEngine;
 
 /**
- * Description: Regulates an enemy's actions, both movement and combat, including
+ * Description: Regulate an enemy's actions, both movement and combat, including
  * moving forward, evading, and firing.
  * 
- * Details -
+ * Details:
+ * Attributes-
+ * Speed Z - Speed on the Z axis when moving down toward the player
+ * Shot - The enemy bolt fired
+ * Shot Spawn - Where the enemy bolt is shot from
+ * Fire Rate - How often to fire
+ * Fire Delay - In how many seconds to start firing
+ * Dodge X - Speed on the X axis when evading
+ * Smoothing X - Value to make dodge movements gentle
+ * Tilt X - How many degrees to rotate on ?
+ * Start Wait - In how many seconds to start evading
+ * Move Time - How often to evade
+ * Game Boundary - Values for game boundary on the X and Z axis
+ * Target Move X - How far to move on the X axis when dodging
+ * Rigidbody - Control of the enemy ship's position on the X xis and Z axis
+ * _audio - Audio source for the enemy firing sound
+ * 
+ * Methods-
  * Awake: Instantiate and initialize audio source
  * Start: Intialize access to rigidbody component and move forward while repeatedly firing and evading
  * Fire: Instantiate shot and play audio.

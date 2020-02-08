@@ -7,6 +7,18 @@ using UnityEngine.UI;
  * Description: Regulates the display of the main menu.
  * 
  * Details:
+ * Attributes-
+ * Easy button -
+ * Normal button -
+ * Hard button -
+ * Level buttons - 
+ * Level progress sliders -
+ * Level progress text
+ * Data controller -
+ * Current difficulty -
+ * _audo - 
+ * 
+ * Methods-
  * LoadSettings : Go to the Settings screen
  * LoadInfo: Go to the Info screen
  * SelectLevels: Load Game screen for levels 1 to 10
@@ -51,51 +63,51 @@ public class MainMenuController : MonoBehaviour
 
     public void SelectLevel1()
     {
-        LoadGame(0);
+        LoadGame(DataController.LEVEL_ONE);
     }
 
     public void SelectLevel2()
     {
-        LoadGame(1);
+        LoadGame(DataController.LEVEL_TWO);
     }
 
     public void SelectLevel3()
     {
-        LoadGame(2);
+        LoadGame(DataController.LEVEL_THREE);
     }
 
     public void SelectLevel4()
     {
-        LoadGame(3);
+        LoadGame(DataController.LEVEL_FOUR);
     }
 
     public void SelectLevel5()
     {
-        LoadGame(4);
+        LoadGame(DataController.LEVEL_FIVE);
     }
     public void SelectLevel6()
     {
-        LoadGame(5);
+        LoadGame(DataController.LEVEL_SIX);
     }
 
     public void SelectLevel7()
     {
-        LoadGame(6);
+        LoadGame(DataController.LEVEL_SEVEN);
     }
 
     public void SelectLevel8()
     {
-        LoadGame(7);
+        LoadGame(DataController.LEVEL_EIGHT);
     }
 
     public void SelectLevel9()
     {
-        LoadGame(8);
+        LoadGame(DataController.LEVEL_NINE);
     }
 
     public void SelectLevel10()
     {
-        LoadGame(9);
+        LoadGame(DataController.LEVEL_TEN);
     }
 
     public void SelectEasyDifficulty()

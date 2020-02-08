@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 /**
- * Description: Stores a player’s progress in a difficulty. 
+ * Description: Store a player’s progress for a given difficulty. 
  * 
  * Details:
  * Attributes-
@@ -18,11 +18,11 @@
  * Level 8 complete words - List of words completed by the player for level 8 under the difficulty
  * Level 9 complete words - List of words completed by the player for level 9 under the difficulty
  * Level 10 complete words - List of words completed by the player for level 10 under the difficulty
- * Levels Unlocked - true/false for levels unlocked by the player. By default, level 1 is unlocked.
+ * Levels Unlocked - true/false for levels unlocked by the player under the difficulty. By default, level 1 is unlocked.
  * 
  * Methods-
- * ListOfLevelCompletedWords: Returns a list of words completed by the player given a level index
- * AddToListOfLevelCompletedWords: Adds a word to the list of completed words for a level if not there
+ * ListOfLevelCompletedWords: Return a list of words completed by the player given a level index
+ * AddToListOfLevelCompletedWords: Add a word to the list of completed words for a level if not there
  */
 [System.Serializable]
 public class Difficulty

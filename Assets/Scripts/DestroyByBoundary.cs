@@ -6,7 +6,7 @@
  * 
  * Details: 
  * Methods-
- * OnTriggerExit: Calls Destroy on the exiting game object
+ * OnTriggerExit: Calls Destroy on the colliding game object
  */
 public class DestroyByBoundary : MonoBehaviour
 {

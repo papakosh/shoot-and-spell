@@ -18,5 +18,4 @@ public class DestroyByTime : MonoBehaviour
     {
         Destroy(gameObject, lifetime);
     }
-
 }

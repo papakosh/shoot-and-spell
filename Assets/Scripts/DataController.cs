@@ -28,8 +28,8 @@ using System.Text;
  * LoadPlayerData: Read player data from json file
  * LoadGameData: Read game data from json file
  * IsAndroidJar: Check file path to see if it is jar file or not
- * Start: Indicate data controller not to be destroyed, then load game and player data, initialize 
- * current difficulty and game settings, before finally loading main menu.
+ * Start: Prepare data (load game and player data, initialize current difficulty), setup
+ * game settings, and then load main menu.
  */
 public class DataController : MonoBehaviour
 {
