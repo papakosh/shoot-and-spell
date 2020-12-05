@@ -2,11 +2,29 @@
 using UnityStandardAssets.CrossPlatformInput;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulate a player’s stats and actions, both movement and combat, including pick ups, taking damage, 
  * absorbing damage, decreasing speed, moving within the game boundaries, single shot firing, dual shot firing, and 
  * teleportation.
  * 
- * Details - 
+ * Details:
+ * Attributes-
+ * Max Speed - Maximum speed forward (up) for the player
+ * Tilt X - How much tilt movement left or right on the x-axis when flying that way
+ * Game Boundary - The game boundary limits
+ * Bolt - The player bolt fired
+ * Single Shot Spawn - Where a single bolt is shot from 
+ * Dual Shot Spawn - Where two bolts are shot from 
+ * PlayerController instance - Instance of player controller
+ * Current Speed - Player's current forward moving speed
+ * Can Teleport - True or false the player has teleport skill
+ * Can Fire Dual Shot - True or false the player has dual shot skill
+ * Can Absorb Damage - True or false the player has shield skill
+ * Current health - Player's hit points at the time of checking
+ * Maximum health - Maximum player's hit points given their rank
+ * 
+ * Methods -
  * PickupTeleport - Play sfx, set skill to true and update game controller
  * PickupArmor - Play sfx, set skill to true and update game controller
  * PickupDualShot - Play sfx, set skill to true and update game controller

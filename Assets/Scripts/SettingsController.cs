@@ -2,13 +2,32 @@
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulates the game settings, including volume for music, weapons, explosions, 
  * and voices; joystick left-right position; and resetting everything to default.
  * 
  * Details: 
+ * Attributes-
+ * Music Vol Slider - UI object to control music volume value
+ * Weapons Vol Slider - UI object to control weapons volume value
+ * Explosions Vol Slider - UI object to control explosions volume value
+ * Voices Vol Slider - UI object to control voices volume value
+ * Music Vol Text - UI object to display music volume value
+ * Weapons Vol Text - UI object to display weapons volume value
+ * Explosions Vol Text - UI object to display explosions volume value
+ * Voices Vol Text - UI object to display voices volume value
+ * Test Stop Music button - Button for play / stop music in settings
+ * Test Stop Weapons button - Button for play / stop weapons in settings
+ * Test Stop Explosions  button - Button for play / stop explosions in settings
+ * Test Stop Voices button - Button for play / stop voices in settings
+ * Left Hand Control toggle - Radio button for selecting left handed controls
+ * Right Hand Control toggle - Radio button for selecting right handed controls
+ * 
+ * Mathods -
  * ApplyChanges - Save setting changes to player prefs
  * ResetAll - Reset Player Prefs and put settings back to default values
- * LoadMainMenu: Return to main menu
+ * LoadMainMenu - Return to main menu
  * RefreshVolume - Refresh text to show changes to volume and update audio.volume to new value, if playing
  * Test(music/weapons/explosions/voices)Volume - If audio playing, stop, then check to see which 
  * volume was playing (music/weapons/explosions/voices) and set test/stop button text to test, 
@@ -27,20 +46,19 @@ public class SettingsController : MonoBehaviour
     public Text explosionsVolText;
     public Text voicesVolText;
 
-    private AudioSource _audio;
-
     public GameObject testStopMusicButton;
     public GameObject testStopWeaponsButton;
     public GameObject testStopExplosionsButton;
     public GameObject testStopVoicesButton;
 
+    public Toggle leftHandControlToggle;
+    public Toggle rightHandControlToggle;
+
+    private AudioSource _audio;
     private bool musicIsPlaying;
     private bool weaponsIsPlaying;
     private bool explosionsIsPlaying;
     private bool voicesIsPlaying;
-
-    public Toggle leftHandControlToggle;
-    public Toggle rightHandControlToggle;
 
     public void ApplyChanges()
     {

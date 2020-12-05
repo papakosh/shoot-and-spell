@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Destroy the associated game object after a specified time
  * 
  * Details: 

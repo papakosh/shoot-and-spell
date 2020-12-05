@@ -4,18 +4,20 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulates the display of the main menu.
  * 
  * Details:
  * Attributes-
- * Easy button -
- * Normal button -
- * Hard button -
- * Level buttons - 
- * Level progress sliders -
- * Level progress text
- * Data controller -
- * Current difficulty -
+ * Easy button - Chosen to select easy difficulty
+ * Normal button - Chosen to select normal difficulty
+ * Hard button - Chosen to select hard difficulty
+ * Level buttons - Chosen to select specific level
+ * Level progress sliders - Displays progress on spelling words on a level
+ * Level progress text - Displays on the progress slider how many words out of the total have been spelt
+ * Data controller - Regulates the game's access to game and player data.
+ * Current difficulty - Store a player’s progress for a current difficulty. 
  * _audo - 
  * 
  * Methods-

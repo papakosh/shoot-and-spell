@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System.Text;
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulates the game's access to game and player data.
  * 
  * Details:

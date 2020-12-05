@@ -2,6 +2,8 @@
 using UnityEngine.SceneManagement;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Manages url linking for on-screen text under the credits section.
  * 
  * Details:

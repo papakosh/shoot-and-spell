@@ -2,6 +2,8 @@
 using UnityEngine;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulate an enemy's actions, both movement and combat, including
  * moving forward, evading, and firing.
  * 
@@ -14,10 +16,10 @@ using UnityEngine;
  * Fire Delay - In how many seconds to start firing
  * Dodge X - Speed on the X axis when evading
  * Smoothing X - Value to make dodge movements gentle
- * Tilt X - How many degrees to rotate on ?
+ * Tilt X - How many degrees to rotate on x-axis
  * Start Wait - In how many seconds to start evading
  * Move Time - How often to evade
- * Game Boundary - Values for game boundary on the X and Z axis
+ * Game Boundary - Values for game boundary on the X and Z axis to avoid moving into the boundary and being destroyed
  * Target Move X - How far to move on the X axis when dodging
  * Rigidbody - Control of the enemy ship's position on the X xis and Z axis
  * _audio - Audio source for the enemy firing sound

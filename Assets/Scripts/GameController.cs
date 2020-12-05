@@ -5,8 +5,10 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Manages most of the gameplay, including an endless run of asteroids, letters, and enemy ships; scoring the words 
- * spelled; rewarding the player with rank; and spawning pickups, as well the player experience, like using skills, taking damage, difficulty settings, etc.
+ * spelled; rewarding the player with rank; spawning pickups, and finally, the player experience, like using skills and taking damage.
  * 
  * Details - 
  * LoadMainMenu - Delete temporary data, unpause the game, and finally load the main menu.
@@ -27,8 +29,8 @@ using UnityEngine.UI;
  * UpdateDualShotStatusIcon - Change status icon on UI to reflect whether player has dual shot skill or not
  * Awake - Instantiate instance of gamecontroller class, locate the data controller object, set the current difficulty, and initialize audio source object
  * Start - Setup the game level (initial level values, background image, debris wait times, word to be spelled); Setup the player data (retrieve player stats
- * and customize player UI options); Setup UI (prepare UI for display); Coutdown from 5 seconds; and finally, spawn waves of debris (asteroids, enemy ships, 
- * and letter blocks) when the counter reach zero to begin play.
+ * and customize player UI options); Setup UI (prepare UI for display); Countdown from 5 seconds; and finally, spawn waves of debris (asteroids, enemy ships, 
+ * and letter blocks) when the countdown reaches zero to begin play.
  */
 public class GameController : MonoBehaviour
 {

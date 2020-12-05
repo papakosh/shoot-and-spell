@@ -1,9 +1,17 @@
 ﻿using UnityEngine;
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Sets the direction and speed of the associated game object
  * 
- * Details: Multiplying the Vector3 of Transform.forward by a speed value, we change 
- * the velocity of the game object’s rigidbody along the Z-axis.
+ * Details:
+ * Attributes-
+ * speedZ - Speed on the Z axis when moving down toward the player
+ * 
+ * Mathods-
+ * Start: Move the associated game object (like an asteroid) forward
+ * at specified speed by multiplying rigidbody's transform.forward
+ * by speedZ
  */
 public class Movement : MonoBehaviour
 {

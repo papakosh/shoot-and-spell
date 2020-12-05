@@ -1,4 +1,6 @@
 ﻿/**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Regulates how the levels work and display to a player. 
  * 
  * Details:

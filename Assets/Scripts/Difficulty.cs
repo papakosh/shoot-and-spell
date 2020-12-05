@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Store a player’s progress for a given difficulty. 
  * 
  * Details:
@@ -8,16 +10,16 @@
  * Name - Name of the difficulty (easy, normal or hard)
  * Player rank - Player's rank under the difficulty
  * Player xp - Player's experience points under the difficulty
- * Level 1 complete words - List of words completed by the player for level 1 under the difficulty
- * Level 2 complete words - List of words completed by the player for level 2 under the difficulty
- * Level 3 complete words - List of words completed by the player for level 3 under the difficulty
- * Level 4 complete words - List of words completed by the player for level 4 under the difficulty
- * Level 5 complete words - List of words completed by the player for level 5 under the difficulty
- * Level 6 complete words - List of words completed by the player for level 6 under the difficulty
- * Level 7 complete words - List of words completed by the player for level 7 under the difficulty
- * Level 8 complete words - List of words completed by the player for level 8 under the difficulty
- * Level 9 complete words - List of words completed by the player for level 9 under the difficulty
- * Level 10 complete words - List of words completed by the player for level 10 under the difficulty
+ * Level 1 completed words - List of words completed by the player for level 1 under the difficulty
+ * Level 2 completed words - List of words completed by the player for level 2 under the difficulty
+ * Level 3 completed words - List of words completed by the player for level 3 under the difficulty
+ * Level 4 completed words - List of words completed by the player for level 4 under the difficulty
+ * Level 5 completed words - List of words completed by the player for level 5 under the difficulty
+ * Level 6 completed words - List of words completed by the player for level 6 under the difficulty
+ * Level 7 completed words - List of words completed by the player for level 7 under the difficulty
+ * Level 8 completed words - List of words completed by the player for level 8 under the difficulty
+ * Level 9 completed words - List of words completed by the player for level 9 under the difficulty
+ * Level 10 completed words - List of words completed by the player for level 10 under the difficulty
  * Levels Unlocked - true/false for levels unlocked by the player under the difficulty. By default, level 1 is unlocked.
  * 
  * Methods-

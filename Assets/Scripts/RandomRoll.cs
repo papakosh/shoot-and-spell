@@ -1,11 +1,16 @@
 ﻿using UnityEngine;
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Add random rotation to the associated game object
  * 
- * Details: Using a random Vector3 value from Random.insideUnitSphere function 
- * we change the angular velocity of the game object’s rigidbody. The random vector3 
- * is additionally modified by a roll value to increase the speed of the rotation from 
- * the default 1 provided by insideUnitSphere.
+ * Details: 
+ * Attributes-
+ * roll - speed of rotation
+ * 
+ * Methods-
+ * Start - Set the angular velocity of an associated game object to 1 (from
+ * Random.insideUnitSphere) multiplied by a roll value.
  */
 public class RandomRoll : MonoBehaviour
 {

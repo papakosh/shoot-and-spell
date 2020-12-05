@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Creates a parallax effect to mimic a ship flying through space 
  * by having the background always moving
  * 

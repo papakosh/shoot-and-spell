@@ -2,6 +2,8 @@
 using UnityEngine;
 
 /**
+ * @Copyright 2020 Crowswood Games (Company), Brian Navarro aka PapaKosh (Developer)
+ * 
  * Description: Process collisions between game objects (letters, pickups, hazards, 
  * enemy ships, game boundary, enemy bolts, player bolts, and the player)
  * 
